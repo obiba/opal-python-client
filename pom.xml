@@ -12,18 +12,114 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-
-  <parent>
-    <artifactId>opal</artifactId>
-    <groupId>org.obiba.opal</groupId>
-    <version>2.11-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
-  </parent>
-
+  <groupId>org.obiba.opal</groupId>
   <artifactId>opal-python-client</artifactId>
-
   <name>opal-python-client</name>
-  <description>Opal Python Client Module</description>
+  <description>opal Python Client Module</description>
+  <version>2.11-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <properties>
+    <obiba.deploy.dir>unstable</obiba.deploy.dir>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <java.version>1.8</java.version>
+    <opal.version>2.11-SNAPSHOT</opal.version>
+    <maven-antrun-plugin.version>1.7</maven-antrun-plugin.version>
+    <maven-assembly-plugin.version>2.4</maven-assembly-plugin.version>
+    <maven-buildnumber-plugin.version>1.2</maven-buildnumber-plugin.version>
+    <maven-dependency-plugin.version>3.1.0</maven-dependency-plugin.version>
+    <maven-release-plugin.version>2.5.2</maven-release-plugin.version>
+  </properties>
+
+  <repositories>
+    <repository>
+      <id>obiba.org</id>
+      <name>Obiba Maven 2.x Repository</name>
+      <url>http://repo.obiba.org/repo</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>obiba</id>
+      <url>http://repo.obiba.org/repo</url>
+    </pluginRepository>
+  </pluginRepositories>
+
+  <prerequisites>
+    <maven>3.0.0</maven>
+  </prerequisites>
+
+  <distributionManagement>
+    <repository>
+      <id>obiba-releases</id>
+      <url>http://repo.obiba.org/libs-release-local</url>
+    </repository>
+    <snapshotRepository>
+      <id>obiba-snapshots</id>
+      <url>http://repo.obiba.org/libs-snapshot-local</url>
+    </snapshotRepository>
+  </distributionManagement>
+
+  <scm>
+    <connection>scm:git:git://github.com/obiba/opal-python-client.git</connection>
+    <developerConnection>scm:git:https://github.com/obiba/opal-python-client.git</developerConnection>
+    <url>https://github.com/obiba/opal-python-client</url>
+    <tag>HEAD</tag>
+  </scm>
+
+  <issueManagement>
+    <system>JIRA</system>
+    <url>http://jira.obiba.org</url>
+  </issueManagement>
+
+  <ciManagement>
+    <system>Jenkins</system>
+    <url>http://ci.obiba.org/view/opal/job/opal</url>
+  </ciManagement>
+
+  <mailingLists>
+    <mailingList>
+      <name>OBiBa Users</name>
+      <post>obiba-users@googlegroups.com</post>
+      <archive>https://groups.google.com/forum/?fromgroups#!forum/obiba-users</archive>
+    </mailingList>
+  </mailingLists>
+
+  <licenses>
+    <license>
+      <name>GNU Public License version 3</name>
+      <url>http://www.obiba.org/node/62</url>
+    </license>
+  </licenses>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.obiba.opal</groupId>
+        <artifactId>opal-web-model</artifactId>
+        <version>${opal.version}</version>
+        <scope>compile</scope>
+        <exclusions>
+          <exclusion>
+            <groupId>org.obiba.magma</groupId>
+            <artifactId>magma-api</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.obiba.magma</groupId>
+            <artifactId>magma-math</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
     <dependency>
@@ -33,14 +129,100 @@
   </dependencies>
 
   <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-release-plugin</artifactId>
+          <version>${maven-release-plugin.version}</version>
+          <configuration>
+            <!-- Use parent version as modules' version -->
+            <autoVersionSubmodules>true</autoVersionSubmodules>
+            <releaseProfiles>ci-build,release</releaseProfiles>
+            <!-- Comment this profile because Jenkins crashes while performing the release -->
+            <!--<preparationGoals>clean verify install</preparationGoals>-->
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <version>${maven-dependency-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-antrun-plugin</artifactId>
+          <version>${maven-antrun-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <version>${maven-assembly-plugin.version}</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
     <plugins>
+      <!-- Unzip shared resources -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+           <id>unpack</id>
+           <phase>prepare-package</phase>
+           <goals>
+             <goal>unpack</goal>
+           </goals>
+            <configuration>
+              <outputDirectory>${basedir}/target</outputDirectory>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.obiba.opal</groupId>
+                  <artifactId>opal-web-model</artifactId>
+                  <version>${opal.version}</version>
+                  <classifier>python</classifier>
+                  <overWrite>true</overWrite>
+                  <type>zip</type>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>buildnumber-maven-plugin</artifactId>
+        <version>${maven-buildnumber-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>createBuildNumber</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>create</goal>
+            </goals>
+            <configuration>
+              <format>{0,date,yyyyMMddHHmmss}</format>
+              <items>
+                <item>timestamp</item>
+              </items>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
         <configuration>
           <finalName>opal-python_${project.version}</finalName>
           <appendAssemblyId>false</appendAssemblyId>
           <descriptors>
-            <descriptor>src/main/assembly/python-package.xml</descriptor>
+            <descriptor>src/main/assembly/package.xml</descriptor>
           </descriptors>
           <filters />
         </configuration>

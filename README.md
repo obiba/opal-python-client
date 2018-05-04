@@ -3,8 +3,6 @@
 This Python-based command line tool allows to access to a Opal server through its REST API. This is the perfect tool
 for automating tasks in Opal. This will be the preferred client developed when new features are added to the REST API.
 
-```
-
 ### Usage
 
 To get the options of the command line:
