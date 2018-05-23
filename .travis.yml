@@ -6,6 +6,7 @@ addons:
     - rpm
     - devscripts
     - fakeroot
+    - debhelper
 deploy:
   - provider: script
     script: cp .travis.settings.xml $HOME/.m2/settings.xml && mvn -Prelease deploy
