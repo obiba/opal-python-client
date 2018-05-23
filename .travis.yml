@@ -7,10 +7,10 @@ addons:
     - devscripts
 deploy:
   - provider: script
-    script: mvn -Prelease deploy
+    script: cp .travis.settings.xml $HOME/.m2/settings.xml && mvn -Prelease deploy
     skip_cleanup: true
     on:
-      branch: master
+      branch: travis
       tags: false
 cache:
   directories:

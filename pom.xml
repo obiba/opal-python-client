@@ -62,6 +62,10 @@
       <id>obiba-bintray</id>
       <url>https://api.bintray.com/obiba/maven/</url>
     </repository>
+    <snapshotRepository>
+      <id>obiba-artifactory</id>
+      <url>https://obiba.jfrog.io/obiba/libs-snapshot</url>
+    </snapshotRepository>
   </distributionManagement>
 
   <scm>
