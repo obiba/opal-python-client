@@ -12,8 +12,8 @@ deploy:
     script: cp .travis.settings.xml $HOME/.m2/settings.xml && mvn -Prelease deploy
     skip_cleanup: true
     on:
-      branch: travis
-      tags: false
+      all_branches: true
+      tags: true
 cache:
   directories:
   - $HOME/.cache
