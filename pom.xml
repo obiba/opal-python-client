@@ -15,30 +15,44 @@
   <groupId>org.obiba.opal</groupId>
   <artifactId>opal-python-client</artifactId>
   <name>opal-python-client</name>
-  <description>opal Python Client Module</description>
+  <description>Opal Python Client Module</description>
   <version>2.11-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <properties>
-    <obiba.deploy.dir>unstable</obiba.deploy.dir>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <java.version>1.8</java.version>
     <opal.version>2.11-SNAPSHOT</opal.version>
+
+    <!-- maven plugins -->
+    <github-release-plugin.version>1.2.0</github-release-plugin.version>
     <maven-antrun-plugin.version>1.7</maven-antrun-plugin.version>
     <maven-assembly-plugin.version>2.4</maven-assembly-plugin.version>
     <maven-buildnumber-plugin.version>1.2</maven-buildnumber-plugin.version>
     <maven-dependency-plugin.version>3.1.0</maven-dependency-plugin.version>
     <maven-release-plugin.version>2.5.2</maven-release-plugin.version>
+    <rpm-maven-plugin.version>2.1.4</rpm-maven-plugin.version>
   </properties>
 
   <repositories>
     <repository>
-      <id>obiba.org</id>
-      <name>Obiba Maven 2.x Repository</name>
-      <url>http://repo.obiba.org/repo</url>
+      <id>obiba-releases</id>
+      <name>Obiba Maven Releases Repository</name>
+      <url>https://dl.bintray.com/obiba/maven</url>
       <releases>
         <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>obiba-snapshots</id>
+      <name>Obiba Maven Snapshots Repository</name>
+      <url>https://obiba.jfrog.io/obiba/libs-snapshot</url>
+      <releases>
+        <enabled>false</enabled>
       </releases>
       <snapshots>
         <enabled>true</enabled>
@@ -46,43 +60,31 @@
     </repository>
   </repositories>
 
-  <pluginRepositories>
-    <pluginRepository>
-      <id>obiba</id>
-      <url>http://repo.obiba.org/repo</url>
-    </pluginRepository>
-  </pluginRepositories>
-
-  <prerequisites>
-    <maven>3.0.0</maven>
-  </prerequisites>
-
   <distributionManagement>
     <repository>
-      <id>obiba-releases</id>
-      <url>http://repo.obiba.org/libs-release-local</url>
+      <id>obiba-bintray</id>
+      <url>https://api.bintray.com/obiba/maven/</url>
     </repository>
     <snapshotRepository>
-      <id>obiba-snapshots</id>
-      <url>http://repo.obiba.org/libs-snapshot-local</url>
+      <id>obiba-artifactory</id>
+      <url>https://obiba.jfrog.io/obiba/libs-snapshot</url>
     </snapshotRepository>
   </distributionManagement>
 
   <scm>
-    <connection>scm:git:git://github.com/obiba/opal-python-client.git</connection>
+    <connection>scm:git:https://github.com/obiba/opal-python-client.git</connection>
     <developerConnection>scm:git:https://github.com/obiba/opal-python-client.git</developerConnection>
     <url>https://github.com/obiba/opal-python-client</url>
-    <tag>HEAD</tag>
   </scm>
 
   <issueManagement>
-    <system>JIRA</system>
-    <url>http://jira.obiba.org</url>
+    <system>GitHub</system>
+    <url>https://github.com/obiba/opal-python-client/issues</url>
   </issueManagement>
 
   <ciManagement>
-    <system>Jenkins</system>
-    <url>http://ci.obiba.org/view/opal/job/opal</url>
+    <system>Travis</system>
+    <url>https://travis-ci.org/obiba/opal-python-client</url>
   </ciManagement>
 
   <mailingLists>
@@ -96,7 +98,7 @@
   <licenses>
     <license>
       <name>GNU Public License version 3</name>
-      <url>http://www.obiba.org/node/62</url>
+      <url>https://www.gnu.org/licenses/gpl-3.0.txt</url>
     </license>
   </licenses>
 
@@ -136,11 +138,7 @@
           <artifactId>maven-release-plugin</artifactId>
           <version>${maven-release-plugin.version}</version>
           <configuration>
-            <!-- Use parent version as modules' version -->
-            <autoVersionSubmodules>true</autoVersionSubmodules>
-            <releaseProfiles>ci-build,release</releaseProfiles>
-            <!-- Comment this profile because Jenkins crashes while performing the release -->
-            <!--<preparationGoals>clean verify install</preparationGoals>-->
+            <releaseProfiles>release</releaseProfiles>
           </configuration>
         </plugin>
         <plugin>
@@ -157,6 +155,16 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-assembly-plugin</artifactId>
           <version>${maven-assembly-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>rpm-maven-plugin</artifactId>
+          <version>${rpm-maven-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>de.jutzig</groupId>
+          <artifactId>github-release-plugin</artifactId>
+          <version>${github-release-plugin.version}</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -236,11 +244,12 @@
           </execution>
         </executions>
       </plugin>
+
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
         <executions>
           <execution>
-            <id>unzip-package</id>
+            <id>make-py</id>
             <phase>prepare-package</phase>
             <configuration>
               <target>
@@ -273,15 +282,24 @@
           </execution>
         </executions>
       </plugin>
+
+      <!-- Disable default deployer. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 
   <profiles>
     <profile>
-      <!-- A profile for the builds performed by the continuous integration server -->
-      <id>ci-build</id>
+      <id>release</id>
       <build>
         <plugins>
+
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>rpm-maven-plugin</artifactId>
@@ -356,6 +374,7 @@
               </execution>
             </executions>
           </plugin>
+
           <plugin>
             <artifactId>maven-antrun-plugin</artifactId>
             <executions>
@@ -388,66 +407,53 @@
                     </copy>
                     <mkdir dir="${deb.dir}/usr/share/pyshared" />
                     <mkdir dir="${deb.dir}/usr/bin" />
-                    <move todir="${deb.dir}/usr/bin">
+                    <copy todir="${deb.dir}/usr/bin">
                       <fileset dir="${target.dir}/opal-python/bin/scripts" includes="opal" />
-                    </move>
-                    <move todir="${deb.dir}/usr/share/pyshared/opal">
+                    </copy>
+                    <copy todir="${deb.dir}/usr/share/pyshared/opal">
                       <fileset dir="${target.dir}/opal-python/bin/opal" includes="**/*" />
-                    </move>
+                    </copy>
                     <exec executable="debuild" dir="${deb.dir}" failonerror="true" osfamily="unix">
                       <arg value="-b" />
+                      <arg value="-i" />
+                      <arg value="-us" />
+                      <arg value="-uc" />
                     </exec>
-                    <move todir="${basedir}/target">
-                      <fileset dir="${deb.dir}">
-                        <include name="*.deb" />
-                      </fileset>
-                    </move>
-                    <delete dir="${deb.dir}" />
                   </target>
                 </configuration>
               </execution>
+            </executions>
+          </plugin>
+
+          <!-- Upload packages to github release -->
+          <plugin>
+            <groupId>de.jutzig</groupId>
+            <artifactId>github-release-plugin</artifactId>
+            <executions>
               <execution>
-                <id>deploy-deb</id>
+                <id>make-release</id>
                 <phase>deploy</phase>
                 <goals>
-                  <goal>run</goal>
+                  <goal>release</goal>
                 </goals>
                 <configuration>
-                  <target>
-                    <property name="deb.package.name" value="${project.name}_${project.version}-b${buildNumber}_all.deb" />
-                    <!-- Deploy deb file in deb repo -->
-                    <copy todir="${obiba.deb.dir}/${obiba.deploy.dir}" file="target/${deb.package.name}" />
-                  </target>
-                </configuration>
-              </execution>
-              <execution>
-                <id>deploy-package</id>
-                <phase>deploy</phase>
-                <goals>
-                  <goal>run</goal>
-                </goals>
-                <configuration>
-                  <target>
-                    <property name="python.dist.path" value="${basedir}/target" />
-                    <property name="python.package.name" value="${project.name}-${project.version}.tar.gz" />
-                    <!-- Deploy Python package file in download repo -->
-                    <copy todir="${obiba.download.dir}/opal/${obiba.deploy.dir}" file="target/${python.package.name}" />
-                  </target>
-                </configuration>
-              </execution>
-              <execution>
-                <id>deploy-rpm</id>
-                <phase>deploy</phase>
-                <goals>
-                  <goal>run</goal>
-                </goals>
-                <configuration>
-                  <target>
-                    <!-- Deploy rpm file in rpm repo -->
-                    <copy todir="${obiba.rpm.dir}/${obiba.deploy.dir}">
-                      <fileset dir="target/rpm/opal-python-client/RPMS/noarch" />
-                    </copy>
-                  </target>
+                  <releaseName>${project.version}</releaseName>
+                  <tag>${project.version}</tag>
+                  <fileSets>
+                    <fileSet>
+                      <directory>${project.build.directory}</directory>
+                      <includes>
+                        <include>*.tar.gz</include>
+                        <include>*.deb</include>
+                      </includes>
+                    </fileSet>
+                    <fileSet>
+                      <directory>${project.build.directory}/rpm/${project.name}/RPMS/noarch</directory>
+                      <includes>
+                        <include>*.rpm</include>
+                      </includes>
+                    </fileSet>
+                  </fileSets>
                 </configuration>
               </execution>
             </executions>
