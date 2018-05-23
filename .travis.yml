@@ -1,4 +1,24 @@
+sudo: false
 language: java
-jdk:
-  - oraclejdk8
-sudo: required
+addons:
+  apt:
+    packages:
+    - rpm
+    - devscripts
+deploy:
+  - provider: script
+    script: mvn -Prelease deploy
+    skip_cleanup: true
+    on:
+      branch: master
+      tags: false
+cache:
+  directories:
+  - $HOME/.cache
+  - $HOME/.m2
+notifications:
+  email:
+    recipients:
+    - dev@obiba.org
+    on_success: change
+    on_failure: always
