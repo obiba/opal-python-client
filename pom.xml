@@ -36,73 +36,6 @@
     <rpm-maven-plugin.version>2.1.4</rpm-maven-plugin.version>
   </properties>
 
-  <repositories>
-    <repository>
-      <id>obiba-releases</id>
-      <name>Obiba Maven Releases Repository</name>
-      <url>https://dl.bintray.com/obiba/maven</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-    <repository>
-      <id>obiba-snapshots</id>
-      <name>Obiba Maven Snapshots Repository</name>
-      <url>https://obiba.jfrog.io/obiba/libs-snapshot</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
-
-  <distributionManagement>
-    <repository>
-      <id>obiba-bintray</id>
-      <url>https://api.bintray.com/obiba/maven/</url>
-    </repository>
-    <snapshotRepository>
-      <id>obiba-artifactory</id>
-      <url>https://obiba.jfrog.io/obiba/libs-snapshot</url>
-    </snapshotRepository>
-  </distributionManagement>
-
-  <scm>
-    <connection>scm:git:https://github.com/obiba/opal-python-client.git</connection>
-    <developerConnection>scm:git:https://github.com/obiba/opal-python-client.git</developerConnection>
-    <url>https://github.com/obiba/opal-python-client</url>
-  </scm>
-
-  <issueManagement>
-    <system>GitHub</system>
-    <url>https://github.com/obiba/opal-python-client/issues</url>
-  </issueManagement>
-
-  <ciManagement>
-    <system>Travis</system>
-    <url>https://travis-ci.org/obiba/opal-python-client</url>
-  </ciManagement>
-
-  <mailingLists>
-    <mailingList>
-      <name>OBiBa Users</name>
-      <post>obiba-users@googlegroups.com</post>
-      <archive>https://groups.google.com/forum/?fromgroups#!forum/obiba-users</archive>
-    </mailingList>
-  </mailingLists>
-
-  <licenses>
-    <license>
-      <name>GNU Public License version 3</name>
-      <url>https://www.gnu.org/licenses/gpl-3.0.txt</url>
-    </license>
-  </licenses>
-
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -266,7 +199,7 @@
                       <filter token="project.name" value="${project.name}" />
                       <filter token="project.version" value="${project.version}" />
                       <filter token="project.description" value="${project.description}" />
-                      <filter token="project.download.url" value="http://download.obiba.org/opal/${obiba.deploy.dir}/${python.package.name}" />
+                      <filter token="project.download.url" value="https://github.com/obiba/${project.name}/releases/download/${project.version}/${python.package.name}" />
                     </filterset>
                 </copy>
                 <exec dir="${python.dist.path}/opal-python" executable="python" failonerror="true">
@@ -464,5 +397,72 @@
       </build>
     </profile>
   </profiles>
+
+  <repositories>
+    <repository>
+      <id>obiba-releases</id>
+      <name>Obiba Maven Releases Repository</name>
+      <url>https://dl.bintray.com/obiba/maven</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>obiba-snapshots</id>
+      <name>Obiba Maven Snapshots Repository</name>
+      <url>https://obiba.jfrog.io/obiba/libs-snapshot</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+
+  <distributionManagement>
+    <repository>
+      <id>obiba-bintray</id>
+      <url>https://api.bintray.com/obiba/maven/</url>
+    </repository>
+    <snapshotRepository>
+      <id>obiba-artifactory</id>
+      <url>https://obiba.jfrog.io/obiba/libs-snapshot</url>
+    </snapshotRepository>
+  </distributionManagement>
+
+  <scm>
+    <connection>scm:git:https://github.com/obiba/opal-python-client.git</connection>
+    <developerConnection>scm:git:https://github.com/obiba/opal-python-client.git</developerConnection>
+    <url>https://github.com/obiba/opal-python-client</url>
+  </scm>
+
+  <issueManagement>
+    <system>GitHub</system>
+    <url>https://github.com/obiba/opal-python-client/issues</url>
+  </issueManagement>
+
+  <ciManagement>
+    <system>Travis</system>
+    <url>https://travis-ci.org/obiba/opal-python-client</url>
+  </ciManagement>
+
+  <mailingLists>
+    <mailingList>
+      <name>OBiBa Users</name>
+      <post>obiba-users@googlegroups.com</post>
+      <archive>https://groups.google.com/forum/?fromgroups#!forum/obiba-users</archive>
+    </mailingList>
+  </mailingLists>
+
+  <licenses>
+    <license>
+      <name>GNU Public License version 3</name>
+      <url>https://www.gnu.org/licenses/gpl-3.0.txt</url>
+    </license>
+  </licenses>
 
 </project>
