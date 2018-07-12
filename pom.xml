@@ -29,7 +29,6 @@
     <github-release-plugin.version>1.2.0</github-release-plugin.version>
     <maven-antrun-plugin.version>1.7</maven-antrun-plugin.version>
     <maven-assembly-plugin.version>2.4</maven-assembly-plugin.version>
-    <maven-buildnumber-plugin.version>1.2</maven-buildnumber-plugin.version>
     <maven-dependency-plugin.version>3.1.0</maven-dependency-plugin.version>
     <maven-deploy-plugin.version>2.8.1</maven-deploy-plugin.version>
     <maven-release-plugin.version>2.5.2</maven-release-plugin.version>
@@ -135,27 +134,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-release-plugin</artifactId>
-      </plugin>
-
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>buildnumber-maven-plugin</artifactId>
-        <version>${maven-buildnumber-plugin.version}</version>
-        <executions>
-          <execution>
-            <id>createBuildNumber</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>create</goal>
-            </goals>
-            <configuration>
-              <format>{0,date,yyyyMMddHHmmss}</format>
-              <items>
-                <item>timestamp</item>
-              </items>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
 
       <plugin>
@@ -323,7 +301,7 @@
                   <target>
                     <property name="target.dir" value="${basedir}/target" />
                     <property name="deb.dir" value="${target.dir}/deb" />
-                    <property name="deb.version" value="${project.version}-b${buildNumber}" />
+                    <property name="deb.version" value="${project.version}" />
                     <unzip src="${target.dir}/opal-python_${project.version}.zip" dest="${target.dir}" />
                     <!-- delete junk python bytecode -->
                     <delete>
