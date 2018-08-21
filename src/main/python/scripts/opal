@@ -10,7 +10,6 @@ import opal.entity
 import opal.import_opal
 import opal.import_csv
 import opal.import_xml
-import opal.import_spss
 import opal.import_rsas
 import opal.import_rstata
 import opal.import_rspss
@@ -84,8 +83,6 @@ add_subcommand('import-csv', 'Import data from a CSV file.', opal.import_csv.add
                opal.import_csv.do_command)
 add_subcommand('import-xml', 'Import data from a ZIP file.', opal.import_xml.add_arguments,
                opal.import_xml.do_command)
-add_subcommand('import-spss', 'Import data from a SPSS file.', opal.import_spss.add_arguments,
-               opal.import_spss.do_command)
 add_subcommand('import-r-sas', 'Import data from a SAS file (using R).', opal.import_rsas.add_arguments,
                opal.import_rsas.do_command)
 add_subcommand('import-r-stata', 'Import data from a Stata file (using R).', opal.import_rstata.add_arguments,
