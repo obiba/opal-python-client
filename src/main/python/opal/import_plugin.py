@@ -12,7 +12,7 @@ def add_arguments(parser):
   """
   Add import command specific options
   """
-  parser.add_argument('--name', '-n', required=True, help='Opal plugin name')
+  parser.add_argument('--name', '-n', required=True, help='Opal datasource plugin name')
   parser.add_argument('--config', '-c', required=True, help='A JSON file containing the import configuration.')
   
   # non specific import arguments
