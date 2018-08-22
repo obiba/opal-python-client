@@ -13,6 +13,7 @@ import opal.import_xml
 import opal.import_rsas
 import opal.import_rstata
 import opal.import_rspss
+import opal.import_plugin
 import opal.import_limesurvey
 import opal.import_sql
 import opal.import_vcf
@@ -89,6 +90,8 @@ add_subcommand('import-r-stata', 'Import data from a Stata file (using R).', opa
                opal.import_rstata.do_command)
 add_subcommand('import-r-spss', 'Import data from a SPSS file (using R).', opal.import_rspss.add_arguments,
                opal.import_rspss.do_command)
+add_subcommand('import-plugin', 'Import data from an Opal datasource plugin.', opal.import_plugin.add_arguments,
+               opal.import_plugin.do_command)
 add_subcommand('import-limesurvey', 'Import data from a LimeSurvey database.', opal.import_limesurvey.add_arguments,
                opal.import_limesurvey.do_command)
 add_subcommand('import-sql', 'Import data from a SQL database.', opal.import_sql.add_arguments,
