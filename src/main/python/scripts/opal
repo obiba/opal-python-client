@@ -10,10 +10,10 @@ import opal.entity
 import opal.import_opal
 import opal.import_csv
 import opal.import_xml
-import opal.import_spss
 import opal.import_rsas
 import opal.import_rstata
 import opal.import_rspss
+import opal.import_plugin
 import opal.import_limesurvey
 import opal.import_sql
 import opal.import_vcf
@@ -84,14 +84,14 @@ add_subcommand('import-csv', 'Import data from a CSV file.', opal.import_csv.add
                opal.import_csv.do_command)
 add_subcommand('import-xml', 'Import data from a ZIP file.', opal.import_xml.add_arguments,
                opal.import_xml.do_command)
-add_subcommand('import-spss', 'Import data from a SPSS file.', opal.import_spss.add_arguments,
-               opal.import_spss.do_command)
 add_subcommand('import-r-sas', 'Import data from a SAS file (using R).', opal.import_rsas.add_arguments,
                opal.import_rsas.do_command)
 add_subcommand('import-r-stata', 'Import data from a Stata file (using R).', opal.import_rstata.add_arguments,
                opal.import_rstata.do_command)
 add_subcommand('import-r-spss', 'Import data from a SPSS file (using R).', opal.import_rspss.add_arguments,
                opal.import_rspss.do_command)
+add_subcommand('import-plugin', 'Import data from an Opal datasource plugin.', opal.import_plugin.add_arguments,
+               opal.import_plugin.do_command)
 add_subcommand('import-limesurvey', 'Import data from a LimeSurvey database.', opal.import_limesurvey.add_arguments,
                opal.import_limesurvey.do_command)
 add_subcommand('import-sql', 'Import data from a SQL database.', opal.import_sql.add_arguments,
