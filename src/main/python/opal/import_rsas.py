@@ -70,6 +70,7 @@ class OpalExtensionFactory(opal.io.OpalImporter.ExtensionFactoryInterface):
         """
         factory = factory.Extensions[opal.protobuf.Magma_pb2.RHavenDatasourceFactoryDto.params]
         factory.file = self.path
+        factory.symbol = self.path[self.path.rfind("/")+1:self.path.rfind(".")]
 
         if self.locale:
             factory.locale = self.locale
