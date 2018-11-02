@@ -22,6 +22,7 @@ import opal.import_idsmap
 import opal.import_annotations
 import opal.export_xml
 import opal.export_csv
+import opal.export_plugin
 import opal.export_rsas
 import opal.export_rspss
 import opal.export_rstata
@@ -115,6 +116,8 @@ add_subcommand('export-r-spss', 'Export data to a folder of SPSS files (using R)
                opal.export_rspss.do_command)
 add_subcommand('export-sql', 'Export data to a SQL database.', opal.export_sql.add_arguments,
                opal.export_sql.do_command)
+add_subcommand('export-plugin', 'Export data to a Opal datasource plugin.', opal.export_plugin.add_arguments,
+               opal.export_plugin.do_command)
 add_subcommand('export-vcf', 'Export genotypes data to VCF/BCF files.', opal.export_vcf.add_arguments,
                opal.export_vcf.do_command)
 add_subcommand('export-annot', 'Extract data dictionary annotations in CSV/TSV format.', opal.export_annotations.add_arguments, opal.export_annotations.do_command)
