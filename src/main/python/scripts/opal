@@ -45,7 +45,7 @@ import opal.plugin
 import opal.security.encrypt
 import opal.security.decrypt
 import opal.system
-
+import opal.analysis_plugin
 
 def add_opal_arguments(parser):
     """
@@ -142,6 +142,8 @@ add_subcommand('task', 'Manage a task.', opal.task.add_arguments, opal.task.do_c
 add_subcommand('system', 'Query for system status and configuration.', opal.system.add_arguments, opal.system.do_command)
 add_subcommand('rest', 'Request directly the Opal REST API, for advanced users.', opal.rest.add_arguments,
                opal.rest.do_command)
+add_subcommand('analysis-plugin', 'Analyses an Opal project variables using external R plugins.', opal.analysis_plugin.add_arguments,
+               opal.analysis_plugin.do_command)
 
 
 
