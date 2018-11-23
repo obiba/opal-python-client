@@ -21,7 +21,7 @@ def do_ws(args):
 
 def add_arguments(parser):
   """
-  Add import command specific options
+  Add analyse command specific options
   """
   parser.add_argument('--project', '-pr', required=True, help='Project name')
   parser.add_argument('--config', '-c', required=True, help='A JSON file containing the analysis configuration')
@@ -29,7 +29,7 @@ def add_arguments(parser):
 
 def do_command(args):
   """
-  Execute import data command
+  Execute analysis
   """
   # Build and send request
   try:
@@ -52,7 +52,7 @@ class OpalAnalysisDtoFactory():
   @classmethod
   def create(self, project, config):
     """
-    Create a list or a s
+    Create an analysis option DTO
     """
 
     dto = opal.protobuf.Commands_pb2.AnalyseCommandOptionsDto()

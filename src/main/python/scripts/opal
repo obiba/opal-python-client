@@ -46,6 +46,8 @@ import opal.security.encrypt
 import opal.security.decrypt
 import opal.system
 import opal.analysis_plugin
+import opal.export_analysis_plugin
+
 
 def add_opal_arguments(parser):
     """
@@ -144,6 +146,8 @@ add_subcommand('rest', 'Request directly the Opal REST API, for advanced users.'
                opal.rest.do_command)
 add_subcommand('analysis-plugin', 'Analyses an Opal project variables using external R plugins.', opal.analysis_plugin.add_arguments,
                opal.analysis_plugin.do_command)
+add_subcommand('export-analysis-plugin', 'Exports analysis data of an Opal project or specific tables.', opal.export_analysis_plugin.add_arguments,
+               opal.export_analysis_plugin.do_command)
 
 
 
