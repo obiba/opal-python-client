@@ -1,5 +1,5 @@
 """
-Opal analysis plugin.
+Opal Export analysis plugin.
 """
 
 import sys
@@ -14,11 +14,11 @@ def do_ws(args):
   Build the web service resource path
   """
   if args.table is None:
-    ws = "/project/%s/_export-analysis" % args.project
+    ws = "/project/%s/analyses/_export" % args.project
   else:
-    ws = "/project/%s/table/%s/_export-analysis" % (args.project, args.table)
+    ws = "/project/%s/table/%s/analyses/_export" % (args.project, args.table)
 
-  return ws
+  return "%s?all=true" % ws if args.all_results else ws
 
 
 def add_arguments(parser):
@@ -27,17 +27,19 @@ def add_arguments(parser):
   """
   parser.add_argument('--project', '-pr', required=True, help='Project name for which analysis data will be exported.')
   parser.add_argument('--table', '-t', required=False, help='Table name for which analysis data will be exported.')
+  parser.add_argument('--all-results', '-ar', action='store_true',
+                      help='Export all results (default exports last result).')
 
 
 def do_command(args):
   """
-  Execute export anaysis command
+  Execute export analysis command
   """
   # Build and send request
   try:
     request = opal.core.OpalClient.build(opal.core.OpalClient.LoginInfo.parse(args)).new_request()
     request.fail_on_error().accept("application/zip")
-    response = request.post().resource(do_ws(args)).send()
+    response = request.get().resource(do_ws(args)).send()
     print response.content
 
   except Exception, e:
@@ -47,5 +49,3 @@ def do_command(args):
     errno, errstr = error
     print >> sys.stderr, 'An error occurred: ', errstr
     sys.exit(2)
-
-
