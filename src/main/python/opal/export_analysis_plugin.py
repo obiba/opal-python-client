@@ -15,8 +15,11 @@ def do_ws(args):
   """
   if args.table is None:
     ws = "/project/%s/analyses/_export" % args.project
-  else:
+  elif args.analysis_id is None:
     ws = "/project/%s/table/%s/analyses/_export" % (args.project, args.table)
+  else:
+    ws = "/project/%s/table/%s/analysis/%s/_export" % (args.project, args.table, args.analysis_id)
+
 
   return "%s?all=true" % ws if args.all_results else ws
 
@@ -29,6 +32,8 @@ def add_arguments(parser):
   parser.add_argument('--table', '-t', required=False, help='Table name for which analysis data will be exported.')
   parser.add_argument('--all-results', '-ar', action='store_true',
                       help='Export all results (default exports last result).')
+  parser.add_argument('--analysis-id', '-ai', required=False,
+                      help='A table Analysis ID for which results will be exported.')
 
 
 def do_command(args):
