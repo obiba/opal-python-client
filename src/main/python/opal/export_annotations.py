@@ -17,6 +17,8 @@ def add_arguments(parser):
                         help='Fully qualified name of a datasource/project or a table or a variable, for instance: opal-data or opal-data.questionnaire or opal-data.questionnaire:Q1. Wild cards can also be used, for instance: "opal-data.*", etc.')
     parser.add_argument('--output', '-out', help='CSV/TSV file to output (default is stdout)',
                         type=argparse.FileType('w'), default=sys.stdout)
+    parser.add_argument('--locale', '-l', required=False,
+                        help='Exported locale (default is none)')
     parser.add_argument('--separator', '-s', required=False,
                         help='Separator char for CSV/TSV format (default is the tabulation character)')
     parser.add_argument('--taxonomies', '-tx', nargs='+', required=False,
@@ -82,7 +84,11 @@ def handle_table(args, writer, tableObject):
 def handle_variable(args, writer, datasource, table, variableObject):
     if 'attributes' in variableObject:
         for attribute in variableObject['attributes']:
-            if 'namespace' in attribute and 'locale' not in attribute:
+            do_search = 'namespace' in attribute and 'locale' in attribute \
+                        and args.locale in attribute['locale'] \
+                if args.locale \
+                else 'namespace' in attribute and 'locale' not in attribute
+            if do_search:
                 if not args.taxonomies or attribute['namespace'] in args.taxonomies:
                     row = [datasource, table, variableObject['name'], attribute['namespace'], attribute['name'],
                            attribute['value']]
