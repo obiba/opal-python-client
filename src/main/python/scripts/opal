@@ -48,6 +48,7 @@ import opal.system
 import opal.analysis_plugin
 import opal.export_analysis_plugin
 import opal.backup_view
+import opal.restore_view
 
 
 def add_opal_arguments(parser):
@@ -83,6 +84,7 @@ add_subcommand('data', 'Query for data.', opal.data.add_arguments, opal.data.do_
 add_subcommand('entity', 'Query for entities (Participant, etc.).', opal.entity.add_arguments, opal.entity.do_command)
 add_subcommand('file', 'Manage Opal file system.', opal.file.add_arguments, opal.file.do_command)
 add_subcommand('backup-view', 'Backup views of a project.', opal.backup_view.add_arguments, opal.backup_view.do_command)
+add_subcommand('restore-view', 'Restore views of a project.', opal.restore_view.add_arguments, opal.restore_view.do_command)
 add_subcommand('import-opal', 'Import data from a remote Opal server.', opal.import_opal.add_arguments,
                opal.import_opal.do_command)
 add_subcommand('import-csv', 'Import data from a CSV file.', opal.import_csv.add_arguments,
