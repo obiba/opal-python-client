@@ -1,5 +1,5 @@
 """
-Backup views of a project: download view's XML representation and save it in a file, one for each view.
+Backup views of a project: download view's JSON representation and save it in a file, one for each view.
 """
 
 import sys
@@ -17,7 +17,6 @@ def add_arguments(parser):
                         help='List of view names to be backed up (default is all)')
     parser.add_argument('--output', '-out', required=False, help='Output directory name (default is current directory)')
     parser.add_argument('--force', '-f', action='store_true', help='Skip confirmation when overwriting the backup file.')
-    parser.add_argument('--json', '-j', action='store_true', help='Pretty JSON formatting of the response')
 
 
 def retrieve_datasource_views(args):
@@ -36,7 +35,7 @@ def retrieve_datasource_views(args):
     return views
 
 def backup_view(args, view, outdir):
-    outfile = view + '.xml'
+    outfile = view + '.json'
     print 'Backup of', view, 'in', outfile, '...'
 
     outpath = os.path.join(outdir, outfile)
@@ -46,7 +45,7 @@ def backup_view(args, view, outdir):
     if args.verbose:
         request.verbose()
     response = request.get().resource(
-        opal.core.UriBuilder(['datasource', args.project, 'view', view, 'xml']).build()).accept_xml().send()
+        opal.core.UriBuilder(['datasource', args.project, 'view', view]).build()).send()
 
     dowrite = True
     if os.path.exists(outpath) and not args.force:
@@ -64,7 +63,7 @@ def backup_view(args, view, outdir):
 
 def do_command(args):
     """
-    Retrieve table DTOs of the project, look for the views, download the views in XML into a file in provided or current directory
+    Retrieve table DTOs of the project, look for the views, download the views in JSON into a file in provided or current directory
     """
 
     # Build and send request
