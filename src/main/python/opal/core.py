@@ -173,6 +173,9 @@ class OpalRequest:
     def accept_protobuf(self):
         return self.accept('application/x-protobuf')
 
+    def accept_xml(self):
+        return self.accept('application/xml')
+
     def content_type_json(self):
         return self.content_type('application/json')
 
