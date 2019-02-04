@@ -14,7 +14,7 @@ def add_arguments(parser):
     """
     parser.add_argument('--project', '-pr', required=True, help='Destination project name')
     parser.add_argument('--views', '-vw', nargs='+', required=False,
-                        help='List of view names to be restored (default is all the XML files that are found in the backup directory)')
+                        help='List of view names to be restored (default is all the JSON files that are found in the backup directory)')
     parser.add_argument('--input', '-in', required=False, help='Input directory name (default is current directory)')
     parser.add_argument('--force', '-f', action='store_true', help='Skip confirmation when overwriting an existing view.')
 
