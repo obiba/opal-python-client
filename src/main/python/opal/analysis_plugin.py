@@ -7,7 +7,6 @@ import opal.io
 import sys
 import json
 import opal.protobuf.Commands_pb2
-from google.protobuf.json_format import Parse
 
 
 def do_ws(args):
@@ -47,6 +46,17 @@ def do_command(args):
     sys.exit(2)
 
 
+def to_analyse_dto(config):
+    dto = opal.protobuf.Commands_pb2.AnalyseCommandOptionsDto.AnalyseDto()
+    dto.table = config['table']
+    dto.name = config['name']
+    dto.plugin = config['plugin']
+    dto.template = config['template']
+    dto.params = config['params']
+    dto.variables = config['variables']
+    return dto
+
+
 class OpalAnalysisDtoFactory():
 
   @classmethod
@@ -62,9 +72,9 @@ class OpalAnalysisDtoFactory():
 
     if type(configJson) is list:
       for conf in configJson:
-        analyses.append(Parse(json.dumps(conf), opal.protobuf.Commands_pb2.AnalyseCommandOptionsDto.AnalyseDto(), True))
+        analyses.append(to_analyse_dto(conf))
     else:
-      analyses.append(Parse(json.dumps(configJson), opal.protobuf.Commands_pb2.AnalyseCommandOptionsDto.AnalyseDto(), True))
+      analyses.append(to_analyse_dto(configJson))
 
     dto.analyses.extend(analyses)
 
