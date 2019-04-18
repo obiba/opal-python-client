@@ -91,11 +91,11 @@ add_subcommand('import-csv', 'Import data from a CSV file.', opal.import_csv.add
                opal.import_csv.do_command)
 add_subcommand('import-xml', 'Import data from a ZIP file.', opal.import_xml.add_arguments,
                opal.import_xml.do_command)
-add_subcommand('import-r-sas', 'Import data from a SAS file (using R).', opal.import_rsas.add_arguments,
+add_subcommand('import-r-sas', 'Import data from a SAS or SAS Transport file (using R).', opal.import_rsas.add_arguments,
                opal.import_rsas.do_command)
 add_subcommand('import-r-stata', 'Import data from a Stata file (using R).', opal.import_rstata.add_arguments,
                opal.import_rstata.do_command)
-add_subcommand('import-r-spss', 'Import data from a SPSS file (using R).', opal.import_rspss.add_arguments,
+add_subcommand('import-r-spss', 'Import data from a SPSS or compressed SPSS file (using R).', opal.import_rspss.add_arguments,
                opal.import_rspss.do_command)
 add_subcommand('import-plugin', 'Import data from an Opal datasource plugin.', opal.import_plugin.add_arguments,
                opal.import_plugin.do_command)
@@ -114,11 +114,11 @@ add_subcommand('export-xml', 'Export data to a zip of Opal XML files.', opal.exp
                opal.export_xml.do_command)
 add_subcommand('export-csv', 'Export data to a folder of CSV files.', opal.export_csv.add_arguments,
                opal.export_csv.do_command)
-add_subcommand('export-r-sas', 'Export data to a SAS file (using R).', opal.export_rsas.add_arguments,
+add_subcommand('export-r-sas', 'Export data to a SAS or SAS Transport file (using R).', opal.export_rsas.add_arguments,
                opal.export_rsas.do_command)
 add_subcommand('export-r-stata', 'Export data to a Stata file (using R).', opal.export_rstata.add_arguments,
                opal.export_rstata.do_command)
-add_subcommand('export-r-spss', 'Export data to a SPSS file (using R).', opal.export_rspss.add_arguments,
+add_subcommand('export-r-spss', 'Export data to a SPSS or compressed SPSS file (using R).', opal.export_rspss.add_arguments,
                opal.export_rspss.do_command)
 add_subcommand('export-sql', 'Export data to a SQL database.', opal.export_sql.add_arguments,
                opal.export_sql.do_command)
