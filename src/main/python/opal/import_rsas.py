@@ -12,7 +12,7 @@ def add_arguments(parser):
     """
     Add data command specific options
     """
-    parser.add_argument('--path', '-pa', required=True, help='SAS file to import on the Opal filesystem (from the Opal filesystem).')
+    parser.add_argument('--path', '-pa', required=True, help='SAS file to import from the Opal filesystem.')
     parser.add_argument('--locale', '-l', required=False, help='SAS file locale (e.g. fr, en...).')
     parser.add_argument('--type', '-ty', required=False, help='Entity type (e.g. Participant)')
     parser.add_argument('--idVariable', '-iv', required=False, help='SAS variable that provides the entity ID. If not specified, first variable values are considered to be the entity identifiers.')

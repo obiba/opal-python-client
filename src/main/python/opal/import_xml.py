@@ -11,8 +11,7 @@ def add_arguments(parser):
     """
     Add data command specific options
     """
-    parser.add_argument('--path', '-pa', required=True, help='Zip of XML files to import on the Opal filesystem '
-                                                             '(from the Opal filesystem).')
+    parser.add_argument('--path', '-pa', required=True, help='Zip of XML files to import from the Opal filesystem.')
     # non specific import arguments
     opal.io.add_import_arguments(parser)
 

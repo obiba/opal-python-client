@@ -12,8 +12,7 @@ def add_arguments(parser):
     """
     Add data command specific options
     """
-    parser.add_argument('--path', '-pa', required=True, help='CSV file to import on the Opal filesystem '
-                                                             '(from the Opal filesystem).')
+    parser.add_argument('--path', '-pa', required=True, help='CSV file to import from the Opal filesystem.')
     parser.add_argument('--characterSet', '-c', required=False, help='Character set.')
     parser.add_argument('--separator', '-s', required=False, help='Field separator.')
     parser.add_argument('--quote', '-q', required=False, help='Quotation mark character.')
