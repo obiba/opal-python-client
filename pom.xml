@@ -416,7 +416,7 @@
     <connection>scm:git:https://github.com/obiba/opal-python-client.git</connection>
     <developerConnection>scm:git:https://github.com/obiba/opal-python-client.git</developerConnection>
     <url>https://github.com/obiba/opal-python-client</url>
-    <tag>HEAD</tag>
+    <tag>opal-python-client-2.14.x</tag>
   </scm>
 
   <issueManagement>
