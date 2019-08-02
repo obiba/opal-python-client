@@ -29,6 +29,8 @@ class OpalClient:
         if loginInfo.isSsl():
             return OpalClient.buildWithCertificate(loginInfo.data['server'], loginInfo.data['cert'],
                                                    loginInfo.data['key'])
+        elif loginInfo.isToken():
+            return OpalClient.buildWithToken(loginInfo.data['server'], loginInfo.data['token'])
         else:
             return OpalClient.buildWithAuthentication(loginInfo.data['server'], loginInfo.data['user'],
                                                       loginInfo.data['password'])
@@ -52,6 +54,15 @@ class OpalClient:
         client.credentials(user, password)
         return client
 
+    @classmethod
+    def buildWithToken(cls, server, token):
+        client = cls(server)
+        if client.base_url.startswith('https:'):
+            client.verify_peer(0)
+            client.verify_host(0)
+        client.token(token)
+        return client
+
     def __ensure_entry(self, text, entry, pwd=False):
         e = entry
         if not entry:
@@ -66,6 +77,10 @@ class OpalClient:
         u = self.__ensure_entry('User name', user)
         p = self.__ensure_entry('Password', password, True)
         return self.header('Authorization', 'X-Opal-Auth ' + base64.b64encode(u + ':' + p))
+
+    def token(self, token):
+        tk = self.__ensure_entry('Token', token, True)
+        return self.header('X-Opal-Auth', tk)
 
     def keys(self, cert_file, key_file, key_pwd=None, ca_certs=None):
         self.curl_option(pycurl.SSLCERT, cert_file)
@@ -113,14 +128,21 @@ class OpalClient:
             if argv.get('user') and argv.get('password'):
                 data['user'] = argv['user']
                 data['password'] = argv['password']
+            elif argv.get('token'):
+                data['token'] = argv['token']
             elif argv.get('ssl_cert') and argv.get('ssl_key'):
                 data['cert'] = argv['ssl_cert']
                 data['key'] = argv['ssl_key']
             else:
-                raise Exception('Invalid login information. Requires user-password or certificate-key information')
+                raise Exception('Invalid login information. Requires user-password or token or certificate-key information')
 
             setattr(cls, 'data', data)
             return cls()
+
+        def isToken(self):
+            if self.data.viewkeys() & {'token'}:
+                return True
+            return False
 
         def isSsl(self):
             if self.data.viewkeys() & {'cert', 'key'}:
