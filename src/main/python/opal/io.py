@@ -17,6 +17,7 @@ def add_import_arguments(parser):
     parser.add_argument('--limit', '-li', required=False, type=int, help='Import limit (maximum number of value sets)')
     parser.add_argument('--identifiers', '-id', required=False, help='Name of the ID mapping')
     parser.add_argument('--policy', '-po', required=False, help='ID mapping policy: required (each identifiers must be mapped prior importation, default), ignore (ignore unknown identifiers), generate (generate a system identifier for each unknown identifier)')
+    parser.add_argument('--merge', '-mg', action='store_true', help='Merge imported data dictionary with the destination one (default is false, i.e. data dictionary is overridden).')
     parser.add_argument('--json', '-j', action='store_true', help='Pretty JSON formatting of the response')
 
 class OpalImporter:
@@ -29,7 +30,7 @@ class OpalImporter:
             raise Exception("ExtensionFactoryInterface.add() method must be implemented by a concrete class.")
 
     @classmethod
-    def build(cls, client, destination, tables=None, incremental=None, limit=None, identifiers=None, policy=None, verbose=None):
+    def build(cls, client, destination, tables=None, incremental=None, limit=None, identifiers=None, policy=None, merge=None, verbose=None):
         setattr(cls, 'client', client)
         setattr(cls, 'destination', destination)
         setattr(cls, 'tables', tables)
@@ -37,6 +38,7 @@ class OpalImporter:
         setattr(cls, 'limit', limit)
         setattr(cls, 'identifiers', identifiers)
         setattr(cls, 'policy', policy)
+        setattr(cls, 'merge', merge)
         setattr(cls, 'verbose', verbose)
         return cls()
 
@@ -98,7 +100,7 @@ class OpalImporter:
         request.fail_on_error().accept_json()
         return request.get().resource(job_resource).send()
 
-    def __create_transient_datasource(self, extension_factory):
+    def __create_transient_datasource(self, extension_factory, ):
         """
         Create a transient datasource
         """
@@ -139,7 +141,10 @@ class OpalImporter:
             print "**"
 
         # send request and parse response as a datasource
-        uri = opal.core.UriBuilder(['project', self.destination, 'transient-datasources']).build()
+        mergeStr = 'false'
+        if self.merge:
+            mergeStr = 'true'
+        uri = opal.core.UriBuilder(['project', self.destination, 'transient-datasources']).query('merge', mergeStr).build()
         response = request.post().resource(uri).content(factory.SerializeToString()).send()
         transient = opal.protobuf.Magma_pb2.DatasourceDto()
         transient.ParseFromString(response.content)

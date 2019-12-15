@@ -26,7 +26,7 @@ def do_command(args):
         importer = opal.io.OpalImporter.build(client=client, destination=args.destination, tables=args.tables,
                                               incremental=args.incremental, limit=args.limit,
                                               identifiers=args.identifiers,
-                                              policy=args.policy, verbose=args.verbose)
+                                              policy=args.policy, merge=args.merge, verbose=args.verbose)
         # print result
         extension_factory = OpalExtensionFactory(database=args.database)
 
