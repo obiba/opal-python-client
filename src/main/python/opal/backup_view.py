@@ -10,7 +10,7 @@ import os
 
 def add_arguments(parser):
     """
-    Add data command specific options
+    Add command specific options
     """
     parser.add_argument('--project', '-pr', required=True, help='Source project name')
     parser.add_argument('--views', '-vw', nargs='+', required=False,
