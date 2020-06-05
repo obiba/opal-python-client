@@ -14,7 +14,7 @@ def add_arguments(parser):
     parser.add_argument('--project', '-pr', required=True, help='Destination project name (must exist)')
     parser.add_argument('--archive', '-ar', required=True, help='Archive directory or zip file path in the Opal file system')
     parser.add_argument('--arpassword', '-arp', required=False, help='Password to decrypt zip archive (optional)')
-    parser.add_argument('--force', '-f', action='store_true', help='Force overwriting existing items (table, view, resource, report). Files override is not checked.')
+    parser.add_argument('--force', '-f', action='store_true', help='Force overwriting existing items (table, view, resource, report). Files override is not checked')
     parser.add_argument('--json', '-j', action='store_true', help='Pretty JSON formatting of the response')
 
 def do_command(args):
