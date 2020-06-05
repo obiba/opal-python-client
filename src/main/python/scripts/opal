@@ -41,6 +41,7 @@ import opal.perm_variable
 import opal.perm_r
 import opal.perm_datashield
 import opal.perm_system
+import opal.project
 import opal.plugin
 import opal.security.encrypt
 import opal.security.decrypt
@@ -81,6 +82,7 @@ subparsers = parser.add_subparsers(title='sub-commands',
                                         'for more details.')
 
 # Add subcommands
+add_subcommand('project', 'Fetch, create, delete a project.', opal.project.add_arguments, opal.project.do_command)
 add_subcommand('dict', 'Query for data dictionary.', opal.dictionary.add_arguments, opal.dictionary.do_command)
 add_subcommand('data', 'Query for data.', opal.data.add_arguments, opal.data.do_command)
 add_subcommand('entity', 'Query for entities (Participant, etc.).', opal.entity.add_arguments, opal.entity.do_command)

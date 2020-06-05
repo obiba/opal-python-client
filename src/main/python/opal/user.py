@@ -69,7 +69,7 @@ def do_command(args):
             if not args.name:
                 raise Exception('A user name is required.')
             if not args.upassword and not args.ucertificate:
-                    raise Exception('A user password or a certificat file is required.')
+                    raise Exception('A user password or a certificate file is required.')
 
             # create user
             user = opal.protobuf.Opal_pb2.SubjectCredentialsDto()
