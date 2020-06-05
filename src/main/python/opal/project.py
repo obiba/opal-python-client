@@ -9,26 +9,23 @@ import opal.protobuf.Projects_pb2
 
 def add_arguments(parser):
     """
-    Add data command specific options
+    Add command specific options
     """
-    parser.add_argument('--name', '-n', required=True, help='Project name.')
+    parser.add_argument('--name', '-n', required=False, help='Project name. Not specifying the project name, will get the list of the projects.')
     parser.add_argument('--database', '-db', required=False, help='Project database name. If not provided only views can be added.')
     parser.add_argument('--title', '-t', required=False, help='Project title.')
     parser.add_argument('--description', '-dc', required=False, help='Project description.')
     parser.add_argument('--tags', '-tg', nargs='+', required=False, help='Tags to apply to the project.')
     parser.add_argument('--export-folder', '-ex', required=False, help='Project preferred export folder.')
 
-    parser.add_argument('--fetch', '-fe', action='store_true', required=False,
-                        help='Fetch the project.')
-    parser.add_argument('--add', '-a', action='store_true', help='Add a project.')
-    parser.add_argument('--delete', '-de', action='store_true', required=False,
-                        help='Delete a project.')
+    parser.add_argument('--add', '-a', action='store_true', help='Add a project (requires at least a project name).')
+    parser.add_argument('--delete', '-de', action='store_true', required=False, help='Delete a project (requires at least a project name).')
     parser.add_argument('--force', '-f', action='store_true', help='Skip confirmation on project deletion')
     parser.add_argument('--json', '-j', action='store_true', help='Pretty JSON formatting of the response')
 
 def do_command(args):
     """
-    Execute group command
+    Execute command
     """
     # Build and send request
     try:
@@ -38,7 +35,15 @@ def do_command(args):
         if args.verbose:
             request.verbose()
 
-        if args.add:
+        if not args.name:
+            response = request.get().resource(opal.core.UriBuilder(['projects']).build()).send()
+            # format response
+            res = response.content
+            if args.json:
+                res = response.pretty_json()
+            # output to stdout
+            print res
+        elif args.add:
             # create project
             project = opal.protobuf.Projects_pb2.ProjectFactoryDto()
             project.name = args.name
