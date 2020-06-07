@@ -35,15 +35,9 @@ def do_command(args):
         if args.verbose:
             request.verbose()
 
-        if not args.name:
-            response = request.get().resource(opal.core.UriBuilder(['projects']).build()).send()
-            # format response
-            res = response.content
-            if args.json:
-                res = response.pretty_json()
-            # output to stdout
-            print res
-        elif args.add:
+        if args.add:
+            if not args.name:
+                raise Exception('A project name is required.')
             # create project
             project = opal.protobuf.Projects_pb2.ProjectFactoryDto()
             project.name = args.name
@@ -62,6 +56,8 @@ def do_command(args):
             request.fail_on_error().accept_json().content_type_protobuf()
             request.post().resource(opal.core.UriBuilder(['projects']).build()).content(project.SerializeToString()).send()
         elif args.delete:
+            if not args.name:
+                raise Exception('A project name is required.')
             # confirm
             if args.force:
                 request.delete().resource(opal.core.UriBuilder(['project', args.name]).build()).send()
@@ -73,6 +69,14 @@ def do_command(args):
                 else:
                     print 'Aborted.'
                     sys.exit(0)
+        elif not args.name:
+            response = request.get().resource(opal.core.UriBuilder(['projects']).build()).send()
+            # format response
+            res = response.content
+            if args.json:
+                res = response.pretty_json()
+            # output to stdout
+            print res
         else:
             response = request.get().resource(opal.core.UriBuilder(['project', args.name]).build()).send()
             # format response
