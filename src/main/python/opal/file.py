@@ -16,7 +16,7 @@ class OpalFile:
         self.path = path
 
     def get_meta_ws(self):
-        return '/files/meta' + self.path
+        return '/files/_meta' + self.path
 
     def get_ws(self):
         return '/files' + self.path
@@ -51,16 +51,9 @@ def do_command(args):
         file = OpalFile(args.path)
 
         # send request
-        if args.download:
+        if args.download or args.download_password:
             response = request.get().resource(file.get_ws()).header('X-File-Key', args.download_password).send()
         elif args.upload:
-            #boundary = 'OpalPythonClient'
-            #request.post().content_type('multipart/form-data; boundary=' + boundary).accept('text/html')
-            #content = '--' + boundary + '\n'
-            #content = content + 'Content-Disposition: form-data; name="fileToUpload"; filename="'+args.upload+'"\n\n'
-            #content = content + open(args.upload,'rb').read()
-            #content = content + '\n--' + boundary
-            #request.content(content)
             request.content_upload(args.upload).accept('text/html').content_type('multipart/form-data')
             response = request.post().resource(file.get_ws()).send()
         elif args.delete:
@@ -80,7 +73,7 @@ def do_command(args):
 
         # format response
         res = response.content
-        if args.json and not args.download and not args.upload:
+        if args.json and not args.download and not args.download_password and not args.upload:
             res = response.pretty_json()
 
         # output to stdout
