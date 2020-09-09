@@ -32,9 +32,9 @@ def new_request(args):
 def show_task(args):
     task = get_task(args)
     if args.json:
-        print json.dumps(task, sort_keys=True, indent=2)
+        print(json.dumps(task, sort_keys=True, indent=2))
     else:
-        print json.dumps(task)
+        print(json.dumps(task))
 
 def get_task(args):
     request = new_request(args)
@@ -65,7 +65,7 @@ def wait_task(args):
         sys.stdout.flush()
         time.sleep(1)
         task = get_task(args)
-    print '\r\033[K' + task['status']
+    print('\r\033[K' + task['status'])
 
 def do_command(args):
     """
@@ -85,16 +85,16 @@ def do_command(args):
         if args.wait:
             wait_task(args)
         if args.status:
-            print get_task(args)['status']
+            print(get_task(args)['status'])
         if args.cancel:
             cancel_task(args)
         if args.delete:
             delete_task(args)
 
-    except Exception, e:
-        print e
+    except Exception as e:
+        print(e)
         sys.exit(2)
-    except pycurl.error, error:
+    except pycurl.error as error:
         errno, errstr = error
-        print >> sys.stderr, 'An error occurred: ', errstr
+        print('An error occurred: ', errstr, file=sys.stderr)
         sys.exit(2)

@@ -37,12 +37,12 @@ def do_command(args):
     request.fail_on_error().accept_json().content_type_protobuf()
     request.post().resource(do_ws(args)).content(dto.SerializeToString()).send()
 
-  except Exception, e:
-    print e
+  except Exception as e:
+    print(e)
     sys.exit(2)
-  except pycurl.error, error:
+  except pycurl.error as error:
     errno, errstr = error
-    print >> sys.stderr, 'An error occurred: ', errstr
+    print('An error occurred: ', errstr, file=sys.stderr)
     sys.exit(2)
 
 

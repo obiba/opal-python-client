@@ -231,9 +231,9 @@
                   <changelogFile>/usr/share/doc/opal-python-client/changelog</changelogFile>
                   <targetOS>Linux</targetOS>
                   <requires>
-                    <require>python &gt;= 2.7</require>
-                    <require>python-pycurl</require>
-                    <require>protobuf-python &gt;= 2.5</require>
+                    <require>python3</require>
+                    <require>python3-pycurl</require>
+                    <require>protobuf-python3 &gt;= 2.5</require>
                   </requires>
 
                   <mappings>

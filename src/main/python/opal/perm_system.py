@@ -15,7 +15,7 @@ def add_arguments(parser):
     """
     Add command specific options
     """
-    opal.perm.add_permission_arguments(parser, PERMISSIONS.keys())
+    opal.perm.add_permission_arguments(parser, list(PERMISSIONS.keys()))
 
 def do_command(args):
     """
@@ -38,18 +38,18 @@ def do_command(args):
 
         try:
             response = request.resource(opal.perm.do_ws(args, ['system', 'permissions', 'administration'], PERMISSIONS)).send()
-        except Exception, e:
-            print Exception, e
+        except Exception as e:
+            print(Exception, e)
 
         # format response
         if response.code != 200:
-            print response.content
+            print(response.content)
 
-    except Exception, e:
-        print e
+    except Exception as e:
+        print(e)
         sys.exit(2)
 
-    except pycurl.error, error:
+    except pycurl.error as error:
         errno, errstr = error
-        print >> sys.stderr, 'An error occurred: ', errstr
+        print('An error occurred: ', errstr, file=sys.stderr)
         sys.exit(2)

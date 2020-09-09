@@ -56,7 +56,7 @@ def do_command(args):
             response = request.get().resource('/plugin/' + args.fetch).send()
         elif args.configure:
             request.content_type_text_plain()
-            print 'Enter plugin site properties (one property per line, Ctrl-D to end input):'
+            print('Enter plugin site properties (one property per line, Ctrl-D to end input):')
             request.content(sys.stdin.read())
             response = request.put().resource('/plugin/' + args.configure + '/cfg').send()
         elif args.remove:
@@ -76,12 +76,12 @@ def do_command(args):
             res = response.pretty_json()
 
         # output to stdout
-        print res
-    except Exception, e:
-        print >> sys.stderr, e
+        print(res)
+    except Exception as e:
+        print(e, file=sys.stderr)
         sys.exit(2)
-    except pycurl.error, error:
-        print response
+    except pycurl.error as error:
+        print(response)
         errno, errstr = error
-        print >> sys.stderr, 'An error occurred: ', errstr
+        print('An error occurred: ', errstr, file=sys.stderr)
         sys.exit(2)

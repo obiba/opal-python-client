@@ -63,12 +63,12 @@ class OpalImporter:
         if self.tables:
             def f(t): return any(t in s for s in transient.table)
 
-            tables2import = filter(f, self.tables)
+            tables2import = list(filter(f, self.tables))
 
         def table_fullname(t):
             return transient.name + '.' + t
 
-        options.tables.extend(map(table_fullname, tables2import))
+        options.tables.extend(list(map(table_fullname, tables2import)))
 
         if self.identifiers:
             options.idConfig.name = self.identifiers
@@ -87,9 +87,9 @@ class OpalImporter:
                 options.idConfig.ignoreUnknownIdentifier = False
 
         if self.verbose:
-            print "** Import options:"
-            print options
-            print "**"
+            print("** Import options:")
+            print(options)
+            print("**")
 
         uri = opal.core.UriBuilder(['project', self.destination, 'commands', '_import']).build()
         response = request.post().resource(uri).content(options.SerializeToString()).send()
@@ -136,9 +136,9 @@ class OpalImporter:
         extension_factory.add(factory)
 
         if self.verbose:
-            print "** Datasource factory:"
-            print factory
-            print "**"
+            print("** Datasource factory:")
+            print(factory)
+            print("**")
 
         # send request and parse response as a datasource
         mergeStr = 'false'
@@ -150,9 +150,9 @@ class OpalImporter:
         transient.ParseFromString(response.content)
 
         if self.verbose:
-            print "** Transient datasource:"
-            print transient
-            print "**"
+            print("** Transient datasource:")
+            print(transient)
+            print("**")
         return transient
 
     def compare_datasource(self, transient):
@@ -210,16 +210,16 @@ class OpalExporter:
 
             def table_fullname(t): return self.datasource + '.' + t
 
-            options.tables.extend(map(table_fullname, tables2export))
+            options.tables.extend(list(map(table_fullname, tables2export)))
         if self.identifiers:
             options.idConfig.name = self.identifiers
             options.idConfig.allowIdentifierGeneration = False
             options.idConfig.ignoreUnknownIdentifier = False
 
         if self.verbose:
-            print "** Export options:"
-            print options
-            print "**"
+            print("** Export options:")
+            print(options)
+            print("**")
 
         # submit data export job
         request = self.client.new_request()
@@ -271,15 +271,15 @@ class OpalCopier:
 
             def table_fullname(t): return self.datasource + '.' + t
 
-            options.tables.extend(map(table_fullname, tables2copy))
+            options.tables.extend(list(map(table_fullname, tables2copy)))
         # name option will be ignored if more than one table
         if self.name:
             options.destinationTableName = self.name
 
         if self.verbose:
-            print "** Copy options:"
-            print options
-            print "**"
+            print("** Copy options:")
+            print(options)
+            print("**")
 
         # submit data copy job
         request = self.client.new_request()

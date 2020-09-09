@@ -62,12 +62,12 @@ def do_command(args):
             if args.force:
                 request.delete().resource(opal.core.UriBuilder(['project', args.name]).build()).send()
             else:
-                print 'Delete the project "' + args.name + '"? [y/N]: ',
+                print('Delete the project "' + args.name + '"? [y/N]: ', end=' ')
                 confirmed = sys.stdin.readline().rstrip().strip()
                 if confirmed == 'y':
                     request.delete().resource(opal.core.UriBuilder(['project', args.name]).build()).send()
                 else:
-                    print 'Aborted.'
+                    print('Aborted.')
                     sys.exit(0)
         elif not args.name:
             response = request.get().resource(opal.core.UriBuilder(['projects']).build()).send()
@@ -76,7 +76,7 @@ def do_command(args):
             if args.json:
                 res = response.pretty_json()
             # output to stdout
-            print res
+            print(res)
         else:
             response = request.get().resource(opal.core.UriBuilder(['project', args.name]).build()).send()
             # format response
@@ -84,12 +84,12 @@ def do_command(args):
             if args.json:
                 res = response.pretty_json()
             # output to stdout
-            print res
+            print(res)
 
-    except Exception, e:
-        print e
+    except Exception as e:
+        print(e)
         sys.exit(2)
-    except pycurl.error, error:
+    except pycurl.error as error:
         errno, errstr = error
-        print >> sys.stderr, 'An error occurred: ', errstr
+        print('An error occurred: ', errstr, file=sys.stderr)
         sys.exit(2)

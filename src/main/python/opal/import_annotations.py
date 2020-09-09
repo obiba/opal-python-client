@@ -7,7 +7,7 @@ import csv
 import opal.core
 import pprint
 import sys
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 
 def add_arguments(parser):
@@ -36,7 +36,7 @@ def do_command(args):
     try:
         sep = csv_separator(args)
         reader = csv.reader(args.input, delimiter=sep)
-        reader.next()  # skip header
+        next(reader)  # skip header
         value_map = {}
         for row in reader:
             append_row(value_map, row, tables=args.tables, taxonomies=args.taxonomies)
@@ -52,12 +52,12 @@ def do_command(args):
                                 ds = args.destination if args.destination else datasource
                                 variables = value_map[datasource][table][namespace][name][value]
                                 annotate(args, ds, table, namespace, name, value, variables)
-    except Exception, e:
-        print e
+    except Exception as e:
+        print(e)
         sys.exit(2)
-    except pycurl.error, error:
+    except pycurl.error as error:
         errno, errstr = error
-        print >> sys.stderr, 'An error occurred: ', errstr
+        print('An error occurred: ', errstr, file=sys.stderr)
         sys.exit(2)
 
 
@@ -70,14 +70,14 @@ def annotate(args, datasource, table, namespace, name, value, variables):
         params['locale'] = args.locale
 
     builder = opal.core.UriBuilder(['datasource', datasource, 'table', table, 'variables', '_attribute'], params=params)
-    form = '&'.join(map(lambda x: urllib.urlencode({'variable': x}), variables))
+    form = '&'.join([urllib.parse.urlencode({'variable': x}) for x in variables])
     if args.verbose:
         request.verbose()
     try:
         request.put().resource(builder.build()).content(form).send()
-    except Exception, e:
-        print 'Error: Annotation failed for table ' + datasource + '.' + table
-        print e
+    except Exception as e:
+        print('Error: Annotation failed for table ' + datasource + '.' + table)
+        print(e)
 
 
 def append_row(dictionary, row, tables=None, taxonomies=None):

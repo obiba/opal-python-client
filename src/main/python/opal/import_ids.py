@@ -25,16 +25,16 @@ def do_command(args):
             request.verbose()
 
         request.content_type_text_plain()
-        print 'Enter identifiers (one identifier per line, Ctrl-D to end input):'
+        print('Enter identifiers (one identifier per line, Ctrl-D to end input):')
         request.content(sys.stdin.read())
 
         # send request
         uri = opal.core.UriBuilder(['identifiers', 'mappings', 'entities', '_import']).query('type', args.type).build()
         request.post().resource(uri).send()
-    except Exception, e:
-        print e
+    except Exception as e:
+        print(e)
         sys.exit(2)
-    except pycurl.error, error:
+    except pycurl.error as error:
         errno, errstr = error
-        print >> sys.stderr, 'An error occurred: ', errstr
+        print('An error occurred: ', errstr, file=sys.stderr)
         sys.exit(2)

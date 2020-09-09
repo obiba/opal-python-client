@@ -45,12 +45,12 @@ def do_command(args):
     request = opal.core.OpalClient.build(opal.core.OpalClient.LoginInfo.parse(args)).new_request()
     request.fail_on_error().accept("application/zip")
     response = request.get().resource(do_ws(args)).send()
-    print response.content
+    print(response.content)
 
-  except Exception, e:
-    print >> sys.stderr, e
+  except Exception as e:
+    print(e, file=sys.stderr)
     sys.exit(2)
-  except pycurl.error, error:
+  except pycurl.error as error:
     errno, errstr = error
-    print >> sys.stderr, 'An error occurred: ', errstr
+    print('An error occurred: ', errstr, file=sys.stderr)
     sys.exit(2)

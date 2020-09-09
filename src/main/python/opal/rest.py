@@ -73,12 +73,12 @@ def do_command(args):
 
         if args.content_type:
             request.content_type(args.content_type)
-            print 'Enter content:'
+            print('Enter content:')
             request.content(sys.stdin.read())
 
         if args.headers:
             headers = ast.literal_eval(args.headers)
-            for key in headers.keys():
+            for key in list(headers.keys()):
                 request.header(key, headers[key])
 
         if args.verbose:
@@ -96,11 +96,11 @@ def do_command(args):
             res = response.headers['Allow']
 
         # output to stdout
-        print res
-    except Exception, e:
-        print e
+        print(res)
+    except Exception as e:
+        print(e)
         sys.exit(2)
-    except pycurl.error, error:
+    except pycurl.error as error:
         errno, errstr = error
-        print >> sys.stderr, 'An error occurred: ', errstr
+        print('An error occurred: ', errstr, file=sys.stderr)
         sys.exit(2)

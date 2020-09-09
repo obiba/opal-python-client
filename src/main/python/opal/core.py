@@ -8,10 +8,11 @@ import sys
 import pycurl
 import base64
 import json
-import cStringIO
+import io
 import os.path
 import getpass
-import urllib
+import urllib.request, urllib.parse, urllib.error
+from functools import reduce
 
 
 class OpalClient:
@@ -69,7 +70,7 @@ class OpalClient:
             if pwd:
                 e = getpass.getpass(prompt=text + ': ')
             else:
-                print text + ': ',
+                print(text + ': ', end=' ')
                 e = sys.stdin.readline().rstrip().strip()
         return e
 
@@ -140,12 +141,12 @@ class OpalClient:
             return cls()
 
         def isToken(self):
-            if self.data.viewkeys() & {'token'}:
+            if self.data.keys() & {'token'}:
                 return True
             return False
 
         def isSsl(self):
-            if self.data.viewkeys() & {'cert', 'key'}:
+            if self.data.keys() & {'cert', 'key'}:
                 return True
             return False
 
@@ -259,18 +260,18 @@ class OpalRequest:
 
     def content(self, content):
         if self._verbose:
-            print '* Content:'
-            print content
+            print('* Content:')
+            print(content)
         self.curl_option(pycurl.POST, 1)
         self.curl_option(pycurl.POSTFIELDSIZE, len(content))
-        reader = cStringIO.StringIO(content)
+        reader = io.StringIO(content)
         self.curl_option(pycurl.READFUNCTION, reader.read)
         return self
 
     def content_file(self, filename):
         if self._verbose:
-            print '* File Content:'
-            print '[file=' + filename + ', size=' + str(os.path.getsize(filename)) + ']'
+            print('* File Content:')
+            print('[file=' + filename + ', size=' + str(os.path.getsize(filename)) + ']')
         self.curl_option(pycurl.POST, 1)
         self.curl_option(pycurl.POSTFIELDSIZE, os.path.getsize(filename))
         reader = open(filename, 'rb')
@@ -279,8 +280,8 @@ class OpalRequest:
 
     def content_upload(self, filename):
         if self._verbose:
-            print '* File Content:'
-            print '[file=' + filename + ', size=' + str(os.path.getsize(filename)) + ']'
+            print('* File Content:')
+            print('[file=' + filename + ', size=' + str(os.path.getsize(filename)) + ']')
             # self.curl_option(pycurl.POST,1)
         self.curl_option(pycurl.HTTPPOST, [("file1", (pycurl.FORM_FILE, filename))])
         return self
@@ -454,14 +455,14 @@ class UriBuilder:
             return p + '/' + s
 
         def concat_params(k):
-            return urllib.quote(k) + '=' + urllib.quote(str(self.params[k]))
+            return urllib.parse.quote(k) + '=' + urllib.parse.quote(str(self.params[k]))
 
         def concat_query(q, p):
             return q + '&' + p
 
-        p = urllib.quote('/' + reduce(concat_segment, self.path))
+        p = urllib.parse.quote('/' + reduce(concat_segment, self.path))
         if len(self.params):
-            q = reduce(concat_query, map(concat_params, self.params.keys()))
+            q = reduce(concat_query, list(map(concat_params, list(self.params.keys()))))
             return p + '?' + q
         else:
             return p
