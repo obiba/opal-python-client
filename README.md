@@ -26,7 +26,7 @@ sub-commands will be developed in the future.
 
 ## Development
 
-Opal Python client can be easily extended by using the classes defined in `core.py`.
+Opal Python client can be easily extended by using the classes defined in `core.py` and `io.py`.
 
 ## Mailing list
 
