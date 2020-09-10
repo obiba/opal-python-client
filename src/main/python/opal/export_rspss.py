@@ -2,9 +2,9 @@
 Data export in SPSS (using R).
 """
 
-import sys
 import opal.core
 import opal.io
+import sys
 
 
 def add_arguments(parser):
@@ -15,7 +15,8 @@ def add_arguments(parser):
     parser.add_argument('--tables', '-t', nargs='+', required=True, help='The list of tables to be exported')
     parser.add_argument('--output', '-out', required=True, help='Output file name (.sav or .zsav (compressed format))')
     parser.add_argument('--identifiers', '-id', required=False, help='Name of the ID mapping')
-    parser.add_argument('--no-multilines', '-nl', action='store_true', help='Do not write value sequences as multiple lines')
+    parser.add_argument('--no-multilines', '-nl', action='store_true',
+                        help='Do not write value sequences as multiple lines')
     parser.add_argument('--json', '-j', action='store_true', help='Pretty JSON formatting of the response')
 
 
@@ -46,12 +47,12 @@ def do_command(args):
             res = response.pretty_json()
 
         # output to stdout
-        print res
+        print(res)
 
-    except Exception, e:
-        print e
+    except Exception as e:
+        print(e)
         sys.exit(2)
-    except pycurl.error, error:
+    except pycurl.error as error:
         errno, errstr = error
-        print >> sys.stderr, 'An error occurred: ', errstr
+        print('An error occurred: ', errstr, file=sys.stderr)
         sys.exit(2)

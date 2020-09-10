@@ -2,10 +2,10 @@
 Backup views of a project: download view's JSON representation and save it in a file, one for each view.
 """
 
-import sys
 import opal.core
 import opal.io
 import os
+import sys
 
 
 def add_arguments(parser):
@@ -16,7 +16,8 @@ def add_arguments(parser):
     parser.add_argument('--views', '-vw', nargs='+', required=False,
                         help='List of view names to be backed up (default is all)')
     parser.add_argument('--output', '-out', required=False, help='Output directory name (default is current directory)')
-    parser.add_argument('--force', '-f', action='store_true', help='Skip confirmation when overwriting the backup file.')
+    parser.add_argument('--force', '-f', action='store_true',
+                        help='Skip confirmation when overwriting the backup file.')
 
 
 def retrieve_datasource_views(args):
@@ -30,13 +31,14 @@ def retrieve_datasource_views(args):
     views = []
     for table in response:
         if 'viewLink' in table:
-            views.append(str(table[u'name']))
+            views.append(str(table['name']))
 
     return views
 
+
 def backup_view(args, view, outdir):
     outfile = view + '.json'
-    print 'Backup of', view, 'in', outfile, '...'
+    print('Backup of', view, 'in', outfile, '...')
 
     outpath = os.path.join(outdir, outfile)
 
@@ -50,7 +52,7 @@ def backup_view(args, view, outdir):
     dowrite = True
     if os.path.exists(outpath) and not args.force:
         dowrite = False
-        print 'Overwrite the file "' + outpath + '"? [y/N]: ',
+        print('Overwrite the file "' + outpath + '"? [y/N]: ', end=' ')
         confirmed = sys.stdin.readline().rstrip().strip()
         if confirmed == 'y':
             dowrite = True
@@ -79,7 +81,7 @@ def do_command(args):
                     safeviews.append(view)
             views = safeviews
         if not views:
-            print 'No views to backup in project', args.project
+            print('No views to backup in project', args.project)
         else:
             # prepare output directory
             outdir = args.output
@@ -87,19 +89,19 @@ def do_command(args):
                 outdir = os.getcwd()
             else:
                 outdir = os.path.normpath(outdir)
-            print 'Output directory is', outdir
+            print('Output directory is', outdir)
             if not os.path.exists(outdir):
-                print 'Creating output directory ...'
+                print('Creating output directory ...')
                 os.makedirs(outdir)
 
             # backup each view
             for view in views:
                 backup_view(args, view, outdir)
 
-    except Exception, e:
-        print e
+    except Exception as e:
+        print(e)
         sys.exit(2)
-    except pycurl.error, error:
+    except pycurl.error as error:
         errno, errstr = error
-        print >> sys.stderr, 'An error occurred: ', errstr
+        print('An error occurred: ', errstr, file=sys.stderr)
         sys.exit(2)

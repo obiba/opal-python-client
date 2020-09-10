@@ -35,12 +35,12 @@ def do_command(args):
         writer = csv.writer(args.output, delimiter=sep)
         writer.writerow(['project', 'table', 'variable', 'namespace', 'name', 'value'])
         handle_item(args, writer, args.name)
-    except Exception, e:
-        print e
+    except Exception as e:
+        print(e)
         sys.exit(2)
-    except pycurl.error, error:
+    except pycurl.error as error:
         errno, errstr = error
-        print >> sys.stderr, 'An error occurred: ', errstr
+        print('An error occurred: ', errstr, file=sys.stderr)
         sys.exit(2)
 
 

@@ -2,9 +2,9 @@
 Opal file management.
 """
 
-import sys
-import pycurl
 import opal.core
+import pycurl
+import sys
 
 
 class OpalFile:
@@ -61,12 +61,12 @@ def do_command(args):
             if args.force:
                 response = request.delete().resource(file.get_ws()).send()
             else:
-                print 'Delete the file "' + args.path + '"? [y/N]: ',
+                print('Delete the file "' + args.path + '"? [y/N]: ', end=' ')
                 confirmed = sys.stdin.readline().rstrip().strip()
                 if confirmed == 'y':
                     response = request.delete().resource(file.get_ws()).send()
                 else:
-                    print 'Aborted.'
+                    print('Aborted.')
                     sys.exit(0)
         else:
             response = request.get().resource(file.get_meta_ws()).send()
@@ -77,12 +77,12 @@ def do_command(args):
             res = response.pretty_json()
 
         # output to stdout
-        print res
-    except Exception, e:
-        print >> sys.stderr, e
+        print(res)
+    except Exception as e:
+        print(e, file=sys.stderr)
         sys.exit(2)
-    except pycurl.error, error:
-        print response
+    except pycurl.error as error:
+        print(response)
         errno, errstr = error
-        print >> sys.stderr, 'An error occurred: ', errstr
+        print('An error occurred: ', errstr, file=sys.stderr)
         sys.exit(2)

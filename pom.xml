@@ -23,7 +23,6 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <java.version>1.8</java.version>
-    <opal.version>3.0-SNAPSHOT</opal.version>
 
     <!-- maven plugins -->
     <github-release-plugin.version>1.2.0</github-release-plugin.version>
@@ -37,30 +36,10 @@
 
   <dependencyManagement>
     <dependencies>
-      <dependency>
-        <groupId>org.obiba.opal</groupId>
-        <artifactId>opal-web-model</artifactId>
-        <version>${opal.version}</version>
-        <scope>compile</scope>
-        <exclusions>
-          <exclusion>
-            <groupId>org.obiba.magma</groupId>
-            <artifactId>magma-api</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.obiba.magma</groupId>
-            <artifactId>magma-math</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
     </dependencies>
   </dependencyManagement>
 
   <dependencies>
-    <dependency>
-      <groupId>org.obiba.opal</groupId>
-      <artifactId>opal-web-model</artifactId>
-    </dependency>
   </dependencies>
 
   <build>
@@ -103,34 +82,6 @@
     </pluginManagement>
 
     <plugins>
-      <!-- Unzip shared resources -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <executions>
-          <execution>
-           <id>unpack</id>
-           <phase>prepare-package</phase>
-           <goals>
-             <goal>unpack</goal>
-           </goals>
-            <configuration>
-              <outputDirectory>${basedir}/target</outputDirectory>
-              <artifactItems>
-                <artifactItem>
-                  <groupId>org.obiba.opal</groupId>
-                  <artifactId>opal-web-model</artifactId>
-                  <version>${opal.version}</version>
-                  <classifier>python</classifier>
-                  <overWrite>true</overWrite>
-                  <type>zip</type>
-                </artifactItem>
-              </artifactItems>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-release-plugin</artifactId>
@@ -231,9 +182,8 @@
                   <changelogFile>/usr/share/doc/opal-python-client/changelog</changelogFile>
                   <targetOS>Linux</targetOS>
                   <requires>
-                    <require>python &gt;= 2.7</require>
-                    <require>python-pycurl</require>
-                    <require>protobuf-python &gt;= 2.5</require>
+                    <require>python3</require>
+                    <require>python3-pycurl</require>
                   </requires>
 
                   <mappings>

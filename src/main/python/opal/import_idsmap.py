@@ -2,8 +2,8 @@
 Import identifiers mapping
 """
 
-import sys
 import opal.core
+import sys
 
 
 def add_arguments(parser):
@@ -13,6 +13,7 @@ def add_arguments(parser):
     parser.add_argument('--type', '-t', required=True, help='Entity type (e.g. Participant).')
     parser.add_argument('--map', '-m', required=True, help='Mapping name.')
     parser.add_argument('--separator', '-s', required=False, help='Field separator (default is ,).')
+
 
 def do_command(args):
     """
@@ -27,7 +28,7 @@ def do_command(args):
             request.verbose()
 
         request.content_type_text_plain()
-        print 'Enter identifiers (one identifiers mapping per line, Ctrl-D to end input):'
+        print('Enter identifiers (one identifiers mapping per line, Ctrl-D to end input):')
         request.content(sys.stdin.read())
 
         # send request
@@ -36,10 +37,10 @@ def do_command(args):
             builder.query('separator', args.separator)
         uri = builder.build()
         request.post().resource(uri).send()
-    except Exception, e:
-        print e
+    except Exception as e:
+        print(e)
         sys.exit(2)
-    except pycurl.error, error:
+    except pycurl.error as error:
         errno, errstr = error
-        print >> sys.stderr, 'An error occurred: ', errstr
+        print('An error occurred: ', errstr, file=sys.stderr)
         sys.exit(2)

@@ -8,8 +8,8 @@ Homepage: http://www.obiba.org
 
 Package: opal-python-client
 Architecture: all
-Pre-Depends: python-protobuf (>= 2.5), python-pycurl
-Depends: python (>= 2.7)
+Pre-Depends: python3-pycurl
+Depends: python3
 Description: OBiBa Data integration Web application for biobanks
  Python client for Opal, OBiBa’s core database application for biobanks.
  Participant data, once collected from any data source, must be integrated and

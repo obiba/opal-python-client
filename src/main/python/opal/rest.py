@@ -38,9 +38,9 @@ Examples of Opal web services on which GET can be performed:
   Raw repeatable variable value of a entity at given position (start at 0)
 """
 
-import sys
 import ast
 import opal.core
+import sys
 
 
 def add_arguments(parser):
@@ -53,7 +53,8 @@ def add_arguments(parser):
     parser.add_argument('--accept', '-a', required=False, help='Accept header (default is application/json)')
     parser.add_argument('--content-type', '-ct', required=False,
                         help='Content-Type header (default is application/json)')
-    parser.add_argument('--headers', '-hs', required=False, help='Custom headers in the form of: { "Key2": "Value2", "Key2": "Value2" }')
+    parser.add_argument('--headers', '-hs', required=False,
+                        help='Custom headers in the form of: { "Key2": "Value2", "Key2": "Value2" }')
     parser.add_argument('--json', '-j', action='store_true', help='Pretty JSON formatting of the response')
 
 
@@ -73,12 +74,12 @@ def do_command(args):
 
         if args.content_type:
             request.content_type(args.content_type)
-            print 'Enter content:'
+            print('Enter content:')
             request.content(sys.stdin.read())
 
         if args.headers:
             headers = ast.literal_eval(args.headers)
-            for key in headers.keys():
+            for key in list(headers.keys()):
                 request.header(key, headers[key])
 
         if args.verbose:
@@ -96,11 +97,11 @@ def do_command(args):
             res = response.headers['Allow']
 
         # output to stdout
-        print res
-    except Exception, e:
-        print e
+        print(res)
+    except Exception as e:
+        print(e)
         sys.exit(2)
-    except pycurl.error, error:
+    except pycurl.error as error:
         errno, errstr = error
-        print >> sys.stderr, 'An error occurred: ', errstr
+        print('An error occurred: ', errstr, file=sys.stderr)
         sys.exit(2)

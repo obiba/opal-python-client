@@ -2,10 +2,9 @@
 Apply permissions on a set of tables.
 """
 
-import sys
 import opal.core
 import opal.perm
-
+import sys
 
 PERMISSIONS = {
     'view': 'TABLE_READ',
@@ -20,7 +19,7 @@ def add_arguments(parser):
     """
     Add command specific options
     """
-    opal.perm.add_permission_arguments(parser, PERMISSIONS.keys())
+    opal.perm.add_permission_arguments(parser, list(PERMISSIONS.keys()))
     parser.add_argument('--project', '-pr', required=True, help='Project name to which the tables belong')
     parser.add_argument('--tables', '-t', nargs='+', required=False,
                         help='List of table names on which the permission is to be set (default is all)')
@@ -55,7 +54,7 @@ def retrieve_datasource_tables(args):
 
     tables = []
     for table in response:
-        tables.append(str(table[u'name']))
+        tables.append(str(table['name']))
 
     return tables
 
@@ -87,18 +86,18 @@ def do_command(args):
             try:
                 response = request.resource(
                     opal.perm.do_ws(args, ['project', args.project, 'permissions', 'table', table], PERMISSIONS)).send()
-            except Exception, e:
-                print Exception, e
+            except Exception as e:
+                print(Exception, e)
 
             # format response
             if response.code != 200:
-                print response.content
+                print(response.content)
 
-    except Exception, e:
-        print e
+    except Exception as e:
+        print(e)
         sys.exit(2)
 
-    except pycurl.error, error:
+    except pycurl.error as error:
         errno, errstr = error
-        print >> sys.stderr, 'An error occurred: ', errstr
+        print('An error occurred: ', errstr, file=sys.stderr)
         sys.exit(2)
