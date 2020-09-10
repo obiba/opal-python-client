@@ -4,14 +4,16 @@ See also http://www.angryobjects.com/2011/10/15/http-with-python-pycurl-by-examp
 Curl options http://curl.haxx.se/libcurl/c/curl_easy_setopt.html
 """
 
-import sys
-import pycurl
 import base64
-import json
-import io
-import os.path
 import getpass
-import urllib.request, urllib.parse, urllib.error
+import io
+import json
+import os.path
+import pycurl
+import sys
+import urllib.error
+import urllib.parse
+import urllib.request
 from functools import reduce
 
 
@@ -135,7 +137,8 @@ class OpalClient:
                 data['cert'] = argv['ssl_cert']
                 data['key'] = argv['ssl_key']
             else:
-                raise Exception('Invalid login information. Requires user-password or token or certificate-key information')
+                raise Exception(
+                    'Invalid login information. Requires user-password or token or certificate-key information')
 
             setattr(cls, 'data', data)
             return cls()
@@ -193,17 +196,11 @@ class OpalRequest:
     def accept_json(self):
         return self.accept('application/json')
 
-    def accept_protobuf(self):
-        return self.accept('application/x-protobuf')
-
     def accept_xml(self):
         return self.accept('application/xml')
 
     def content_type_json(self):
         return self.content_type('application/json')
-
-    def content_type_protobuf(self):
-        return self.content_type('application/x-protobuf')
 
     def content_type_text_plain(self):
         return self.content_type('text/plain')
@@ -447,7 +444,7 @@ class UriBuilder:
         return self
 
     def query(self, key, value):
-        self.params.update([(key, value),])
+        self.params.update([(key, value), ])
         return self
 
     def __str__(self):

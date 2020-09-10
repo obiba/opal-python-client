@@ -2,10 +2,10 @@
 Backup views of a project: download view's JSON representation and save it in a file, one for each view.
 """
 
-import sys
 import opal.core
 import opal.io
 import os
+import sys
 
 
 def add_arguments(parser):
@@ -16,7 +16,8 @@ def add_arguments(parser):
     parser.add_argument('--views', '-vw', nargs='+', required=False,
                         help='List of view names to be backed up (default is all)')
     parser.add_argument('--output', '-out', required=False, help='Output directory name (default is current directory)')
-    parser.add_argument('--force', '-f', action='store_true', help='Skip confirmation when overwriting the backup file.')
+    parser.add_argument('--force', '-f', action='store_true',
+                        help='Skip confirmation when overwriting the backup file.')
 
 
 def retrieve_datasource_views(args):
@@ -33,6 +34,7 @@ def retrieve_datasource_views(args):
             views.append(str(table['name']))
 
     return views
+
 
 def backup_view(args, view, outdir):
     outfile = view + '.json'

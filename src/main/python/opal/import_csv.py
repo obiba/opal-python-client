@@ -2,10 +2,9 @@
 Opal CSV data import.
 """
 
-import sys
-import re
 import opal.core
 import opal.io
+import sys
 
 
 def add_arguments(parser):
@@ -17,11 +16,13 @@ def add_arguments(parser):
     parser.add_argument('--separator', '-s', required=False, help='Field separator.')
     parser.add_argument('--quote', '-q', required=False, help='Quotation mark character.')
     parser.add_argument('--firstRow', '-f', type=int, required=False, help='From row.')
-    parser.add_argument('--valueType', '-vt', required=False, help='Default value type (text, integer, decimal, boolean etc.). When not specified, "text" is the default.')
+    parser.add_argument('--valueType', '-vt', required=False,
+                        help='Default value type (text, integer, decimal, boolean etc.). When not specified, "text" is the default.')
     parser.add_argument('--type', '-ty', required=True, help='Entity type (e.g. Participant)')
 
     # non specific import arguments
     opal.io.add_import_arguments(parser)
+
 
 def do_command(args):
     """
@@ -31,12 +32,14 @@ def do_command(args):
     try:
         client = opal.core.OpalClient.build(opal.core.OpalClient.LoginInfo.parse(args))
         importer = opal.io.OpalImporter.build(client=client, destination=args.destination, tables=args.tables,
-                                              incremental=args.incremental, limit=args.limit,identifiers=args.identifiers,
+                                              incremental=args.incremental, limit=args.limit,
+                                              identifiers=args.identifiers,
                                               policy=args.policy, merge=args.merge, verbose=args.verbose)
         # print result
         extension_factory = OpalExtensionFactory(characterSet=args.characterSet, separator=args.separator,
                                                  quote=args.quote,
-                                                 firstRow=args.firstRow, path=args.path, valueType=args.valueType, type=args.type,
+                                                 firstRow=args.firstRow, path=args.path, valueType=args.valueType,
+                                                 type=args.type,
                                                  tables=args.tables,
                                                  destination=args.destination)
 
@@ -70,12 +73,11 @@ class OpalExtensionFactory(opal.io.OpalImporter.ExtensionFactoryInterface):
         self.tables = tables
         self.destination = destination
 
-
     def add(self, factory):
         """
         Add specific datasource factory extension
         """
-        csv_factory = factory.Extensions[opal.protobuf.Magma_pb2.CsvDatasourceFactoryDto.params]
+        csv_factory = {}
 
         if self.characterSet:
             csv_factory.characterSet = self.characterSet
@@ -92,20 +94,24 @@ class OpalExtensionFactory(opal.io.OpalImporter.ExtensionFactoryInterface):
         if self.valueType:
             csv_factory.defaultValueType = self.valueType
 
-        table = csv_factory.tables.add()
-        table.data = self.path
-        table.entityType = self.type
+        table = {
+            'data': self.path,
+            'entityType': self.type
+        }
 
         if self.tables:
-            table.name = self.tables[0]
+            table['name'] = self.tables[0]
         else:
             # Take filename as the table name
             name = self.path.split("/")
 
             index = name[-1].find('.csv')
             if index > 0:
-                table.name = name[-1][:index]
+                table['name'] = name[-1][:index]
             else:
-                table.name = name[-1]
+                table['name'] = name[-1]
+        table['refTable'] = self.destination + "." + table['name']
 
-        table.refTable = self.destination + "." + table.name
+        csv_factory['tables'] = [table]
+
+        factory['Magma.CsvDatasourceFactoryDto.params'] = csv_factory

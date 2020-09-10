@@ -2,8 +2,8 @@
 Import system identifiers
 """
 
-import sys
 import opal.core
+import sys
 
 
 def add_arguments(parser):
@@ -11,6 +11,7 @@ def add_arguments(parser):
     Add import_ids command specific options
     """
     parser.add_argument('--type', '-t', required=True, help='Entity type (e.g. Participant).')
+
 
 def do_command(args):
     """

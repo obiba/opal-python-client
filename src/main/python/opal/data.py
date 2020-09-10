@@ -2,8 +2,8 @@
 Opal data.
 """
 
-import sys
 import opal.core
+import sys
 
 
 def add_arguments(parser):

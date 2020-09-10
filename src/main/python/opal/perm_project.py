@@ -2,13 +2,14 @@
 Apply permissions on a project.
 """
 
-import sys
 import opal.core
 import opal.perm
+import sys
 
 PERMISSIONS = {
     'administrate': 'PROJECT_ALL'
 }
+
 
 def add_arguments(parser):
     """
@@ -16,6 +17,7 @@ def add_arguments(parser):
     """
     opal.perm.add_permission_arguments(parser, list(PERMISSIONS.keys()))
     parser.add_argument('--project', '-pr', required=True, help='Project name')
+
 
 def do_command(args):
     """
@@ -37,7 +39,8 @@ def do_command(args):
             request.post()
 
         try:
-            response = request.resource(opal.perm.do_ws(args, ['project', args.project, 'permissions', 'project'], PERMISSIONS)).send()
+            response = request.resource(
+                opal.perm.do_ws(args, ['project', args.project, 'permissions', 'project'], PERMISSIONS)).send()
         except Exception as e:
             print(Exception, e)
 

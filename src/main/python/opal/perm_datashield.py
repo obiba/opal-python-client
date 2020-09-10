@@ -2,20 +2,22 @@
 Apply DataSHIELD permissions.
 """
 
-import sys
 import opal.core
 import opal.perm
+import sys
 
 PERMISSIONS = {
     'use': 'DATASHIELD_USE',
     'administrate': 'DATASHIELD_ALL'
 }
 
+
 def add_arguments(parser):
     """
     Add command specific options
     """
     opal.perm.add_permission_arguments(parser, list(PERMISSIONS.keys()))
+
 
 def do_command(args):
     """
@@ -37,7 +39,8 @@ def do_command(args):
             request.post()
 
         try:
-            response = request.resource(opal.perm.do_ws(args, ['system', 'permissions', 'datashield'], PERMISSIONS)).send()
+            response = request.resource(
+                opal.perm.do_ws(args, ['system', 'permissions', 'datashield'], PERMISSIONS)).send()
         except Exception as e:
             print(Exception, e)
 

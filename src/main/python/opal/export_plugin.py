@@ -2,10 +2,10 @@
 Data export to a datasource plugin.
 """
 
-import sys
+import json
 import opal.core
 import opal.io
-import json
+import sys
 
 
 def add_arguments(parser):

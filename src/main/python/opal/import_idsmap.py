@@ -2,8 +2,8 @@
 Import identifiers mapping
 """
 
-import sys
 import opal.core
+import sys
 
 
 def add_arguments(parser):
@@ -13,6 +13,7 @@ def add_arguments(parser):
     parser.add_argument('--type', '-t', required=True, help='Entity type (e.g. Participant).')
     parser.add_argument('--map', '-m', required=True, help='Mapping name.')
     parser.add_argument('--separator', '-s', required=False, help='Field separator (default is ,).')
+
 
 def do_command(args):
     """

@@ -2,10 +2,10 @@
 Restore views of a project: upload view's JSON representation and make it a view.
 """
 
-import sys
 import opal.core
 import opal.io
 import os
+import sys
 import zipfile
 
 
@@ -16,8 +16,10 @@ def add_arguments(parser):
     parser.add_argument('--project', '-pr', required=True, help='Destination project name')
     parser.add_argument('--views', '-vw', nargs='+', required=False,
                         help='List of view names to be restored (default is all the JSON files that are found in the backup directory/zip archive)')
-    parser.add_argument('--input', '-in', required=False, help='Input directory name or input zip file containing JSON views (default is current directory)')
-    parser.add_argument('--force', '-f', action='store_true', help='Skip confirmation when overwriting an existing view.')
+    parser.add_argument('--input', '-in', required=False,
+                        help='Input directory name or input zip file containing JSON views (default is current directory)')
+    parser.add_argument('--force', '-f', action='store_true',
+                        help='Skip confirmation when overwriting an existing view.')
 
 
 def retrieve_datasource_views(args):
@@ -58,10 +60,12 @@ def restore_view(args, obsviews, infile):
 
         if view in obsviews:
             request.put().resource(
-                opal.core.UriBuilder(['datasource', args.project, 'view', view]).query('comment', 'restore-view').build()).send()
+                opal.core.UriBuilder(['datasource', args.project, 'view', view]).query('comment',
+                                                                                       'restore-view').build()).send()
         else:
             request.post().resource(
-                opal.core.UriBuilder(['datasource', args.project, 'views']).query('comment', 'restore-view').build()).send()
+                opal.core.UriBuilder(['datasource', args.project, 'views']).query('comment',
+                                                                                  'restore-view').build()).send()
 
 
 def restore_zipped_view(args, obsviews, infile, zippedinput):
@@ -85,10 +89,12 @@ def restore_zipped_view(args, obsviews, infile, zippedinput):
 
         if view in obsviews:
             request.put().resource(
-                opal.core.UriBuilder(['datasource', args.project, 'view', view]).query('comment', 'restore-view').build()).send()
+                opal.core.UriBuilder(['datasource', args.project, 'view', view]).query('comment',
+                                                                                       'restore-view').build()).send()
         else:
             request.post().resource(
-                opal.core.UriBuilder(['datasource', args.project, 'views']).query('comment', 'restore-view').build()).send()
+                opal.core.UriBuilder(['datasource', args.project, 'views']).query('comment',
+                                                                                  'restore-view').build()).send()
 
 
 def list_json_files(dirref, basenames):
@@ -121,7 +127,8 @@ def do_command(args):
 
         if indir.endswith('.zip'):
             with zipfile.ZipFile(indir, 'r') as inzip:
-                for viewfile in [filename for filename in inzip.namelist() if filename.endswith('.json') and (not views or filename[:-5] in views)]:
+                for viewfile in [filename for filename in inzip.namelist() if
+                                 filename.endswith('.json') and (not views or filename[:-5] in views)]:
                     restore_zipped_view(args, obsviews, viewfile, inzip)
         else:
             for viewfile in list_json_files(indir, views):

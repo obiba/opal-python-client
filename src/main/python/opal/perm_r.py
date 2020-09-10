@@ -2,19 +2,21 @@
 Apply R permissions.
 """
 
-import sys
 import opal.core
 import opal.perm
+import sys
 
 PERMISSIONS = {
     'use': 'R_USE'
 }
+
 
 def add_arguments(parser):
     """
     Add command specific options
     """
     opal.perm.add_permission_arguments(parser, list(PERMISSIONS.keys()))
+
 
 def do_command(args):
     """

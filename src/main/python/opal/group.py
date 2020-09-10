@@ -2,9 +2,8 @@
 Opal groups management.
 """
 
-import sys
 import opal.core
-import opal.protobuf.Opal_pb2
+import sys
 
 
 def add_arguments(parser):

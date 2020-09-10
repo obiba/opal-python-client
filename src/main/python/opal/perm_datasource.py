@@ -2,9 +2,9 @@
 Apply permissions on a datasource.
 """
 
-import sys
 import opal.core
 import opal.perm
+import sys
 
 PERMISSIONS = {
     'view-value': 'DATASOURCE_VIEW',
@@ -12,12 +12,14 @@ PERMISSIONS = {
     'administrate': 'DATASOURCE_ALL'
 }
 
+
 def add_arguments(parser):
     """
     Add command specific options
     """
     opal.perm.add_permission_arguments(parser, list(PERMISSIONS.keys()))
     parser.add_argument('--project', '-pr', required=True, help='Project name to which the tables belong')
+
 
 def do_command(args):
     """
@@ -39,7 +41,8 @@ def do_command(args):
             request.post()
 
         try:
-            response = request.resource(opal.perm.do_ws(args, ['project', args.project, 'permissions', 'datasource'], PERMISSIONS)).send()
+            response = request.resource(
+                opal.perm.do_ws(args, ['project', args.project, 'permissions', 'datasource'], PERMISSIONS)).send()
         except Exception as e:
             print(Exception, e)
 

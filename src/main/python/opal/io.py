@@ -2,23 +2,28 @@
 Opal data importer
 """
 
-import re
+import json
 import opal.core
-import opal.protobuf.Magma_pb2
-import opal.protobuf.Commands_pb2
+import re
+
 
 def add_import_arguments(parser):
     """
     Add Default Import arguments
     """
     parser.add_argument('--destination', '-d', required=True, help='Destination datasource name')
-    parser.add_argument('--tables', '-t', nargs='+', required=False, help='The list of tables to be imported (defaults to all)')
-    parser.add_argument('--incremental', '-i', action='store_true', help='Incremental import (new and updated value sets)')
+    parser.add_argument('--tables', '-t', nargs='+', required=False,
+                        help='The list of tables to be imported (defaults to all)')
+    parser.add_argument('--incremental', '-i', action='store_true',
+                        help='Incremental import (new and updated value sets)')
     parser.add_argument('--limit', '-li', required=False, type=int, help='Import limit (maximum number of value sets)')
     parser.add_argument('--identifiers', '-id', required=False, help='Name of the ID mapping')
-    parser.add_argument('--policy', '-po', required=False, help='ID mapping policy: required (each identifiers must be mapped prior importation, default), ignore (ignore unknown identifiers), generate (generate a system identifier for each unknown identifier)')
-    parser.add_argument('--merge', '-mg', action='store_true', help='Merge imported data dictionary with the destination one (default is false, i.e. data dictionary is overridden).')
+    parser.add_argument('--policy', '-po', required=False,
+                        help='ID mapping policy: required (each identifiers must be mapped prior importation, default), ignore (ignore unknown identifiers), generate (generate a system identifier for each unknown identifier)')
+    parser.add_argument('--merge', '-mg', action='store_true',
+                        help='Merge imported data dictionary with the destination one (default is false, i.e. data dictionary is overridden).')
     parser.add_argument('--json', '-j', action='store_true', help='Pretty JSON formatting of the response')
+
 
 class OpalImporter:
     """
@@ -30,7 +35,8 @@ class OpalImporter:
             raise Exception("ExtensionFactoryInterface.add() method must be implemented by a concrete class.")
 
     @classmethod
-    def build(cls, client, destination, tables=None, incremental=None, limit=None, identifiers=None, policy=None, merge=None, verbose=None):
+    def build(cls, client, destination, tables=None, incremental=None, limit=None, identifiers=None, policy=None,
+              merge=None, verbose=None):
         setattr(cls, 'client', client)
         setattr(cls, 'destination', destination)
         setattr(cls, 'tables', tables)
@@ -50,14 +56,13 @@ class OpalImporter:
 
         # submit data import job
         request = self.client.new_request()
-        request.fail_on_error().accept_json().content_type_protobuf()
+        request.fail_on_error().accept_json().content_type_json()
 
         if self.verbose:
             request.verbose()
 
         # import options
-        options = opal.protobuf.Commands_pb2.ImportCommandOptionsDto()
-        options.destination = self.destination
+        options = {'destination': self.destination}
         # tables must be the ones of the transient
         tables2import = transient.table
         if self.tables:
@@ -68,23 +73,23 @@ class OpalImporter:
         def table_fullname(t):
             return transient.name + '.' + t
 
-        options.tables.extend(list(map(table_fullname, tables2import)))
+        options['tables'] = list(map(table_fullname, tables2import))
 
         if self.identifiers:
-            options.idConfig.name = self.identifiers
+            options['idConfig'] = {'name': self.identifiers}
             if self.policy:
                 if self.policy == 'ignore':
-                    options.idConfig.allowIdentifierGeneration = False
-                    options.idConfig.ignoreUnknownIdentifier = True
+                    options['idConfig']['allowIdentifierGeneration'] = False
+                    options['idConfig']['ignoreUnknownIdentifier'] = True
                 elif self.policy == 'generate':
-                    options.idConfig.allowIdentifierGeneration = True
-                    options.idConfig.ignoreUnknownIdentifier = False
+                    options['idConfig']['allowIdentifierGeneration'] = True
+                    options['idConfig']['ignoreUnknownIdentifier'] = False
                 else:
-                    options.idConfig.allowIdentifierGeneration = False
-                    options.idConfig.ignoreUnknownIdentifier = False
+                    options['idConfig']['allowIdentifierGeneration'] = False
+                    options['idConfig']['ignoreUnknownIdentifier'] = False
             else:
-                options.idConfig.allowIdentifierGeneration = False
-                options.idConfig.ignoreUnknownIdentifier = False
+                options['idConfig']['allowIdentifierGeneration'] = False
+                options['idConfig']['ignoreUnknownIdentifier'] = False
 
         if self.verbose:
             print("** Import options:")
@@ -92,7 +97,7 @@ class OpalImporter:
             print("**")
 
         uri = opal.core.UriBuilder(['project', self.destination, 'commands', '_import']).build()
-        response = request.post().resource(uri).content(options.SerializeToString()).send()
+        response = request.post().resource(uri).content(json.dumps(options)).send()
 
         # get job status
         job_resource = re.sub(r'http.*\/ws', r'', response.headers['Location'])
@@ -105,33 +110,35 @@ class OpalImporter:
         Create a transient datasource
         """
         request = self.client.new_request()
-        request.fail_on_error().accept_protobuf().content_type_protobuf()
+        request.fail_on_error().accept_json().content_type_json()
 
         if self.verbose:
             request.verbose()
 
         # build transient datasource factory
-        factory = opal.protobuf.Magma_pb2.DatasourceFactoryDto()
+        factory = {}
         if self.incremental:
-            factory.incrementalConfig.incremental = True
-            factory.incrementalConfig.incrementalDestinationName = self.destination
+            factory['incrementalConfig'] = {
+                'incremental': True,
+                'incrementalDestinationName': self.destination
+            }
         if self.limit:
-            factory.batchConfig.limit = self.limit
+            factory['batchConfig'] = {'limit': self.limit}
         if self.identifiers:
-            factory.idConfig.name = self.identifiers
+            factory['idConfig'] = {'name': self.identifiers}
             if self.policy:
                 if self.policy == 'ignore':
-                    factory.idConfig.allowIdentifierGeneration = False
-                    factory.idConfig.ignoreUnknownIdentifier = True
+                    factory['idConfig']['allowIdentifierGeneration'] = False
+                    factory['idConfig']['ignoreUnknownIdentifier'] = True
                 elif self.policy == 'generate':
-                    factory.idConfig.allowIdentifierGeneration = True
-                    factory.idConfig.ignoreUnknownIdentifier = False
+                    factory['idConfig']['allowIdentifierGeneration'] = True
+                    factory['idConfig']['ignoreUnknownIdentifier'] = False
                 else:
-                    factory.idConfig.allowIdentifierGeneration = False
-                    factory.idConfig.ignoreUnknownIdentifier = False
+                    factory['idConfig']['allowIdentifierGeneration'] = False
+                    factory['idConfig']['ignoreUnknownIdentifier'] = False
             else:
-                factory.idConfig.allowIdentifierGeneration = False
-                factory.idConfig.ignoreUnknownIdentifier = False
+                factory['idConfig']['allowIdentifierGeneration'] = False
+                factory['idConfig']['ignoreUnknownIdentifier'] = False
 
         extension_factory.add(factory)
 
@@ -144,10 +151,10 @@ class OpalImporter:
         mergeStr = 'false'
         if self.merge:
             mergeStr = 'true'
-        uri = opal.core.UriBuilder(['project', self.destination, 'transient-datasources']).query('merge', mergeStr).build()
-        response = request.post().resource(uri).content(factory.SerializeToString()).send()
-        transient = opal.protobuf.Magma_pb2.DatasourceDto()
-        transient.ParseFromString(response.content)
+        uri = opal.core.UriBuilder(['project', self.destination, 'transient-datasources']).query('merge',
+                                                                                                 mergeStr).build()
+        response = request.post().resource(uri).content(json.dumps(factory)).send()
+        transient = json.loads(response.content)
 
         if self.verbose:
             print("** Transient datasource:")
@@ -161,17 +168,16 @@ class OpalImporter:
                                     transient.name.encode('ascii', 'ignore'),
                                     'compare', self.destination]).build()
         request = self.client.new_request()
-        request.fail_on_error().accept_protobuf().content_type_protobuf()
+        request.fail_on_error().accept_json().content_type_json()
         if self.verbose:
             request.verbose()
         response = request.get().resource(uri).send()
-        compare = opal.protobuf.Magma_pb2.DatasourceCompareDto()
-        compare.ParseFromString(response.content)
-        for i in compare.tableComparisons:
-            if i.conflicts:
+        compare = json.loads(response.content)
+        for i in compare['tableComparisons']:
+            if i['conflicts']:
                 all_conflicts = []
-                for c in i.conflicts:
-                    all_conflicts.append(c.code + "(" + ', '.join(c.arguments) + ")")
+                for c in i['conflicts']:
+                    all_conflicts.append(c['code'] + "(" + ', '.join(c['arguments']) + ")")
 
                 raise Exception("Import conflicts: " + '; '.join(all_conflicts))
 
@@ -182,7 +188,8 @@ class OpalExporter:
     """
 
     @classmethod
-    def build(cls, client, datasource, tables, output, incremental=None, multilines=True, identifiers=None, verbose=None):
+    def build(cls, client, datasource, tables, output, incremental=None, multilines=True, identifiers=None,
+              verbose=None):
         setattr(cls, 'client', client)
         setattr(cls, 'datasource', datasource)
         setattr(cls, 'tables', tables)
@@ -199,23 +206,25 @@ class OpalExporter:
 
     def submit(self, format):
         # export options
-        options = opal.protobuf.Commands_pb2.ExportCommandOptionsDto()
-        options.format = format
-        options.out = self.output
-        options.nonIncremental = not self.incremental
-        options.multilines = self.multilines
-        options.noVariables = False
+        options = {
+            'format': format,
+            'out': self.output,
+            'nonIncremental': not self.incremental,
+            'multilines': self.multilines,
+            'noVariables': False
+        }
         if self.tables:
             tables2export = self.tables
 
             def table_fullname(t): return self.datasource + '.' + t
 
-            options.tables.extend(list(map(table_fullname, tables2export)))
+            options['tables'] = list(map(table_fullname, tables2export))
         if self.identifiers:
-            options.idConfig.name = self.identifiers
-            options.idConfig.allowIdentifierGeneration = False
-            options.idConfig.ignoreUnknownIdentifier = False
-
+            options['idConfig'] = {
+                'name': self.identifiers,
+                'allowIdentifierGeneration': False,
+                'ignoreUnknownIdentifier': False
+            }
         if self.verbose:
             print("** Export options:")
             print(options)
@@ -223,19 +232,20 @@ class OpalExporter:
 
         # submit data export job
         request = self.client.new_request()
-        request.fail_on_error().accept_json().content_type_protobuf()
+        request.fail_on_error().accept_json().content_type_json()
 
         if self.verbose:
             request.verbose()
 
         uri = opal.core.UriBuilder(['project', self.datasource, 'commands', '_export']).build()
-        response = request.post().resource(uri).content(options.SerializeToString()).send()
+        response = request.post().resource(uri).content(json.dumps(options)).send()
 
         # get job status
         job_resource = re.sub(r'http.*\/ws', r'', response.headers['Location'])
         request = self.client.new_request()
         request.fail_on_error().accept_json()
         return request.get().resource(job_resource).send()
+
 
 class OpalCopier:
     """
@@ -260,18 +270,20 @@ class OpalCopier:
 
     def submit(self):
         # copy options
-        options = opal.protobuf.Commands_pb2.CopyCommandOptionsDto()
-        options.destination = self.destination
-        options.nonIncremental = not self.incremental
-        options.noVariables = False
-        options.noValues = False
-        options.copyNullValues = self.nulls
+        options = {
+            'destination': self.destination,
+            'nonIncremental': not self.incremental,
+            'noVariables': False,
+            'noValues': False,
+            'copyNullValues': self.nulls,
+            'tables': []
+        }
         if self.tables:
             tables2copy = self.tables
 
             def table_fullname(t): return self.datasource + '.' + t
 
-            options.tables.extend(list(map(table_fullname, tables2copy)))
+            options['tables'] = list(map(table_fullname, tables2copy))
         # name option will be ignored if more than one table
         if self.name:
             options.destinationTableName = self.name
@@ -283,13 +295,13 @@ class OpalCopier:
 
         # submit data copy job
         request = self.client.new_request()
-        request.fail_on_error().accept_json().content_type_protobuf()
+        request.fail_on_error().accept_json().content_type_json()
 
         if self.verbose:
             request.verbose()
 
         uri = opal.core.UriBuilder(['project', self.datasource, 'commands', '_copy']).build()
-        response = request.post().resource(uri).content(options.SerializeToString()).send()
+        response = request.post().resource(uri).content(json.dumps(options)).send()
 
         # get job status
         job_resource = re.sub(r'http.*\/ws', r'', response.headers['Location'])

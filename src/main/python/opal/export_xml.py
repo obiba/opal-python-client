@@ -2,9 +2,9 @@
 Data export in XML.
 """
 
-import sys
 import opal.core
 import opal.io
+import sys
 
 
 def add_arguments(parser):
@@ -27,7 +27,8 @@ def do_command(args):
     try:
         client = opal.core.OpalClient.build(opal.core.OpalClient.LoginInfo.parse(args))
         exporter = opal.io.OpalExporter.build(client=client, datasource=args.datasource, tables=args.tables,
-                                              identifiers=args.identifiers, output=args.output, incremental=args.incremental,
+                                              identifiers=args.identifiers, output=args.output,
+                                              incremental=args.incremental,
                                               verbose=args.verbose)
         # Check output filename extension
         if not (args.output.endswith('.zip')):

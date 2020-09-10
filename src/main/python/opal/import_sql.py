@@ -2,9 +2,9 @@
 Opal Xml import.
 """
 
-import sys
 import opal.core
 import opal.io
+import sys
 
 
 def add_arguments(parser):
@@ -56,5 +56,4 @@ class OpalExtensionFactory(opal.io.OpalImporter.ExtensionFactoryInterface):
         """
         Add specific datasource factory extension
         """
-        jdbc_factory = factory.Extensions[opal.protobuf.Magma_pb2.JdbcDatasourceFactoryDto.params]
-        jdbc_factory.database = self.database
+        factory['Magma.JdbcDatasourceFactoryDto.params'] = {'database': self.database}

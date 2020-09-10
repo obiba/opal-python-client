@@ -2,10 +2,9 @@
 Opal SAS data import (Using R).
 """
 
-import sys
-import re
 import opal.core
 import opal.io
+import sys
 
 
 def add_arguments(parser):
@@ -15,7 +14,8 @@ def add_arguments(parser):
     parser.add_argument('--path', '-pa', required=True, help='Stata file to import from the Opal filesystem.')
     parser.add_argument('--locale', '-l', required=False, help='Stata file locale (e.g. fr, en...).')
     parser.add_argument('--type', '-ty', required=False, help='Entity type (e.g. Participant)')
-    parser.add_argument('--idVariable', '-iv', required=False, help='Stata variable that provides the entity ID. If not specified, first variable values are considered to be the entity identifiers.')
+    parser.add_argument('--idVariable', '-iv', required=False,
+                        help='Stata variable that provides the entity ID. If not specified, first variable values are considered to be the entity identifiers.')
 
     # non specific import arguments
     opal.io.add_import_arguments(parser)
@@ -33,7 +33,8 @@ def do_command(args):
 
         client = opal.core.OpalClient.build(opal.core.OpalClient.LoginInfo.parse(args))
         importer = opal.io.OpalImporter.build(client=client, destination=args.destination, tables=args.tables,
-                                              incremental=args.incremental, limit=args.limit, identifiers=args.identifiers,
+                                              incremental=args.incremental, limit=args.limit,
+                                              identifiers=args.identifiers,
                                               policy=args.policy, merge=args.merge, verbose=args.verbose)
         # print result
         extension_factory = OpalExtensionFactory(path=args.path,
@@ -68,15 +69,16 @@ class OpalExtensionFactory(opal.io.OpalImporter.ExtensionFactoryInterface):
         """
         Add specific datasource factory extension
         """
-        factory = factory.Extensions[opal.protobuf.Magma_pb2.RHavenDatasourceFactoryDto.params]
-        factory.file = self.path
-        factory.symbol = self.path[self.path.rfind("/")+1:self.path.rfind(".")]
+        extension = {
+            'file': self.path,
+            'symbol': self.path[self.path.rfind("/") + 1:self.path.rfind(".")]
+        }
 
         if self.locale:
-            factory.locale = self.locale
-
+            extension['locale'] = self.locale
         if self.entityType:
-            factory.entityType = self.entityType
-
+            extension['entityType'] = self.entityType
         if self.idVariable:
-            factory.idVariable = self.idVariable
+            extension['idVariable'] = self.idVariable
+
+        factory['Magma.RHavenDatasourceFactoryDto.params'] = extension

@@ -6,6 +6,7 @@ import opal.core
 
 SUBJECT_TYPES = ('USER', 'GROUP')
 
+
 def add_permission_arguments(parser, permissions):
     """
     Add permission arguments
@@ -16,6 +17,7 @@ def add_permission_arguments(parser, permissions):
     parser.add_argument('--subject', '-s', required=True, help='Subject name to which the permission will be granted')
     parser.add_argument('--type', '-ty', required=False, help='Subject type: user or group')
 
+
 def map_permission(permission, permissions):
     """
     Map permission argument to permission query parameter
@@ -24,6 +26,7 @@ def map_permission(permission, permissions):
         return None
 
     return permissions[permission.lower()]
+
 
 def validate_args(args, permissions):
     """
@@ -40,6 +43,7 @@ def validate_args(args, permissions):
 
     if not args.type or args.type.upper() not in SUBJECT_TYPES:
         raise Exception("Valid subject types are: %s" % ', '.join(SUBJECT_TYPES).lower())
+
 
 def do_ws(args, path, permissions):
     """

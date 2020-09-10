@@ -53,16 +53,21 @@ import opal.restore_view
 import opal.backup_project
 import opal.restore_project
 
+
 def add_opal_arguments(parser):
     """
     Add Opal access arguments
     """
-    parser.add_argument('--opal', '-o', required=False, default='http://localhost:8080', help='Opal server base url (default: http://localhost:8080)')
+    parser.add_argument('--opal', '-o', required=False, default='http://localhost:8080',
+                        help='Opal server base url (default: http://localhost:8080)')
     parser.add_argument('--user', '-u', required=False, help='Credentials auth: user name (requires a password)')
-    parser.add_argument('--password', '-p', required=False, help='Credentials auth: user password (requires a user name)')
+    parser.add_argument('--password', '-p', required=False,
+                        help='Credentials auth: user password (requires a user name)')
     parser.add_argument('--token', '-tk', required=False, help='Token auth: User access token')
-    parser.add_argument('--ssl-cert', '-sc', required=False, help='Two-way SSL auth: certificate/public key file (requires a private key)')
-    parser.add_argument('--ssl-key', '-sk', required=False, help='Two-way SSL auth: private key file (requires a certificate)')
+    parser.add_argument('--ssl-cert', '-sc', required=False,
+                        help='Two-way SSL auth: certificate/public key file (requires a private key)')
+    parser.add_argument('--ssl-key', '-sk', required=False,
+                        help='Two-way SSL auth: private key file (requires a certificate)')
     parser.add_argument('--verbose', '-v', action='store_true', help='Verbose output')
 
 
@@ -74,6 +79,7 @@ def add_subcommand(name, help, add_args_func, default_func):
     add_opal_arguments(subparser)
     add_args_func(subparser)
     subparser.set_defaults(func=default_func)
+
 
 # Parse arguments
 parser = argparse.ArgumentParser(description='Opal command line.')
@@ -87,21 +93,28 @@ add_subcommand('dict', 'Query for data dictionary.', opal.dictionary.add_argumen
 add_subcommand('data', 'Query for data.', opal.data.add_arguments, opal.data.do_command)
 add_subcommand('entity', 'Query for entities (Participant, etc.).', opal.entity.add_arguments, opal.entity.do_command)
 add_subcommand('file', 'Manage Opal file system.', opal.file.add_arguments, opal.file.do_command)
-add_subcommand('backup-project', 'Backup project data: tables (data export), views, resources, report templates, files.', opal.backup_project.add_arguments, opal.backup_project.do_command)
-add_subcommand('restore-project', 'Restore project data: tables (data import), views, resources, report templates, files.', opal.restore_project.add_arguments, opal.restore_project.do_command)
+add_subcommand('backup-project',
+               'Backup project data: tables (data export), views, resources, report templates, files.',
+               opal.backup_project.add_arguments, opal.backup_project.do_command)
+add_subcommand('restore-project',
+               'Restore project data: tables (data import), views, resources, report templates, files.',
+               opal.restore_project.add_arguments, opal.restore_project.do_command)
 add_subcommand('backup-view', 'Backup views of a project.', opal.backup_view.add_arguments, opal.backup_view.do_command)
-add_subcommand('restore-view', 'Restore views of a project.', opal.restore_view.add_arguments, opal.restore_view.do_command)
+add_subcommand('restore-view', 'Restore views of a project.', opal.restore_view.add_arguments,
+               opal.restore_view.do_command)
 add_subcommand('import-opal', 'Import data from a remote Opal server.', opal.import_opal.add_arguments,
                opal.import_opal.do_command)
 add_subcommand('import-csv', 'Import data from a CSV file.', opal.import_csv.add_arguments,
                opal.import_csv.do_command)
 add_subcommand('import-xml', 'Import data from a ZIP file.', opal.import_xml.add_arguments,
                opal.import_xml.do_command)
-add_subcommand('import-r-sas', 'Import data from a SAS or SAS Transport file (using R).', opal.import_rsas.add_arguments,
+add_subcommand('import-r-sas', 'Import data from a SAS or SAS Transport file (using R).',
+               opal.import_rsas.add_arguments,
                opal.import_rsas.do_command)
 add_subcommand('import-r-stata', 'Import data from a Stata file (using R).', opal.import_rstata.add_arguments,
                opal.import_rstata.do_command)
-add_subcommand('import-r-spss', 'Import data from a SPSS or compressed SPSS file (using R).', opal.import_rspss.add_arguments,
+add_subcommand('import-r-spss', 'Import data from a SPSS or compressed SPSS file (using R).',
+               opal.import_rspss.add_arguments,
                opal.import_rspss.do_command)
 add_subcommand('import-plugin', 'Import data from an Opal datasource plugin.', opal.import_plugin.add_arguments,
                opal.import_plugin.do_command)
@@ -115,7 +128,9 @@ add_subcommand('import-ids', 'Import system identifiers.', opal.import_ids.add_a
                opal.import_ids.do_command)
 add_subcommand('import-ids-map', 'Import identifiers mappings.', opal.import_idsmap.add_arguments,
                opal.import_idsmap.do_command)
-add_subcommand('import-annot', 'Apply data dictionary annotations specified in a file in CSV/TSV format (see export-annot).', opal.import_annotations.add_arguments, opal.import_annotations.do_command)
+add_subcommand('import-annot',
+               'Apply data dictionary annotations specified in a file in CSV/TSV format (see export-annot).',
+               opal.import_annotations.add_arguments, opal.import_annotations.do_command)
 add_subcommand('export-xml', 'Export data to a zip of Opal XML files.', opal.export_xml.add_arguments,
                opal.export_xml.do_command)
 add_subcommand('export-csv', 'Export data to a folder of CSV files.', opal.export_csv.add_arguments,
@@ -124,7 +139,8 @@ add_subcommand('export-r-sas', 'Export data to a SAS or SAS Transport file (usin
                opal.export_rsas.do_command)
 add_subcommand('export-r-stata', 'Export data to a Stata file (using R).', opal.export_rstata.add_arguments,
                opal.export_rstata.do_command)
-add_subcommand('export-r-spss', 'Export data to a SPSS or compressed SPSS file (using R).', opal.export_rspss.add_arguments,
+add_subcommand('export-r-spss', 'Export data to a SPSS or compressed SPSS file (using R).',
+               opal.export_rspss.add_arguments,
                opal.export_rspss.do_command)
 add_subcommand('export-sql', 'Export data to a SQL database.', opal.export_sql.add_arguments,
                opal.export_sql.do_command)
@@ -132,17 +148,24 @@ add_subcommand('export-plugin', 'Export data to a Opal datasource plugin.', opal
                opal.export_plugin.do_command)
 add_subcommand('export-vcf', 'Export genotypes data to VCF/BCF files.', opal.export_vcf.add_arguments,
                opal.export_vcf.do_command)
-add_subcommand('export-annot', 'Extract data dictionary annotations in CSV/TSV format.', opal.export_annotations.add_arguments, opal.export_annotations.do_command)
-add_subcommand('copy-table', 'Copy a table into another table.', opal.copy_table.add_arguments, opal.copy_table.do_command)
+add_subcommand('export-annot', 'Extract data dictionary annotations in CSV/TSV format.',
+               opal.export_annotations.add_arguments, opal.export_annotations.do_command)
+add_subcommand('copy-table', 'Copy a table into another table.', opal.copy_table.add_arguments,
+               opal.copy_table.do_command)
 add_subcommand('delete-table', 'Delete some tables.', opal.delete_table.add_arguments, opal.delete_table.do_command)
 add_subcommand('user', 'Manage users.', opal.user.add_arguments, opal.user.do_command)
 add_subcommand('group', 'Manage groups.', opal.group.add_arguments, opal.group.do_command)
-add_subcommand('perm-project', 'Apply permission on a project.', opal.perm_project.add_arguments, opal.perm_project.do_command)
-add_subcommand('perm-datasource', 'Apply permission on a datasource.', opal.perm_datasource.add_arguments, opal.perm_datasource.do_command)
-add_subcommand('perm-table', 'Apply permission on a set of tables.', opal.perm_table.add_arguments, opal.perm_table.do_command)
-add_subcommand('perm-variable', 'Apply permission on a set of variables.', opal.perm_variable.add_arguments, opal.perm_variable.do_command)
+add_subcommand('perm-project', 'Apply permission on a project.', opal.perm_project.add_arguments,
+               opal.perm_project.do_command)
+add_subcommand('perm-datasource', 'Apply permission on a datasource.', opal.perm_datasource.add_arguments,
+               opal.perm_datasource.do_command)
+add_subcommand('perm-table', 'Apply permission on a set of tables.', opal.perm_table.add_arguments,
+               opal.perm_table.do_command)
+add_subcommand('perm-variable', 'Apply permission on a set of variables.', opal.perm_variable.add_arguments,
+               opal.perm_variable.do_command)
 add_subcommand('perm-r', 'Apply R permission.', opal.perm_r.add_arguments, opal.perm_r.do_command)
-add_subcommand('perm-datashield', 'Apply DataSHIELD permission.', opal.perm_datashield.add_arguments, opal.perm_datashield.do_command)
+add_subcommand('perm-datashield', 'Apply DataSHIELD permission.', opal.perm_datashield.add_arguments,
+               opal.perm_datashield.do_command)
 add_subcommand('perm-system', 'Apply system permission.', opal.perm_system.add_arguments, opal.perm_system.do_command)
 add_subcommand('plugin', 'Manage system plugins.', opal.plugin.add_arguments,
                opal.plugin.do_command)
@@ -151,15 +174,16 @@ add_subcommand('encrypt', "Encrypt string using Opal's secret key.", opal.securi
 add_subcommand('decrypt', "Decrypt string using Opal's secret key.", opal.security.decrypt.add_arguments,
                opal.security.decrypt.do_command)
 add_subcommand('task', 'Manage a task.', opal.task.add_arguments, opal.task.do_command)
-add_subcommand('system', 'Query for system status and configuration.', opal.system.add_arguments, opal.system.do_command)
+add_subcommand('system', 'Query for system status and configuration.', opal.system.add_arguments,
+               opal.system.do_command)
 add_subcommand('rest', 'Request directly the Opal REST API, for advanced users.', opal.rest.add_arguments,
                opal.rest.do_command)
-add_subcommand('analysis-plugin', 'Analyses a project variables using external R plugins.', opal.analysis_plugin.add_arguments,
+add_subcommand('analysis-plugin', 'Analyses a project variables using external R plugins.',
+               opal.analysis_plugin.add_arguments,
                opal.analysis_plugin.do_command)
-add_subcommand('export-analysis-plugin', 'Exports analysis data of a project or specific tables.', opal.export_analysis_plugin.add_arguments,
+add_subcommand('export-analysis-plugin', 'Exports analysis data of a project or specific tables.',
+               opal.export_analysis_plugin.add_arguments,
                opal.export_analysis_plugin.do_command)
-
-
 
 # Execute selected command
 args = parser.parse_args()

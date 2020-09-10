@@ -2,9 +2,9 @@
 Opal system data
 """
 
-import sys
-import pycurl
 import opal.core
+import pycurl
+import sys
 
 
 def add_arguments(parser):

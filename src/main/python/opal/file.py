@@ -2,9 +2,9 @@
 Opal file management.
 """
 
-import sys
-import pycurl
 import opal.core
+import pycurl
+import sys
 
 
 class OpalFile:

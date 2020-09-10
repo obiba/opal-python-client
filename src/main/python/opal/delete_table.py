@@ -2,8 +2,8 @@
 Delete some tables.
 """
 
-import sys
 import opal.core
+import sys
 
 
 def add_arguments(parser):

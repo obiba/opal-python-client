@@ -2,9 +2,9 @@
 Data copy.
 """
 
-import sys
 import opal.core
 import opal.io
+import sys
 
 
 def add_arguments(parser):

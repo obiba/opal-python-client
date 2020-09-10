@@ -38,9 +38,9 @@ Examples of Opal web services on which GET can be performed:
   Raw repeatable variable value of a entity at given position (start at 0)
 """
 
-import sys
 import ast
 import opal.core
+import sys
 
 
 def add_arguments(parser):
@@ -53,7 +53,8 @@ def add_arguments(parser):
     parser.add_argument('--accept', '-a', required=False, help='Accept header (default is application/json)')
     parser.add_argument('--content-type', '-ct', required=False,
                         help='Content-Type header (default is application/json)')
-    parser.add_argument('--headers', '-hs', required=False, help='Custom headers in the form of: { "Key2": "Value2", "Key2": "Value2" }')
+    parser.add_argument('--headers', '-hs', required=False,
+                        help='Custom headers in the form of: { "Key2": "Value2", "Key2": "Value2" }')
     parser.add_argument('--json', '-j', action='store_true', help='Pretty JSON formatting of the response')
 
 

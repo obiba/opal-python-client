@@ -2,10 +2,9 @@
 Apply permissions on a set of tables.
 """
 
-import sys
 import opal.core
 import opal.perm
-
+import sys
 
 PERMISSIONS = {
     'view': 'TABLE_READ',

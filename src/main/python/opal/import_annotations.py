@@ -7,14 +7,17 @@ import csv
 import opal.core
 import pprint
 import sys
-import urllib.request, urllib.parse, urllib.error
+import urllib.error
+import urllib.parse
+import urllib.request
 
 
 def add_arguments(parser):
     """
     Add command specific options
     """
-    parser.add_argument('--input', '-in', help='CSV/TSV input file, typically the output of the "export-annot" command (default is stdin)',
+    parser.add_argument('--input', '-in',
+                        help='CSV/TSV input file, typically the output of the "export-annot" command (default is stdin)',
                         type=argparse.FileType('r'), default=sys.stdin)
     parser.add_argument('--locale', '-l', required=False,
                         help='Destination annotation locale (default is none)')

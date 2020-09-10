@@ -2,9 +2,9 @@
 Apply permissions on a set of variables.
 """
 
-import sys
 import opal.core
 import opal.perm
+import sys
 
 PERMISSIONS = {
     'view': 'VARIABLE_READ',
@@ -44,7 +44,9 @@ def do_command(args):
 
             try:
                 response = request.resource(
-                    opal.perm.do_ws(args, ['project', args.project, 'permissions', 'table', args.table, 'variable', variable], PERMISSIONS)).send()
+                    opal.perm.do_ws(args,
+                                    ['project', args.project, 'permissions', 'table', args.table, 'variable', variable],
+                                    PERMISSIONS)).send()
             except Exception as e:
                 print(Exception, e)
 
