@@ -203,7 +203,7 @@
                     </mapping>
 
                     <mapping>
-                      <directory>/usr/share/pyshared/opal</directory>
+                      <directory>/usr/lib/python3/dist-packages/opal</directory>
                       <filemode>755</filemode>
                       <sources>
                         <source>
@@ -268,12 +268,12 @@
                         <filter token="date" value="${deb.date}" />
                       </filterset>
                     </copy>
-                    <mkdir dir="${deb.dir}/usr/share/pyshared" />
+                    <mkdir dir="${deb.dir}/usr/lib/python3/dist-packages" />
                     <mkdir dir="${deb.dir}/usr/bin" />
                     <copy todir="${deb.dir}/usr/bin">
                       <fileset dir="${target.dir}/opal-python/bin/scripts" includes="opal" />
                     </copy>
-                    <copy todir="${deb.dir}/usr/share/pyshared/opal">
+                    <copy todir="${deb.dir}/usr/lib/python3/dist-packages/opal">
                       <fileset dir="${target.dir}/opal-python/bin/opal" includes="**/*" />
                     </copy>
                     <exec executable="debuild" dir="${deb.dir}" failonerror="true" osfamily="unix">
