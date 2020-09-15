@@ -64,14 +64,14 @@ class OpalImporter:
         # import options
         options = {'destination': self.destination}
         # tables must be the ones of the transient
-        tables2import = transient.table
+        tables2import = transient['table']
         if self.tables:
-            def f(t): return any(t in s for s in transient.table)
+            def f(t): return any(t in s for s in transient['table'])
 
             tables2import = list(filter(f, self.tables))
 
         def table_fullname(t):
-            return transient.name + '.' + t
+            return transient['name'] + '.' + t
 
         options['tables'] = list(map(table_fullname, tables2import))
 
@@ -165,7 +165,7 @@ class OpalImporter:
     def compare_datasource(self, transient):
         # Compare datasources : /datasource/<transient_name>/compare/<ds_name>
         uri = opal.core.UriBuilder(['datasource',
-                                    transient.name.encode('ascii', 'ignore'),
+                                    transient['name'].encode('ascii', 'ignore'),
                                     'compare', self.destination]).build()
         request = self.client.new_request()
         request.fail_on_error().accept_json().content_type_json()
