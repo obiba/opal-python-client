@@ -79,7 +79,7 @@ class OpalClient:
     def credentials(self, user, password):
         u = self.__ensure_entry('User name', user)
         p = self.__ensure_entry('Password', password, True)
-        return self.header('Authorization', 'X-Opal-Auth ' + base64.b64encode(u + ':' + p))
+        return self.header('Authorization', 'X-Opal-Auth ' + base64.b64encode((u + ':' + p).encode("utf-8")).decode("utf-8"))
 
     def token(self, token):
         tk = self.__ensure_entry('Token', token, True)
@@ -307,7 +307,7 @@ class Storage:
 
     def store(self, buf):
         self.line = self.line + 1
-        self.content = self.content + buf
+        self.content = self.content + buf.decode("utf-8")
 
     def __str__(self):
         return self.contents
@@ -325,7 +325,7 @@ class HeaderStorage(Storage):
 
     def store(self, buf):
         Storage.store(self, buf)
-        header = buf.partition(':')
+        header = buf.decode("utf-8").partition(':')
         if header[1]:
             value = header[2].rstrip().strip()
             if header[0] in self.headers:
