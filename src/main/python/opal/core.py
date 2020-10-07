@@ -259,10 +259,10 @@ class OpalRequest:
         if self._verbose:
             print('* Content:')
             print(content)
+        encodedContent = content.encode('utf-8')
         self.curl_option(pycurl.POST, 1)
-        self.curl_option(pycurl.POSTFIELDSIZE, len(content))
-        reader = io.StringIO(content)
-        self.curl_option(pycurl.READFUNCTION, reader.read)
+        self.curl_option(pycurl.POSTFIELDSIZE, len(encodedContent))
+        self.curl_option(pycurl.POSTFIELDS, encodedContent)
         return self
 
     def content_file(self, filename):
