@@ -65,8 +65,7 @@ def do_command(args):
             if args.force:
                 request.delete().resource(opal.core.UriBuilder(['project', args.name]).build()).send()
             else:
-                print('Delete the project "' + args.name + '"? [y/N]: ', end=' ')
-                confirmed = sys.stdin.readline().rstrip().strip()
+                confirmed = input('Delete the project "' + args.name + '"? [y/N]: ')
                 if confirmed == 'y':
                     request.delete().resource(opal.core.UriBuilder(['project', args.name]).build()).send()
                 else:

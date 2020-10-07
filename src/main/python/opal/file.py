@@ -61,8 +61,7 @@ def do_command(args):
             if args.force:
                 response = request.delete().resource(file.get_ws()).send()
             else:
-                print('Delete the file "' + args.path + '"? [y/N]: ', end=' ')
-                confirmed = sys.stdin.readline().rstrip().strip()
+                confirmed = input('Delete the file "' + args.path + '"? [y/N]: ')
                 if confirmed == 'y':
                     response = request.delete().resource(file.get_ws()).send()
                 else:
