@@ -44,8 +44,7 @@ def restore_view(args, obsviews, infile):
     dowrite = True
     if view in obsviews and not args.force:
         dowrite = False
-        print('Overwrite the view "' + view + '"? [y/N]: ', end=' ')
-        confirmed = sys.stdin.readline().rstrip().strip()
+        confirmed = input('Overwrite the view "' + view + '"? [y/N]: ')
         if confirmed == 'y':
             dowrite = True
 
@@ -74,8 +73,7 @@ def restore_zipped_view(args, obsviews, infile, zippedinput):
     dowrite = True
     if view in obsviews and not args.force:
         dowrite = False
-        print('Overwrite the view "' + view + '"? [y/N]: ', end=' ')
-        confirmed = sys.stdin.readline().rstrip().strip()
+        confirmed = input('Overwrite the view "' + view + '"? [y/N]: ')
         if confirmed == 'y':
             dowrite = True
 

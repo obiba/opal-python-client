@@ -52,8 +52,7 @@ def backup_view(args, view, outdir):
     dowrite = True
     if os.path.exists(outpath) and not args.force:
         dowrite = False
-        print('Overwrite the file "' + outpath + '"? [y/N]: ', end=' ')
-        confirmed = sys.stdin.readline().rstrip().strip()
+        confirmed = input('Overwrite the file "' + outpath + '"? [y/N]: ')
         if confirmed == 'y':
             dowrite = True
 
