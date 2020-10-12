@@ -82,7 +82,7 @@ def add_subcommand(name, help, add_args_func, default_func):
 
 
 # Parse arguments
-parser = argparse.ArgumentParser(description='Opal command line.')
+parser = argparse.ArgumentParser(description='Opal command line tool.')
 subparsers = parser.add_subparsers(title='sub-commands',
                                    help='Available sub-commands. Use --help option on the sub-command '
                                         'for more details.')
@@ -187,4 +187,8 @@ add_subcommand('export-analysis-plugin', 'Exports analysis data of a project or 
 
 # Execute selected command
 args = parser.parse_args()
-args.func(args)
+if hasattr(args, 'func'):
+  args.func(args)
+else:
+  print('Opal command line tool.')
+  print('For more details: opal --help')
