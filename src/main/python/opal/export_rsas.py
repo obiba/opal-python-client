@@ -15,6 +15,7 @@ def add_arguments(parser):
     parser.add_argument('--tables', '-t', nargs='+', required=True, help='The list of tables to be exported')
     parser.add_argument('--output', '-out', required=True,
                         help='Output file name (.sas7bdat or .xpt (Transport format))')
+    parser.add_argument('--id-name', '-in', required=False, help='Name of the ID column name')
     parser.add_argument('--identifiers', '-id', required=False, help='Name of the ID mapping')
     parser.add_argument('--no-multilines', '-nl', action='store_true',
                         help='Do not write value sequences as multiple lines')
@@ -32,7 +33,7 @@ def do_command(args):
             raise Exception('Output must be a SAS file (.sas7bdat or .xpt).')
 
         client = opal.core.OpalClient.build(opal.core.OpalClient.LoginInfo.parse(args))
-        exporter = opal.io.OpalExporter.build(client=client, datasource=args.datasource, tables=args.tables,
+        exporter = opal.io.OpalExporter.build(client=client, datasource=args.datasource, tables=args.tables, entityIdNames = args.id_name,
                                               identifiers=args.identifiers, output=args.output, incremental=False,
                                               multilines=(not args.no_multilines), verbose=args.verbose)
         # print result

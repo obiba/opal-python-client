@@ -17,6 +17,7 @@ def add_import_arguments(parser):
     parser.add_argument('--incremental', '-i', action='store_true',
                         help='Incremental import (new and updated value sets)')
     parser.add_argument('--limit', '-li', required=False, type=int, help='Import limit (maximum number of value sets)')
+    parser.add_argument('--id-name', '-in', required=False, help='Name of the ID column name')
     parser.add_argument('--identifiers', '-id', required=False, help='Name of the ID mapping')
     parser.add_argument('--policy', '-po', required=False,
                         help='ID mapping policy: required (each identifiers must be mapped prior importation, default), ignore (ignore unknown identifiers), generate (generate a system identifier for each unknown identifier)')
@@ -189,7 +190,7 @@ class OpalExporter:
 
     @classmethod
     def build(cls, client, datasource, tables, output, incremental=None, multilines=True, identifiers=None,
-              verbose=None):
+              entityIdNames=None, verbose=None):
         setattr(cls, 'client', client)
         setattr(cls, 'datasource', datasource)
         setattr(cls, 'tables', tables)
@@ -197,6 +198,7 @@ class OpalExporter:
         setattr(cls, 'incremental', incremental)
         setattr(cls, 'identifiers', identifiers)
         setattr(cls, 'multilines', multilines)
+        setattr(cls, 'entityIdNames', entityIdNames)
         setattr(cls, 'verbose', verbose)
         return cls()
 
@@ -213,6 +215,9 @@ class OpalExporter:
             'multilines': self.multilines,
             'noVariables': False
         }
+        if self.entityIdNames:
+            options['entityIdNames'] = self.entityIdNames
+
         if self.tables:
             tables2export = self.tables
 

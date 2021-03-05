@@ -13,6 +13,7 @@ import opal.import_xml
 import opal.import_rsas
 import opal.import_rstata
 import opal.import_rspss
+import opal.import_rds
 import opal.import_plugin
 import opal.import_limesurvey
 import opal.import_sql
@@ -26,6 +27,7 @@ import opal.export_plugin
 import opal.export_rsas
 import opal.export_rspss
 import opal.export_rstata
+import opal.export_rds
 import opal.export_sql
 import opal.export_vcf
 import opal.export_annotations
@@ -118,6 +120,8 @@ add_subcommand('import-r-stata', 'Import data from a Stata file (using R).', opa
 add_subcommand('import-r-spss', 'Import data from a SPSS or compressed SPSS file (using R).',
                opal.import_rspss.add_arguments,
                opal.import_rspss.do_command)
+add_subcommand('import-r-rds', 'Import data from a RDS file (single serialized R object, expected to be a tibble, using R).', opal.import_rds.add_arguments,
+               opal.import_rds.do_command)
 add_subcommand('import-plugin', 'Import data from an Opal datasource plugin.', opal.import_plugin.add_arguments,
                opal.import_plugin.do_command)
 add_subcommand('import-limesurvey', 'Import data from a LimeSurvey database.', opal.import_limesurvey.add_arguments,
@@ -144,6 +148,8 @@ add_subcommand('export-r-stata', 'Export data to a Stata file (using R).', opal.
 add_subcommand('export-r-spss', 'Export data to a SPSS or compressed SPSS file (using R).',
                opal.export_rspss.add_arguments,
                opal.export_rspss.do_command)
+add_subcommand('export-r-rds', 'Export data to a RDS file (single serialized R object, using R).', opal.export_rds.add_arguments,
+               opal.export_rds.do_command)
 add_subcommand('export-sql', 'Export data to a SQL database.', opal.export_sql.add_arguments,
                opal.export_sql.do_command)
 add_subcommand('export-plugin', 'Export data to a Opal datasource plugin.', opal.export_plugin.add_arguments,
