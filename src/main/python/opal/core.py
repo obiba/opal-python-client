@@ -282,11 +282,14 @@ class OpalRequest:
         self.curl_option(pycurl.HTTPPOST, [("file1", (pycurl.FORM_FILE, filename))])
         return self
 
-    def send(self):
+    def send(self, buffer=None):
         curl = self.__build_request()
         hbuf = HeaderStorage()
         cbuf = Storage()
-        curl.setopt(curl.WRITEFUNCTION, cbuf.store)
+        if buffer:
+            curl.setopt(curl.WRITEFUNCTION, buffer.write)
+        else:
+            curl.setopt(curl.WRITEFUNCTION, cbuf.store)
         curl.setopt(curl.HEADERFUNCTION, hbuf.store)
         curl.perform()
         response = OpalResponse(curl.getinfo(pycurl.HTTP_CODE), hbuf.headers, cbuf.content)

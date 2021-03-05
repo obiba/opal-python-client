@@ -4,7 +4,7 @@ Opal data.
 
 import opal.core
 import sys
-
+import os
 
 def add_arguments(parser):
     """
@@ -52,15 +52,20 @@ def do_command(args):
             request.verbose()
 
         # send request
-        response = request.get().resource(do_ws(args)).send()
+        if args.raw:
+            fp = os.fdopen(sys.stdout.fileno(), 'wb')
+            response = request.get().resource(do_ws(args)).accept('*/*').send(fp)
+            fp.flush()
+        else:
+            response = request.get().resource(do_ws(args)).send()
 
-        # format response
-        res = response.content
-        if args.json:
-            res = response.pretty_json()
+            # format response
+            res = response.content
+            if args.json:
+                res = response.pretty_json()
 
-        # output to stdout
-        print(res)
+            # output to stdout
+            print(res)
     except Exception as e:
         print(e)
         sys.exit(2)

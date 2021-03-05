@@ -5,6 +5,7 @@ Opal file management.
 import opal.core
 import pycurl
 import sys
+import os
 
 
 class OpalFile:
@@ -52,31 +53,34 @@ def do_command(args):
 
         # send request
         if args.download or args.download_password:
-            response = request.get().resource(file.get_ws()).header('X-File-Key', args.download_password).send()
-        elif args.upload:
-            request.content_upload(args.upload).accept('text/html').content_type('multipart/form-data')
-            response = request.post().resource(file.get_ws()).send()
-        elif args.delete:
-            # confirm
-            if args.force:
-                response = request.delete().resource(file.get_ws()).send()
-            else:
-                confirmed = input('Delete the file "' + args.path + '"? [y/N]: ')
-                if confirmed == 'y':
+            fp = os.fdopen(sys.stdout.fileno(), 'wb')
+            response = request.get().resource(file.get_ws()).accept('*/*').header('X-File-Key', args.download_password).send(fp)
+            fp.flush()
+        else:
+            if args.upload:
+                request.content_upload(args.upload).accept('text/html').content_type('multipart/form-data')
+                response = request.post().resource(file.get_ws()).send()
+            elif args.delete:
+                # confirm
+                if args.force:
                     response = request.delete().resource(file.get_ws()).send()
                 else:
-                    print('Aborted.')
-                    sys.exit(0)
-        else:
-            response = request.get().resource(file.get_meta_ws()).send()
+                    confirmed = input('Delete the file "' + args.path + '"? [y/N]: ')
+                    if confirmed == 'y':
+                        response = request.delete().resource(file.get_ws()).send()
+                    else:
+                        print('Aborted.')
+                        sys.exit(0)
+            else:
+                response = request.get().resource(file.get_meta_ws()).send()
 
-        # format response
-        res = response.content
-        if args.json and not args.download and not args.download_password and not args.upload:
-            res = response.pretty_json()
+            # format response
+            res = response.content
+            if args.json and not args.download and not args.download_password and not args.upload:
+                res = response.pretty_json()
 
-        # output to stdout
-        print(res)
+            # output to stdout
+            print(res)
     except Exception as e:
         print(e, file=sys.stderr)
         sys.exit(2)
