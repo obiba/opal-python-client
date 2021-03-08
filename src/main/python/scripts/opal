@@ -40,6 +40,8 @@ import opal.perm_project
 import opal.perm_datasource
 import opal.perm_table
 import opal.perm_variable
+import opal.perm_resource
+import opal.perm_resources
 import opal.perm_r
 import opal.perm_datashield
 import opal.perm_system
@@ -171,6 +173,10 @@ add_subcommand('perm-table', 'Apply permission on a set of tables.', opal.perm_t
                opal.perm_table.do_command)
 add_subcommand('perm-variable', 'Apply permission on a set of variables.', opal.perm_variable.add_arguments,
                opal.perm_variable.do_command)
+add_subcommand('perm-resources', 'Apply permission on resources as a whole.', opal.perm_resources.add_arguments,
+               opal.perm_resources.do_command)
+add_subcommand('perm-resource', 'Apply permission on a set of resources.', opal.perm_resource.add_arguments,
+               opal.perm_resource.do_command)
 add_subcommand('perm-r', 'Apply R permission.', opal.perm_r.add_arguments, opal.perm_r.do_command)
 add_subcommand('perm-datashield', 'Apply DataSHIELD permission.', opal.perm_datashield.add_arguments,
                opal.perm_datashield.do_command)

@@ -1,5 +1,5 @@
 """
-Apply permissions on a set of tables.
+Apply permissions on a set of resources.
 """
 
 import opal.core
@@ -7,11 +7,8 @@ import opal.perm
 import sys
 
 PERMISSIONS = {
-    'view': 'TABLE_READ',
-    'view-value': 'TABLE_VALUES',
-    'edit': 'TABLE_EDIT',
-    'edit-values': 'TABLE_VALUES_EDIT',
-    'administrate': 'TABLE_ALL'
+    'view': 'RESOURCE_VIEW',
+    'administrate': 'RESOURCE_ALL'
 }
 
 def add_arguments(parser):
@@ -19,23 +16,23 @@ def add_arguments(parser):
     Add command specific options
     """
     opal.perm.add_permission_arguments(parser, list(PERMISSIONS.keys()))
-    parser.add_argument('--project', '-pr', required=True, help='Project name to which the tables belong')
-    parser.add_argument('--tables', '-t', nargs='+', required=False,
-                        help='List of table names on which the permission is to be set (default is all)')
+    parser.add_argument('--project', '-pr', required=True, help='Project name to which the resources belong')
+    parser.add_argument('--resources', '-r', nargs='+', required=False,
+                        help='List of resource names on which the permission is to be set (default is all)')
 
-def retrieve_datasource_tables(args):
+def retrieve_project_resources(args):
     request = opal.core.OpalClient.build(opal.core.OpalClient.LoginInfo.parse(args)).new_request()
     request.fail_on_error()
     if args.verbose:
         request.verbose()
     response = request.get().resource(
-        opal.core.UriBuilder(['datasource', args.project, 'tables']).build()).send().as_json()
+        opal.core.UriBuilder(['project', args.project, 'resources']).build()).send().as_json()
 
-    tables = []
-    for table in response:
-        tables.append(str(table['name']))
+    resources = []
+    for resource in response:
+        resources.append(str(resource['name']))
 
-    return tables
+    return resources
 
 def do_command(args):
     """
@@ -45,11 +42,11 @@ def do_command(args):
     try:
         opal.perm.validate_args(args, PERMISSIONS)
 
-        tables = args.tables
-        if not tables:
-            tables = retrieve_datasource_tables(args)
+        resources = args.resources
+        if not resources:
+            resources = retrieve_project_resources(args)
 
-        for table in tables:
+        for resource in resources:
             request = opal.core.OpalClient.build(opal.core.OpalClient.LoginInfo.parse(args)).new_request()
 
             if args.verbose:
@@ -63,7 +60,7 @@ def do_command(args):
 
             try:
                 response = request.resource(
-                    opal.perm.do_ws(args, ['project', args.project, 'permissions', 'table', table], PERMISSIONS)).send()
+                    opal.perm.do_ws(args, ['project', args.project, 'permissions', 'resource', resource], PERMISSIONS)).send()
             except Exception as e:
                 print(Exception, e)
 
