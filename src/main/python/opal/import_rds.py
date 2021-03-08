@@ -36,8 +36,7 @@ def do_command(args):
                                               identifiers=args.identifiers,
                                               policy=args.policy, merge=args.merge, verbose=args.verbose)
         # print result
-        extension_factory = OpalExtensionFactory(path=args.path,
-                                                 locale=args.locale, entityType=args.type, idVariable=args.idVariable)
+        extension_factory = OpalExtensionFactory(path=args.path, entityType=args.type, idVariable=args.idVariable)
 
         response = importer.submit(extension_factory)
 
@@ -58,9 +57,8 @@ def do_command(args):
 
 
 class OpalExtensionFactory(opal.io.OpalImporter.ExtensionFactoryInterface):
-    def __init__(self, path, locale, entityType, idVariable):
+    def __init__(self, path, entityType, idVariable):
         self.path = path
-        self.locale = locale
         self.entityType = entityType
         self.idVariable = idVariable
 
@@ -73,11 +71,9 @@ class OpalExtensionFactory(opal.io.OpalImporter.ExtensionFactoryInterface):
             'symbol': self.path[self.path.rfind("/") + 1:self.path.rfind(".")]
         }
 
-        if self.locale:
-            extension['locale'] = self.locale
         if self.entityType:
             extension['entityType'] = self.entityType
         if self.idVariable:
-            extension['idVariable'] = self.idVariable
+            extension['idColumn'] = self.idVariable
 
         factory['Magma.RHavenDatasourceFactoryDto.params'] = extension

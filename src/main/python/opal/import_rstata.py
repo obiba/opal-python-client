@@ -79,6 +79,6 @@ class OpalExtensionFactory(opal.io.OpalImporter.ExtensionFactoryInterface):
         if self.entityType:
             extension['entityType'] = self.entityType
         if self.idVariable:
-            extension['idVariable'] = self.idVariable
+            extension['idColumn'] = self.idVariable
 
         factory['Magma.RHavenDatasourceFactoryDto.params'] = extension
