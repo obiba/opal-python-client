@@ -57,6 +57,7 @@ import opal.restore_view
 import opal.backup_project
 import opal.restore_project
 import opal.taxonomy
+import opal.sql
 
 
 def add_opal_arguments(parser):
@@ -198,6 +199,9 @@ add_subcommand('analysis-plugin', 'Analyses a project variables using external R
 add_subcommand('export-analysis-plugin', 'Exports analysis data of a project or specific tables.',
                opal.export_analysis_plugin.add_arguments,
                opal.export_analysis_plugin.do_command)
+add_subcommand('sql', 'Execute a SQL statement on a project\'s tables.',
+               opal.sql.add_arguments,
+               opal.sql.do_command)
 
 # Execute selected command
 args = parser.parse_args()
