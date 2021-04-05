@@ -14,7 +14,7 @@ def add_arguments(parser):
     """
     Add command specific options
     """
-    parser.add_argument('--project', '-pr', required=True, help='Source project name')
+    parser.add_argument('--project', '-pr', required=False, help='Source project name, that will be used to resolve the table names in the FROM statement. If not provided, the fully qualified table names must be specified in the query (escaped by backquotes: `<project>.<table>`).')
     parser.add_argument('--query', '-q', required=True, help='SQL query')
     parser.add_argument('--format', '-f', required=False, help='The format of the output, can be "json" or "csv". Default is "csv".')
     parser.add_argument('--id-name', '-in', required=False, help='Name of the ID column name. Default is "_id".')
@@ -29,7 +29,10 @@ def do_command(args):
     # Build and send request
     try:
         client = opal.core.OpalClient.build(opal.core.OpalClient.LoginInfo.parse(args))
-        builder = opal.core.UriBuilder(['datasource', args.project, '_sql'])
+        if args.project:
+            builder = opal.core.UriBuilder(['datasource', args.project, '_sql'])
+        else:
+            builder = opal.core.UriBuilder(['datasources', '_sql'])
         if args.format == 'json' and args.id_name:
             builder.query('id', args.id_name)
         uri = builder.build()
