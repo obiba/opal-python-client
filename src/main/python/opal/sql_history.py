@@ -14,10 +14,10 @@ def add_arguments(parser):
     """
     Add command specific options
     """
-    parser.add_argument('--project', '-pr', required=False, help='Source project name used as the SQL execution context to filter. If not specified, history from any context is returned. If * is used, history of SQL execution without context is returned.')
+    parser.add_argument('--project', '-pr', required=False, help='Project name used as the SQL execution context to filter. If not specified, history from any context is returned. If \'*\' is specified, history of SQL execution without context is returned.')
     parser.add_argument('--offset', '-os', required=False, help='Number of history items to skip. Default is 0 (note that the items are ordered by most recent first).')
     parser.add_argument('--limit', '-lm', required=False, help='Maximum number of history items to return. Default is 100.')
-    parser.add_argument('--subject', '-sb', required=False, help='Filter by user name, only administrators can retrieve SQL history of other users. Default is the current user name.')
+    parser.add_argument('--subject', '-sb', required=False, help='Filter by user name, only administrators can retrieve SQL history of other users. If \'*\' is specified, history of all users is retrieved. Default is the current user name.')
     parser.add_argument('--json', '-j', action='store_true', help='Pretty JSON formatting of the response')
 
 
