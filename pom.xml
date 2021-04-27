@@ -16,7 +16,7 @@
   <artifactId>opal-python-client</artifactId>
   <name>opal-python-client</name>
   <description>Opal Python Client Module</description>
-  <version>4.1-SNAPSHOT</version>
+  <version>4.2-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <properties>
