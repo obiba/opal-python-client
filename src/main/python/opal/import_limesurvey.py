@@ -15,7 +15,8 @@ def add_arguments(parser):
     parser.add_argument('--url', '-ur', required=False, help='LimeSurvey SQL database JDBC url (if not provided, plugin defaults will be used).')
     parser.add_argument('--uname', '-un', required=False, help='LimeSurvey SQL database user name (if not provided, plugin defaults will be used).')
     parser.add_argument('--pword', '-pwd', required=False, help='LimeSurvey SQL database user password (if not provided, plugin defaults will be used).')
-    parser.add_argument('--prefix', '-pr', required=False, help='Table prefix.')
+    parser.add_argument('--prefix', '-pr', required=False, help='Table prefix (if not provided, plugin defaults will be used).')
+    parser.add_argument('--properties', '-pp', required=False, help='SQL properties (if not provided, plugin defaults will be used).')
 
     # non specific import arguments
     opal.io.add_import_arguments(parser)
@@ -33,7 +34,7 @@ def do_command(args):
                                               identifiers=args.identifiers,
                                               policy=args.policy, merge=args.merge, verbose=args.verbose)
         # print result
-        extension_factory = OpalExtensionFactory(url=args.url, uname=args.uname, pword=args.pword, prefix=args.prefix)
+        extension_factory = OpalExtensionFactory(url=args.url, uname=args.uname, pword=args.pword, prefix=args.prefix, properties=args.properties)
 
         response = importer.submit(extension_factory)
 
@@ -55,11 +56,12 @@ def do_command(args):
 
 
 class OpalExtensionFactory(opal.io.OpalImporter.ExtensionFactoryInterface):
-    def __init__(self, url, uname, pword, prefix):
+    def __init__(self, url, uname, pword, prefix, properties):
         self.url = url
         self.uname = uname
         self.pword = pword
         self.prefix = prefix
+        self.properties = properties
 
     def add(self, factory):
         """
@@ -73,9 +75,13 @@ class OpalExtensionFactory(opal.io.OpalImporter.ExtensionFactoryInterface):
         if self.url:
             config['url'] = self.url
         if self.uname:
-            config['uname'] = self.uname
+            config['username'] = self.uname
         if self.pword:
-            config['pwrod'] = self.pword
+            config['password'] = self.pword
+        if self.prefix:
+            config['prefix'] = self.prefix
+        if self.properties:
+            config['properties'] = self.properties
         extension['parameters'] = json.dumps(config)
 
         factory['Magma.PluginDatasourceFactoryDto.params'] = extension
