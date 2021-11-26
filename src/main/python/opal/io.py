@@ -100,7 +100,12 @@ class OpalImporter:
         response = request.post().resource(uri).content(json.dumps(options)).send()
 
         # get job status
-        job_resource = re.sub(r'http.*\/ws', r'', response.headers['Location'])
+        location = None
+        if 'Location' in response.headers:
+            location = response.headers['Location']
+        elif 'location' in response.headers:
+            location = response.headers['location']
+        job_resource = re.sub(r'http.*\/ws', r'', location)
         request = self.client.new_request()
         request.fail_on_error().accept_json()
         return request.get().resource(job_resource).send()
@@ -245,7 +250,12 @@ class OpalExporter:
         response = request.post().resource(uri).content(json.dumps(options)).send()
 
         # get job status
-        job_resource = re.sub(r'http.*\/ws', r'', response.headers['Location'])
+        location = None
+        if 'Location' in response.headers:
+            location = response.headers['Location']
+        elif 'location' in response.headers:
+            location = response.headers['location']
+        job_resource = re.sub(r'http.*\/ws', r'', location)
         request = self.client.new_request()
         request.fail_on_error().accept_json()
         return request.get().resource(job_resource).send()
@@ -308,7 +318,12 @@ class OpalCopier:
         response = request.post().resource(uri).content(json.dumps(options)).send()
 
         # get job status
-        job_resource = re.sub(r'http.*\/ws', r'', response.headers['Location'])
+        location = None
+        if 'Location' in response.headers:
+            location = response.headers['Location']
+        elif 'location' in response.headers:
+            location = response.headers['location']
+        job_resource = re.sub(r'http.*\/ws', r'', location)
         request = self.client.new_request()
         request.fail_on_error().accept_json()
         return request.get().resource(job_resource).send()
