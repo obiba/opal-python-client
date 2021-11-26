@@ -298,7 +298,7 @@ class OpalRequest:
             curl.setopt(curl.WRITEFUNCTION, cbuf.store)
         curl.setopt(curl.HEADERFUNCTION, hbuf.store)
         curl.perform()
-        response = OpalResponse(curl.getinfo(pycurl.HTTP_CODE), hbuf.headers, cbuf.content)
+        response = OpalResponse(curl.getinfo(pycurl.HTTP_CODE), hbuf.headers, cbuf.content.decode("utf-8"))
         curl.close()
 
         return response
@@ -310,15 +310,15 @@ class Storage:
     """
 
     def __init__(self):
-        self.content = ''
+        self.content = bytearray()
         self.line = 0
 
     def store(self, buf):
         self.line = self.line + 1
-        self.content = self.content + buf.decode("utf-8")
+        self.content = self.content + buf
 
     def __str__(self):
-        return self.contents
+        return self.contents.decode("utf-8")
 
 
 class HeaderStorage(Storage):
