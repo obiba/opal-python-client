@@ -44,7 +44,12 @@ def do_command(args):
         response = request.post().resource(uri).content(json.dumps(options)).send()
 
         # get job status
-        job_resource = re.sub(r'http.*\/ws', r'', response.headers['Location'])
+        location = None
+        if 'Location' in response.headers:
+            location = response.headers['Location']
+        elif 'location' in response.headers:
+            location = response.headers['location']
+        job_resource = re.sub(r'http.*\/ws', r'', location)
         request = client.new_request()
         request.fail_on_error().accept_json()
         if args.verbose:
