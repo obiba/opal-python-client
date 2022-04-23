@@ -70,6 +70,7 @@ def add_opal_arguments(parser):
     parser.add_argument('--user', '-u', required=False, help='Credentials auth: user name (requires a password)')
     parser.add_argument('--password', '-p', required=False,
                         help='Credentials auth: user password (requires a user name)')
+    parser.add_argument('--otp', '-ot', action='store_true', help='Whether a one-time password is to be provided (required when connecting with username/password AND two-factor authentication is enabled)')
     parser.add_argument('--token', '-tk', required=False, help='Token auth: User access token')
     parser.add_argument('--ssl-cert', '-sc', required=False,
                         help='Two-way SSL auth: certificate/public key file (requires a private key)')

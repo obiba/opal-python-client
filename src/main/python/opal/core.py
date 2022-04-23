@@ -36,7 +36,7 @@ class OpalClient:
             return OpalClient.buildWithToken(loginInfo.data['server'], loginInfo.data['token'])
         else:
             return OpalClient.buildWithAuthentication(loginInfo.data['server'], loginInfo.data['user'],
-                                                      loginInfo.data['password'])
+                                                      loginInfo.data['password'], loginInfo.data['otp'])
         raise Exception('Failed to build Opal Client')
 
     @classmethod
@@ -49,12 +49,12 @@ class OpalClient:
         return client
 
     @classmethod
-    def buildWithAuthentication(cls, server, user, password):
+    def buildWithAuthentication(cls, server, user, password, otp):
         client = cls(server)
         if client.base_url.startswith('https:'):
             client.verify_peer(0)
             client.verify_host(0)
-        client.credentials(user, password)
+        client.credentials(user, password, otp)
         return client
 
     @classmethod
@@ -75,10 +75,13 @@ class OpalClient:
                 e = input(text + ': ')
         return e
 
-    def credentials(self, user, password):
+    def credentials(self, user, password, otp):
+        if otp:
+            val = input("Enter 6-digits code: ")
+            self.header('X-Opal-TOTP', val)
         u = self.__ensure_entry('User name', user)
         p = self.__ensure_entry('Password', password, True)
-        return self.header('Authorization', 'X-Opal-Auth ' + base64.b64encode((u + ':' + p).encode("utf-8")).decode("utf-8"))
+        return self.header('Authorization', 'Basic ' + base64.b64encode((u + ':' + p).encode("utf-8")).decode("utf-8"))
 
     def token(self, token):
         tk = self.__ensure_entry('Token', token, True)
@@ -130,6 +133,7 @@ class OpalClient:
             if argv.get('user') and argv.get('password'):
                 data['user'] = argv['user']
                 data['password'] = argv['password']
+                data['otp'] = argv['otp']
             elif argv.get('token'):
                 data['token'] = argv['token']
             elif argv.get('ssl_cert') and argv.get('ssl_key'):
