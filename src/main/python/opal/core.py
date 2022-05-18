@@ -76,11 +76,11 @@ class OpalClient:
         return e
 
     def credentials(self, user, password, otp):
+        u = self.__ensure_entry('User name', user)
+        p = self.__ensure_entry('Password', password, True)
         if otp:
             val = input("Enter 6-digits code: ")
             self.header('X-Opal-TOTP', val)
-        u = self.__ensure_entry('User name', user)
-        p = self.__ensure_entry('Password', password, True)
         return self.header('Authorization', 'Basic ' + base64.b64encode((u + ':' + p).encode("utf-8")).decode("utf-8"))
 
     def token(self, token):
