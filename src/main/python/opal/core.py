@@ -37,7 +37,6 @@ class OpalClient:
         else:
             return OpalClient.buildWithAuthentication(loginInfo.data['server'], loginInfo.data['user'],
                                                       loginInfo.data['password'], loginInfo.data['otp'])
-        raise Exception('Failed to build Opal Client')
 
     @classmethod
     def buildWithCertificate(cls, server, cert, key):
