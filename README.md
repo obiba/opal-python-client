@@ -1,4 +1,4 @@
-# Opal Python [![Build Status](https://travis-ci.org/obiba/opal-python-client.svg?branch=master)](https://travis-ci.org/obiba/opal-python-client)
+# Opal Python [![Build Status](https://app.travis-ci.com/obiba/opal-python-client.svg?branch=master)](https://app.travis-ci.com/github/obiba/opal-python-client)
 
 This Python-based command line tool allows to access to a Opal server through its REST API. This is the perfect tool
 for automating tasks in Opal. This will be the preferred client developed when new features are added to the REST API.
@@ -8,6 +8,12 @@ for automating tasks in Opal. This will be the preferred client developed when n
 * Continuous integration is on [Travis](https://travis-ci.org/obiba/opal-python-client).
 
 ## Usage
+
+Install with:
+
+```
+pip install obiba_opal
+```
 
 To get the options of the command line:
 

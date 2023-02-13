@@ -15,8 +15,8 @@ before_install:
 - pip install pytest
 install:
 - poetry install -v
+script:
 - poetry run pytest
-- poetry build
 before_deploy:
 - poetry config http-basic.pypi $PYPI_USER $PYPI_PASSWORD
 - poetry build
