@@ -12,7 +12,7 @@ for automating tasks in Opal. This will be the preferred client developed when n
 Install with:
 
 ```
-pip install obiba_opal
+pip install obiba-opal
 ```
 
 To get the options of the command line:
