@@ -2,12 +2,7 @@
 Get SQL execution history.
 """
 
-import json
-import opal.core
-import opal.io
-import re
-import sys
-import urllib.parse
+import obiba_opal.core as core
 
 
 def add_arguments(parser):
@@ -27,34 +22,25 @@ def do_command(args):
     """
 
     # Build and send request
-    try:
-        client = opal.core.OpalClient.build(opal.core.OpalClient.LoginInfo.parse(args))
-        if args.subject and args.subject != args.user:
-            builder = opal.core.UriBuilder(['system', 'subject-profile', args.subject, 'sql-history'])
-        else:
-            builder = opal.core.UriBuilder(['system', 'subject-profile', '_current', 'sql-history'])
-        if args.project:
-            builder.query('datasource', args.project)
-        if args.offset:
-            builder.query('offset', args.offset)
-        if args.limit:
-            builder.query('limit', args.limit)
-        uri = builder.build()
-        request = client.new_request()
-        if args.verbose:
-            request.verbose()
-        request.fail_on_error()
-        response = request.accept_json().get().resource(uri).send()
-        # output to stdout
-        if args.json:
-            print(response.pretty_json())
-        else:
-            print(response.content)
-
-    except Exception as e:
-        print(e)
-        sys.exit(2)
-    except pycurl.error as error:
-        errno, errstr = error
-        print('An error occurred: ', errstr, file=sys.stderr)
-        sys.exit(2)
+    client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
+    if args.subject and args.subject != args.user:
+        builder = core.UriBuilder(['system', 'subject-profile', args.subject, 'sql-history'])
+    else:
+        builder = core.UriBuilder(['system', 'subject-profile', '_current', 'sql-history'])
+    if args.project:
+        builder.query('datasource', args.project)
+    if args.offset:
+        builder.query('offset', args.offset)
+    if args.limit:
+        builder.query('limit', args.limit)
+    uri = builder.build()
+    request = client.new_request()
+    if args.verbose:
+        request.verbose()
+    request.fail_on_error()
+    response = request.accept_json().get().resource(uri).send()
+    # output to stdout
+    if args.json:
+        print(response.pretty_json())
+    else:
+        print(response.content)

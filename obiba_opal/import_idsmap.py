@@ -2,7 +2,7 @@
 Import identifiers mapping
 """
 
-import opal.core
+import obiba_opal.core as core
 import sys
 
 
@@ -20,27 +20,19 @@ def do_command(args):
     Execute import command
     """
     # Build and send request
-    try:
-        request = opal.core.OpalClient.build(opal.core.OpalClient.LoginInfo.parse(args)).new_request()
-        request.fail_on_error()
+    request = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args)).new_request()
+    request.fail_on_error()
 
-        if args.verbose:
-            request.verbose()
+    if args.verbose:
+        request.verbose()
 
-        request.content_type_text_plain()
-        print('Enter identifiers (one identifiers mapping per line, Ctrl-D to end input):')
-        request.content(sys.stdin.read())
+    request.content_type_text_plain()
+    print('Enter identifiers (one identifiers mapping per line, Ctrl-D to end input):')
+    request.content(sys.stdin.read())
 
-        # send request
-        builder = opal.core.UriBuilder(['identifiers', 'mapping', args.map, '_import']).query('type', args.type)
-        if args.separator:
-            builder.query('separator', args.separator)
-        uri = builder.build()
-        request.post().resource(uri).send()
-    except Exception as e:
-        print(e)
-        sys.exit(2)
-    except pycurl.error as error:
-        errno, errstr = error
-        print('An error occurred: ', errstr, file=sys.stderr)
-        sys.exit(2)
+    # send request
+    builder = core.UriBuilder(['identifiers', 'mapping', args.map, '_import']).query('type', args.type)
+    if args.separator:
+        builder.query('separator', args.separator)
+    uri = builder.build()
+    request.post().resource(uri).send()

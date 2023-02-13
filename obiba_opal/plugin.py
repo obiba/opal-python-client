@@ -2,8 +2,7 @@
 Opal plugin management.
 """
 
-import opal.core
-import pycurl
+import obiba_opal.core as core
 import sys
 
 
@@ -36,59 +35,50 @@ def do_command(args):
     Execute plugin command
     """
     # Build and send request
-    try:
-        request = opal.core.OpalClient.build(opal.core.OpalClient.LoginInfo.parse(args)).new_request()
-        request.fail_on_error().accept_json()
+    request = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args)).new_request()
+    request.fail_on_error().accept_json()
 
-        if args.verbose:
-            request.verbose()
+    if args.verbose:
+        request.verbose()
 
-        if args.list:
-            response = request.get().resource('/plugins').send()
-        elif args.updates:
-            response = request.get().resource('/plugins/_updates').send()
-        elif args.available:
-            response = request.get().resource('/plugins/_available').send()
-        elif args.install:
-            if args.install.startswith('/'):
-                response = request.post().resource('/plugins?file=' + args.install).send()
+    if args.list:
+        response = request.get().resource('/plugins').send()
+    elif args.updates:
+        response = request.get().resource('/plugins/_updates').send()
+    elif args.available:
+        response = request.get().resource('/plugins/_available').send()
+    elif args.install:
+        if args.install.startswith('/'):
+            response = request.post().resource('/plugins?file=' + args.install).send()
+        else:
+            nameVersion = args.install.split(':')
+            if len(nameVersion) == 1:
+                response = request.post().resource('/plugins?name=' + nameVersion[0]).send()
             else:
-                nameVersion = args.install.split(':')
-                if len(nameVersion) == 1:
-                    response = request.post().resource('/plugins?name=' + nameVersion[0]).send()
-                else:
-                    response = request.post().resource(
-                        '/plugins?name=' + nameVersion[0] + '&version=' + nameVersion[1]).send()
-        elif args.fetch:
-            response = request.get().resource('/plugin/' + args.fetch).send()
-        elif args.configure:
-            request.content_type_text_plain()
-            print('Enter plugin site properties (one property per line, Ctrl-D to end input):')
-            request.content(sys.stdin.read())
-            response = request.put().resource('/plugin/' + args.configure + '/cfg').send()
-        elif args.remove:
-            response = request.delete().resource('/plugin/' + args.remove).send()
-        elif args.reinstate:
-            response = request.put().resource('/plugin/' + args.reinstate).send()
-        elif args.status:
-            response = request.get().resource('/plugin/' + args.status + '/service').send()
-        elif args.start:
-            response = request.put().resource('/plugin/' + args.start + '/service').send()
-        elif args.stop:
-            response = request.delete().resource('/plugin/' + args.stop + '/service').send()
+                response = request.post().resource(
+                    '/plugins?name=' + nameVersion[0] + '&version=' + nameVersion[1]).send()
+    elif args.fetch:
+        response = request.get().resource('/plugin/' + args.fetch).send()
+    elif args.configure:
+        request.content_type_text_plain()
+        print('Enter plugin site properties (one property per line, Ctrl-D to end input):')
+        request.content(sys.stdin.read())
+        response = request.put().resource('/plugin/' + args.configure + '/cfg').send()
+    elif args.remove:
+        response = request.delete().resource('/plugin/' + args.remove).send()
+    elif args.reinstate:
+        response = request.put().resource('/plugin/' + args.reinstate).send()
+    elif args.status:
+        response = request.get().resource('/plugin/' + args.status + '/service').send()
+    elif args.start:
+        response = request.put().resource('/plugin/' + args.start + '/service').send()
+    elif args.stop:
+        response = request.delete().resource('/plugin/' + args.stop + '/service').send()
 
-        # format response
-        res = response.content
-        if args.json:
-            res = response.pretty_json()
+    # format response
+    res = response.content
+    if args.json:
+        res = response.pretty_json()
 
-        # output to stdout
-        print(res)
-    except Exception as e:
-        print(e, file=sys.stderr)
-        sys.exit(2)
-    except pycurl.error as error:
-        print(response)
-        errno, errstr = error
-        print('An error occurred: ', errstr, file=sys.stderr)
-        sys.exit(2)
+    # output to stdout
+    print(res)

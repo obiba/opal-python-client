@@ -6,11 +6,9 @@ Curl options http://curl.haxx.se/libcurl/c/curl_easy_setopt.html
 
 import base64
 import getpass
-import io
 import json
 import os.path
 import pycurl
-import sys
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -48,7 +46,7 @@ class OpalClient:
         return client
 
     @classmethod
-    def buildWithAuthentication(cls, server, user, password, otp):
+    def buildWithAuthentication(cls, server, user, password, otp=None):
         client = cls(server)
         if client.base_url.startswith('https:'):
             client.verify_peer(0)

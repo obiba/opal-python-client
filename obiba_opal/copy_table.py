@@ -2,9 +2,8 @@
 Data copy.
 """
 
-import opal.core
-import opal.io
-import sys
+import obiba_opal.core as core
+import obiba_opal.io as io
 
 
 def add_arguments(parser):
@@ -23,12 +22,12 @@ def add_arguments(parser):
 
 
 def retrieve_datasource_tables(args):
-    request = opal.core.OpalClient.build(opal.core.OpalClient.LoginInfo.parse(args)).new_request()
+    request = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args)).new_request()
     request.fail_on_error()
     if args.verbose:
         request.verbose()
     response = request.get().resource(
-        opal.core.UriBuilder(['datasource', args.project, 'tables']).build()).send().as_json()
+        core.UriBuilder(['datasource', args.project, 'tables']).build()).send().as_json()
 
     tables = []
     for table in response:
@@ -47,28 +46,19 @@ def do_command(args):
         tables = retrieve_datasource_tables(args)
 
     # Build and send request
-    try:
-        client = opal.core.OpalClient.build(opal.core.OpalClient.LoginInfo.parse(args))
-        copier = opal.io.OpalCopier.build(client=client, datasource=args.project, tables=tables,
-                                          destination=args.destination, name=args.name,
-                                          incremental=args.incremental, nulls=args.nulls,
-                                          verbose=args.verbose)
+    client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
+    copier = io.OpalCopier.build(client=client, datasource=args.project, tables=tables,
+                                        destination=args.destination, name=args.name,
+                                        incremental=args.incremental, nulls=args.nulls,
+                                        verbose=args.verbose)
 
-        # print result
-        response = copier.submit()
+    # print result
+    response = copier.submit()
 
-        # format response
-        res = response.content
-        if args.json:
-            res = response.pretty_json()
+    # format response
+    res = response.content
+    if args.json:
+        res = response.pretty_json()
 
-        # output to stdout
-        print(res)
-
-    except Exception as e:
-        print(e)
-        sys.exit(2)
-    except pycurl.error as error:
-        errno, errstr = error
-        print('An error occurred: ', errstr, file=sys.stderr)
-        sys.exit(2)
+    # output to stdout
+    print(res)

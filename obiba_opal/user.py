@@ -3,8 +3,7 @@ Opal user management.
 """
 
 import json
-import opal.core
-import sys
+import obiba_opal.core as core
 
 
 def add_arguments(parser):
@@ -40,7 +39,7 @@ def do_ws(args):
 
 
 def get_user_information(args):
-    request = opal.core.OpalClient.build(opal.core.OpalClient.LoginInfo.parse(args)).new_request()
+    request = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args)).new_request()
     request.fail_on_error()
     userInfo = request.get().resource(do_ws(args)).send().as_json()
     return userInfo
@@ -51,90 +50,82 @@ def do_command(args):
     Execute group command
     """
     # Build and send request
-    try:
-        request = opal.core.OpalClient.build(opal.core.OpalClient.LoginInfo.parse(args)).new_request()
-        request.fail_on_error()
+    request = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args)).new_request()
+    request.fail_on_error()
 
-        if args.verbose:
-            request.verbose()
+    if args.verbose:
+        request.verbose()
 
-        if args.fetch:
-            # send request
-            response = request.get().resource(do_ws(args)).send()
-        elif args.add:
-            if not args.name:
-                raise Exception('A user name is required.')
-            if not args.upassword and not args.ucertificate:
-                raise Exception('A user password or a certificate file is required.')
+    if args.fetch:
+        # send request
+        response = request.get().resource(do_ws(args)).send()
+    elif args.add:
+        if not args.name:
+            raise Exception('A user name is required.')
+        if not args.upassword and not args.ucertificate:
+            raise Exception('A user password or a certificate file is required.')
 
-            # create user
-            user = {'name': args.name}
-            if args.upassword:
-                if len(args.upassword) < 6:
-                    raise Exception('Password must contain at least 6 characters.')
-                user['authenticationType'] = 'PASSWORD'
-                user['password'] = args.upassword
-            else:
-                user['authenticationType'] = 'CERTIFICATE'
-                with open(args.ucertificate, 'rb') as cert:
-                    user['certificate'] = cert.read()
+        # create user
+        user = {'name': args.name}
+        if args.upassword:
+            if len(args.upassword) < 6:
+                raise Exception('Password must contain at least 6 characters.')
+            user['authenticationType'] = 'PASSWORD'
+            user['password'] = args.upassword
+        else:
+            user['authenticationType'] = 'CERTIFICATE'
+            with open(args.ucertificate, 'rb') as cert:
+                user['certificate'] = cert.read()
 
-            if args.disabled:
-                user.enabled = False
+        if args.disabled:
+            user.enabled = False
 
-            if args.groups:
-                user.groups.extend(args.groups)
+        if args.groups:
+            user.groups.extend(args.groups)
 
-            request.fail_on_error().accept_json().content_type_json()
-            response = request.post().resource(do_ws(args)).content(json.dumps(user)).send()
-        elif args.update:
-            if not args.name:
-                raise Exception('A user name is required.')
+        request.fail_on_error().accept_json().content_type_json()
+        response = request.post().resource(do_ws(args)).content(json.dumps(user)).send()
+    elif args.update:
+        if not args.name:
+            raise Exception('A user name is required.')
 
-            userInfo = get_user_information(args)
-            user = {'name': args.name}
+        userInfo = get_user_information(args)
+        user = {'name': args.name}
 
-            if args.upassword:
-                if userInfo['authenticationType'] == "CERTIFICATE":
-                    raise Exception("%s requires a certificate (public key) file" % user.name)
-                if len(args.upassword) < 6:
-                    raise Exception('Password must contain at least 6 characters.')
-                user['authenticationType'] = 'PASSWORD'
-                user['password'] = args.upassword
-            elif args.ucertificate:
-                if userInfo['authenticationType'] == "PASSWORD":
-                    raise Exception("%s requires a password" % user.name)
+        if args.upassword:
+            if userInfo['authenticationType'] == "CERTIFICATE":
+                raise Exception("%s requires a certificate (public key) file" % user.name)
+            if len(args.upassword) < 6:
+                raise Exception('Password must contain at least 6 characters.')
+            user['authenticationType'] = 'PASSWORD'
+            user['password'] = args.upassword
+        elif args.ucertificate:
+            if userInfo['authenticationType'] == "PASSWORD":
+                raise Exception("%s requires a password" % user.name)
 
-                user['authenticationType'] = 'CERTIFICATE'
-                with open(args.ucertificate, 'rb') as cert:
-                    user['certificate'] = cert.read()
-            else:
-                user['authenticationType'] = userInfo['authenticationType']
+            user['authenticationType'] = 'CERTIFICATE'
+            with open(args.ucertificate, 'rb') as cert:
+                user['certificate'] = cert.read()
+        else:
+            user['authenticationType'] = userInfo['authenticationType']
 
-            if args.disabled:
-                user['enabled'] = False
-            if args.groups:
-                user['groups'] = args.groups
+        if args.disabled:
+            user['enabled'] = False
+        if args.groups:
+            user['groups'] = args.groups
 
-            request.fail_on_error().accept_json().content_type_json()
-            response = request.put().resource(do_ws(args)).content(json.dumps(user)).send()
-        elif args.delete:
-            if not args.name:
-                raise Exception('A user name is required.')
+        request.fail_on_error().accept_json().content_type_json()
+        response = request.put().resource(do_ws(args)).content(json.dumps(user)).send()
+    elif args.delete:
+        if not args.name:
+            raise Exception('A user name is required.')
 
-            response = request.delete().resource(do_ws(args)).send()
+        response = request.delete().resource(do_ws(args)).send()
 
-        # format response
-        res = response.content
-        if args.json:
-            res = response.pretty_json()
+    # format response
+    res = response.content
+    if args.json:
+        res = response.pretty_json()
 
-        # output to stdout
-        print(res)
-    except Exception as e:
-        print(e)
-        sys.exit(2)
-    except pycurl.error as error:
-        errno, errstr = error
-        print('An error occurred: ', errstr, file=sys.stderr)
-        sys.exit(2)
+    # output to stdout
+    print(res)

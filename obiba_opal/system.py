@@ -2,8 +2,7 @@
 Opal system data
 """
 
-import opal.core
-import pycurl
+import obiba_opal.core as core
 import sys
 
 
@@ -44,32 +43,23 @@ def do_command(args):
     Execute SYSTEM command
     """
     # Build and send request
-    try:
-        request = opal.core.OpalClient.build(opal.core.OpalClient.LoginInfo.parse(args)).new_request()
-        request.fail_on_error()
+    request = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args)).new_request()
+    request.fail_on_error()
 
-        request.accept_json()
+    request.accept_json()
 
-        if args.verbose:
-            request.verbose()
+    if args.verbose:
+        request.verbose()
 
-        # send request
-        request.get().resource(do_ws(args))
-        response = request.send()
+    # send request
+    request.get().resource(do_ws(args))
+    response = request.send()
 
-        # format response
-        res = response.content
+    # format response
+    res = response.content
 
-        if args.json:
-            res = response.pretty_json()
+    if args.json:
+        res = response.pretty_json()
 
-        # output to stdout
-        print(res)
-
-    except Exception as e:
-        print(e)
-        sys.exit(2)
-    except pycurl.error as error:
-        errno, errstr = error
-        print('An error occurred: ', errstr, file=sys.stderr)
-        sys.exit(2)
+    # output to stdout
+    print(res)

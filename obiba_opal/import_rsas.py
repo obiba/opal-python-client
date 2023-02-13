@@ -2,9 +2,8 @@
 Opal SAS data import (Using R).
 """
 
-import opal.core
-import opal.io
-import sys
+import obiba_opal.core as core
+import obiba_opal.io as io
 
 
 def add_arguments(parser):
@@ -19,7 +18,7 @@ def add_arguments(parser):
                         help='SAS variable that provides the entity ID. If not specified, first variable values are considered to be the entity identifiers.')
 
     # non specific import arguments
-    opal.io.add_import_arguments(parser)
+    io.add_import_arguments(parser)
 
 
 def do_command(args):
@@ -27,39 +26,30 @@ def do_command(args):
     Execute import data command
     """
     # Build and send request
-    try:
-        # Check input filename extension
-        if not (args.path.endswith('.sas7bdat')) and not (args.path.endswith('.xpt')):
-            raise Exception('Input must be a SAS file (.sas7bdat or .xpt).')
+    # Check input filename extension
+    if not (args.path.endswith('.sas7bdat')) and not (args.path.endswith('.xpt')):
+        raise Exception('Input must be a SAS file (.sas7bdat or .xpt).')
 
-        client = opal.core.OpalClient.build(opal.core.OpalClient.LoginInfo.parse(args))
-        importer = opal.io.OpalImporter.build(client=client, destination=args.destination, tables=args.tables,
-                                              incremental=args.incremental, limit=args.limit,
-                                              identifiers=args.identifiers,
-                                              policy=args.policy, merge=args.merge, verbose=args.verbose)
-        # print result
-        extension_factory = OpalExtensionFactory(path=args.path,
-                                                 locale=args.locale, entityType=args.type, idVariable=args.idVariable)
+    client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
+    importer = io.OpalImporter.build(client=client, destination=args.destination, tables=args.tables,
+                                            incremental=args.incremental, limit=args.limit,
+                                            identifiers=args.identifiers,
+                                            policy=args.policy, merge=args.merge, verbose=args.verbose)
+    # print result
+    extension_factory = OpalExtensionFactory(path=args.path,
+                                                locale=args.locale, entityType=args.type, idVariable=args.idVariable)
 
-        response = importer.submit(extension_factory)
+    response = importer.submit(extension_factory)
 
-        # format response
-        res = response.content
-        if args.json:
-            res = response.pretty_json()
+    # format response
+    res = response.content
+    if args.json:
+        res = response.pretty_json()
 
-        # output to stdout
-        print(res)
-    except Exception as e:
-        print(e)
-        sys.exit(2)
-    except pycurl.error as error:
-        errno, errstr = error
-        print('An error occurred: ', errstr, file=sys.stderr)
-        sys.exit(2)
+    # output to stdout
+    print(res)
 
-
-class OpalExtensionFactory(opal.io.OpalImporter.ExtensionFactoryInterface):
+class OpalExtensionFactory(io.OpalImporter.ExtensionFactoryInterface):
     def __init__(self, path, locale, entityType, idVariable):
         self.path = path
         self.locale = locale

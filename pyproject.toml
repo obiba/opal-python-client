@@ -11,6 +11,8 @@ packages = [{include = "obiba_opal"}]
 python = "^3.7"
 pycurl = "^7.45.2"
 
+[tool.poetry.scripts]
+opal = 'obiba_opal.console:run'
 
 [build-system]
 requires = ["poetry-core"]

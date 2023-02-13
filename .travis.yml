@@ -1,26 +1,23 @@
-sudo: required
-language: java
-addons:
-  apt:
-    packages:
-    - rpm
-    - devscripts
-    - fakeroot
-    - debhelper
+language: python
+python:
+- '3.7'
+- '3.11'
+matrix:
+  include:
+  - python: 3.7
+    dist: xenial
+before_install:
+- pip install poetry
+- pip install pytest
+install:
+- poetry install -v
+- poetry run pytest
+before_deploy:
+- poetry config http-basic.pypi $PYPI_USER $PYPI_PASSWORD
+- poetry build
 deploy:
-  - provider: script
-    script: cp .travis.settings.xml $HOME/.m2/settings.xml && mvn -Prelease deploy
-    skip_cleanup: true
-    on:
-      all_branches: true
-      tags: true
-cache:
-  directories:
-  - $HOME/.cache
-  - $HOME/.m2
-notifications:
-  email:
-    recipients:
-    - dev@obiba.org
-    on_success: change
-    on_failure: always
+  provider: script
+  script: poetry publish
+  on:
+    tags: true
+    condition: "$TRAVIS_PYTHON_VERSION == 3.7"

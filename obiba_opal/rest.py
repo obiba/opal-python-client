@@ -39,7 +39,7 @@ Examples of Opal web services on which GET can be performed:
 """
 
 import ast
-import opal.core
+import obiba_opal.core as core
 import sys
 
 
@@ -63,45 +63,37 @@ def do_command(args):
     Execute REST command
     """
     # Build and send request
-    try:
-        request = opal.core.OpalClient.build(opal.core.OpalClient.LoginInfo.parse(args)).new_request()
-        request.fail_on_error()
+    request = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args)).new_request()
+    request.fail_on_error()
 
-        if args.accept:
-            request.accept(args.accept)
-        else:
-            request.accept_json()
+    if args.accept:
+        request.accept(args.accept)
+    else:
+        request.accept_json()
 
-        if args.content_type:
-            request.content_type(args.content_type)
-            print('Enter content:')
-            request.content(sys.stdin.read())
+    if args.content_type:
+        request.content_type(args.content_type)
+        print('Enter content:')
+        request.content(sys.stdin.read())
 
-        if args.headers:
-            headers = ast.literal_eval(args.headers)
-            for key in list(headers.keys()):
-                request.header(key, headers[key])
+    if args.headers:
+        headers = ast.literal_eval(args.headers)
+        for key in list(headers.keys()):
+            request.header(key, headers[key])
 
-        if args.verbose:
-            request.verbose()
+    if args.verbose:
+        request.verbose()
 
-        # send request
-        request.method(args.method).resource(args.ws)
-        response = request.send()
+    # send request
+    request.method(args.method).resource(args.ws)
+    response = request.send()
 
-        # format response
-        res = response.content
-        if args.json:
-            res = response.pretty_json()
-        elif args.method in ['OPTIONS']:
-            res = response.headers['Allow']
+    # format response
+    res = response.content
+    if args.json:
+        res = response.pretty_json()
+    elif args.method in ['OPTIONS']:
+        res = response.headers['Allow']
 
-        # output to stdout
-        print(res)
-    except Exception as e:
-        print(e)
-        sys.exit(2)
-    except pycurl.error as error:
-        errno, errstr = error
-        print('An error occurred: ', errstr, file=sys.stderr)
-        sys.exit(2)
+    # output to stdout
+    print(res)

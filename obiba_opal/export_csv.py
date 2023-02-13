@@ -2,9 +2,8 @@
 Data export in CSV.
 """
 
-import opal.core
-import opal.io
-import sys
+import obiba_opal.core as core
+import obiba_opal.io as io
 
 
 def add_arguments(parser):
@@ -27,27 +26,18 @@ def do_command(args):
     Execute export data command
     """
     # Build and send request
-    try:
-        client = opal.core.OpalClient.build(opal.core.OpalClient.LoginInfo.parse(args))
-        exporter = opal.io.OpalExporter.build(client=client, datasource=args.datasource, tables=args.tables, entityIdNames = args.id_name,
-                                              identifiers=args.identifiers, output=args.output,
-                                              incremental=args.incremental,
-                                              multilines=(not args.no_multilines), verbose=args.verbose)
-        # print result
-        response = exporter.submit('csv')
+    client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
+    exporter = io.OpalExporter.build(client=client, datasource=args.datasource, tables=args.tables, entityIdNames = args.id_name,
+                                            identifiers=args.identifiers, output=args.output,
+                                            incremental=args.incremental,
+                                            multilines=(not args.no_multilines), verbose=args.verbose)
+    # print result
+    response = exporter.submit('csv')
 
-        # format response
-        res = response.content
-        if args.json:
-            res = response.pretty_json()
+    # format response
+    res = response.content
+    if args.json:
+        res = response.pretty_json()
 
-        # output to stdout
-        print(res)
-
-    except Exception as e:
-        print(e)
-        sys.exit(2)
-    except pycurl.error as error:
-        errno, errstr = error
-        print('An error occurred: ', errstr, file=sys.stderr)
-        sys.exit(2)
+    # output to stdout
+    print(res)

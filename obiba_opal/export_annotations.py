@@ -5,7 +5,7 @@ Opal dictionary annotations extraction.
 import argparse
 import csv
 import json
-import opal.core
+import obiba_opal.core as core
 import sys
 
 
@@ -30,30 +30,22 @@ def do_command(args):
     Execute command
     """
     # Build and send request
-    try:
-        sep = csv_separator(args)
-        writer = csv.writer(args.output, delimiter=sep)
-        writer.writerow(['project', 'table', 'variable', 'namespace', 'name', 'value'])
-        handle_item(args, writer, args.name)
-    except Exception as e:
-        print(e)
-        sys.exit(2)
-    except pycurl.error as error:
-        errno, errstr = error
-        print('An error occurred: ', errstr, file=sys.stderr)
-        sys.exit(2)
+    sep = csv_separator(args)
+    writer = csv.writer(args.output, delimiter=sep)
+    writer.writerow(['project', 'table', 'variable', 'namespace', 'name', 'value'])
+    handle_item(args, writer, args.name)
 
 
 def handle_item(args, writer, name):
     # print 'Handling ' + name
-    request = opal.core.OpalClient.build(opal.core.OpalClient.LoginInfo.parse(args)).new_request()
+    request = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args)).new_request()
     request.fail_on_error().accept_json()
 
     if args.verbose:
         request.verbose()
 
     # send request
-    resolver = opal.core.MagmaNameResolver(name)
+    resolver = core.MagmaNameResolver(name)
     request.get().resource(resolver.get_ws())
     response = request.send()
 

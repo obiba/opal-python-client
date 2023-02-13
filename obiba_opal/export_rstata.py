@@ -2,8 +2,8 @@
 Data export in SAS (using R).
 """
 
-import opal.core
-import opal.io
+import obiba_opal.core as core
+import obiba_opal.io as io
 import sys
 
 
@@ -26,30 +26,21 @@ def do_command(args):
     Execute export data command
     """
     # Build and send request
-    try:
-        # Check output filename extension
-        if not (args.output.endswith('.dta')):
-            raise Exception('Output must be a Stata file (.dta).')
+    # Check output filename extension
+    if not (args.output.endswith('.dta')):
+        raise Exception('Output must be a Stata file (.dta).')
 
-        client = opal.core.OpalClient.build(opal.core.OpalClient.LoginInfo.parse(args))
-        exporter = opal.io.OpalExporter.build(client=client, datasource=args.datasource, tables=args.tables, entityIdNames = args.id_name,
-                                              identifiers=args.identifiers, output=args.output, incremental=False,
-                                              multilines=(not args.no_multilines), verbose=args.verbose)
-        # print result
-        response = exporter.submit('RSTATA')
+    client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
+    exporter = io.OpalExporter.build(client=client, datasource=args.datasource, tables=args.tables, entityIdNames = args.id_name,
+                                            identifiers=args.identifiers, output=args.output, incremental=False,
+                                            multilines=(not args.no_multilines), verbose=args.verbose)
+    # print result
+    response = exporter.submit('RSTATA')
 
-        # format response
-        res = response.content
-        if args.json:
-            res = response.pretty_json()
+    # format response
+    res = response.content
+    if args.json:
+        res = response.pretty_json()
 
-        # output to stdout
-        print(res)
-
-    except Exception as e:
-        print(e)
-        sys.exit(2)
-    except pycurl.error as error:
-        errno, errstr = error
-        print('An error occurred: ', errstr, file=sys.stderr)
-        sys.exit(2)
+    # output to stdout
+    print(res)

@@ -2,9 +2,8 @@
 Apply system permissions.
 """
 
-import opal.core
-import opal.perm
-import sys
+import obiba_opal.core as core
+import obiba_opal.perm as perm
 
 PERMISSIONS = {
     'add-project': 'PROJECT_ADD',
@@ -16,7 +15,7 @@ def add_arguments(parser):
     """
     Add command specific options
     """
-    opal.perm.add_permission_arguments(parser, list(PERMISSIONS.keys()))
+    perm.add_permission_arguments(parser, list(PERMISSIONS.keys()))
 
 
 def do_command(args):
@@ -24,35 +23,22 @@ def do_command(args):
     Execute permission command
     """
     # Build and send requests
-    try:
-        opal.perm.validate_args(args, PERMISSIONS)
+    perm.validate_args(args, PERMISSIONS)
 
-        request = opal.core.OpalClient.build(opal.core.OpalClient.LoginInfo.parse(args)).new_request()
+    request = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args)).new_request()
 
-        if args.verbose:
-            request.verbose()
+    if args.verbose:
+        request.verbose()
 
-        # send request
-        if args.delete:
-            request.delete()
-        else:
-            request.post()
+    # send request
+    if args.delete:
+        request.delete()
+    else:
+        request.post()
 
-        try:
-            response = request.resource(
-                opal.perm.do_ws(args, ['system', 'permissions', 'administration'], PERMISSIONS)).send()
-        except Exception as e:
-            print(Exception, e)
+    response = request.resource(
+        perm.do_ws(args, ['system', 'permissions', 'administration'], PERMISSIONS)).send()
 
-        # format response
-        if response.code != 200:
-            print(response.content)
-
-    except Exception as e:
-        print(e)
-        sys.exit(2)
-
-    except pycurl.error as error:
-        errno, errstr = error
-        print('An error occurred: ', errstr, file=sys.stderr)
-        sys.exit(2)
+    # format response
+    if response.code != 200:
+        print(response.content)

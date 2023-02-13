@@ -3,9 +3,7 @@ Opal analysis plugin.
 """
 
 import json
-import opal.core
-import opal.io
-import sys
+import obiba_opal.core as core
 
 
 def do_ws(args):
@@ -30,20 +28,10 @@ def do_command(args):
     Execute analysis
     """
     # Build and send request
-    try:
-        dto = OpalAnalysisDtoFactory.create(args.project, args.config)
-        request = opal.core.OpalClient.build(opal.core.OpalClient.LoginInfo.parse(args)).new_request()
-        request.fail_on_error().accept_json().content_type_json()
-        request.post().resource(do_ws(args)).content(json.dumps(dto)).send()
-
-    except Exception as e:
-        print(e)
-        sys.exit(2)
-    except pycurl.error as error:
-        errno, errstr = error
-        print('An error occurred: ', errstr, file=sys.stderr)
-        sys.exit(2)
-
+    dto = OpalAnalysisDtoFactory.create(args.project, args.config)
+    request = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args)).new_request()
+    request.fail_on_error().accept_json().content_type_json()
+    request.post().resource(do_ws(args)).content(json.dumps(dto)).send()
 
 class OpalAnalysisDtoFactory():
 

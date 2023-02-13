@@ -2,7 +2,7 @@
 Opal permissions
 """
 
-import opal.core
+import obiba_opal.core as core
 
 SUBJECT_TYPES = ('USER', 'GROUP')
 
@@ -50,14 +50,14 @@ def do_ws(args, path, permissions):
     Build the web service resource path
     """
     if args.add:
-        return opal.core.UriBuilder(path) \
+        return core.UriBuilder(path) \
             .query('type', args.type.upper()) \
             .query('permission', map_permission(args.permission, permissions)) \
             .query('principal', args.subject) \
             .build()
 
     if args.delete:
-        return opal.core.UriBuilder(path) \
+        return core.UriBuilder(path) \
             .query('type', args.type.upper()) \
             .query('principal', args.subject) \
             .build()

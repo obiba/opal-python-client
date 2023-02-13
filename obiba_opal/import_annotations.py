@@ -4,7 +4,7 @@ Opal dictionary annotations extraction.
 
 import argparse
 import csv
-import opal.core
+import obiba_opal.core as core
 import pprint
 import sys
 import urllib.error
@@ -36,36 +36,27 @@ def do_command(args):
     Execute command
     """
     # Build and send request
-    try:
-        sep = csv_separator(args)
-        reader = csv.reader(args.input, delimiter=sep)
-        next(reader)  # skip header
-        value_map = {}
-        for row in reader:
-            append_row(value_map, row, tables=args.tables, taxonomies=args.taxonomies)
-        if args.verbose:
-            pp = pprint.PrettyPrinter(indent=2)
-            pp.pprint(value_map)
-        for datasource in value_map:
-            for table in value_map[datasource]:
-                if not args.tables or table in args.tables:
-                    for namespace in value_map[datasource][table]:
-                        for name in value_map[datasource][table][namespace]:
-                            for value in value_map[datasource][table][namespace][name]:
-                                ds = args.destination if args.destination else datasource
-                                variables = value_map[datasource][table][namespace][name][value]
-                                annotate(args, ds, table, namespace, name, value, variables)
-    except Exception as e:
-        print(e)
-        sys.exit(2)
-    except pycurl.error as error:
-        errno, errstr = error
-        print('An error occurred: ', errstr, file=sys.stderr)
-        sys.exit(2)
-
+    sep = csv_separator(args)
+    reader = csv.reader(args.input, delimiter=sep)
+    next(reader)  # skip header
+    value_map = {}
+    for row in reader:
+        append_row(value_map, row, tables=args.tables, taxonomies=args.taxonomies)
+    if args.verbose:
+        pp = pprint.PrettyPrinter(indent=2)
+        pp.pprint(value_map)
+    for datasource in value_map:
+        for table in value_map[datasource]:
+            if not args.tables or table in args.tables:
+                for namespace in value_map[datasource][table]:
+                    for name in value_map[datasource][table][namespace]:
+                        for value in value_map[datasource][table][namespace][name]:
+                            ds = args.destination if args.destination else datasource
+                            variables = value_map[datasource][table][namespace][name][value]
+                            annotate(args, ds, table, namespace, name, value, variables)
 
 def annotate(args, datasource, table, namespace, name, value, variables):
-    request = opal.core.OpalClient.build(opal.core.OpalClient.LoginInfo.parse(args)).new_request()
+    request = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args)).new_request()
     request.fail_on_error().accept_json()
     params = {'namespace': namespace, 'name': name, 'value': value}
 

@@ -2,9 +2,7 @@
 Opal Export analysis plugin.
 """
 
-import opal.core
-import opal.io
-import sys
+import obiba_opal.core as core
 
 
 def do_ws(args):
@@ -39,16 +37,7 @@ def do_command(args):
     Execute export analysis command
     """
     # Build and send request
-    try:
-        request = opal.core.OpalClient.build(opal.core.OpalClient.LoginInfo.parse(args)).new_request()
-        request.fail_on_error().accept("application/zip")
-        response = request.get().resource(do_ws(args)).send()
-        print(response.content)
-
-    except Exception as e:
-        print(e, file=sys.stderr)
-        sys.exit(2)
-    except pycurl.error as error:
-        errno, errstr = error
-        print('An error occurred: ', errstr, file=sys.stderr)
-        sys.exit(2)
+    request = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args)).new_request()
+    request.fail_on_error().accept("application/zip")
+    response = request.get().resource(do_ws(args)).send()
+    print(response.content)

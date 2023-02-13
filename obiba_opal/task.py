@@ -3,7 +3,7 @@ Manage a task: show, status, wait, cancel, delete.
 """
 
 import json
-import opal.core
+import obiba_opal.core as core
 import sys
 import time
 
@@ -23,7 +23,7 @@ def add_arguments(parser):
 
 
 def new_request(args):
-    request = opal.core.OpalClient.build(opal.core.OpalClient.LoginInfo.parse(args)).new_request()
+    request = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args)).new_request()
     request.fail_on_error()
     request.accept_json()
     if args.verbose:
@@ -79,29 +79,20 @@ def do_command(args):
     Execute task command
     """
     # Build and send request
-    try:
-        # Extract task identifier from stdin: can be the ID or the task in JSON
-        if not args.id:
-            id = sys.stdin.read().strip('\n')
-            if id.startswith('{'):
-                id = str(json.loads(id)['id'])
-            args.id = id
+    # Extract task identifier from stdin: can be the ID or the task in JSON
+    if not args.id:
+        id = sys.stdin.read().strip('\n')
+        if id.startswith('{'):
+            id = str(json.loads(id)['id'])
+        args.id = id
 
-        if args.show or not (args.show or args.wait or args.status or args.cancel or args.delete):
-            show_task(args)
-        if args.wait:
-            wait_task(args)
-        if args.status:
-            print(get_task(args)['status'])
-        if args.cancel:
-            cancel_task(args)
-        if args.delete:
-            delete_task(args)
-
-    except Exception as e:
-        print(e)
-        sys.exit(2)
-    except pycurl.error as error:
-        errno, errstr = error
-        print('An error occurred: ', errstr, file=sys.stderr)
-        sys.exit(2)
+    if args.show or not (args.show or args.wait or args.status or args.cancel or args.delete):
+        show_task(args)
+    if args.wait:
+        wait_task(args)
+    if args.status:
+        print(get_task(args)['status'])
+    if args.cancel:
+        cancel_task(args)
+    if args.delete:
+        delete_task(args)

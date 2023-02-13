@@ -3,7 +3,7 @@ Opal data importer
 """
 
 import json
-import opal.core
+import obiba_opal.core as core
 import re
 
 
@@ -96,7 +96,7 @@ class OpalImporter:
             print(options)
             print("**")
 
-        uri = opal.core.UriBuilder(['project', self.destination, 'commands', '_import']).build()
+        uri = core.UriBuilder(['project', self.destination, 'commands', '_import']).build()
         response = request.post().resource(uri).content(json.dumps(options)).send()
 
         # get job status
@@ -156,7 +156,7 @@ class OpalImporter:
         mergeStr = 'false'
         if self.merge:
             mergeStr = 'true'
-        uri = opal.core.UriBuilder(['project', self.destination, 'transient-datasources']).query('merge',
+        uri = core.UriBuilder(['project', self.destination, 'transient-datasources']).query('merge',
                                                                                                  mergeStr).build()
         response = request.post().resource(uri).content(json.dumps(factory)).send()
         transient = json.loads(response.content)
@@ -169,7 +169,7 @@ class OpalImporter:
 
     def compare_datasource(self, transient):
         # Compare datasources : /datasource/<transient_name>/compare/<ds_name>
-        uri = opal.core.UriBuilder(['datasource',
+        uri = core.UriBuilder(['datasource',
                                     transient['name'].encode('ascii', 'ignore'),
                                     'compare', self.destination]).build()
         request = self.client.new_request()
@@ -246,7 +246,7 @@ class OpalExporter:
         if self.verbose:
             request.verbose()
 
-        uri = opal.core.UriBuilder(['project', self.datasource, 'commands', '_export']).build()
+        uri = core.UriBuilder(['project', self.datasource, 'commands', '_export']).build()
         response = request.post().resource(uri).content(json.dumps(options)).send()
 
         # get job status
@@ -314,7 +314,7 @@ class OpalCopier:
         if self.verbose:
             request.verbose()
 
-        uri = opal.core.UriBuilder(['project', self.datasource, 'commands', '_copy']).build()
+        uri = core.UriBuilder(['project', self.datasource, 'commands', '_copy']).build()
         response = request.post().resource(uri).content(json.dumps(options)).send()
 
         # get job status

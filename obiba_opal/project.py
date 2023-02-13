@@ -3,7 +3,7 @@ Opal project management.
 """
 
 import json
-import opal.core
+import obiba_opal.core as core
 import sys
 
 
@@ -32,66 +32,57 @@ def do_command(args):
     Execute command
     """
     # Build and send request
-    try:
-        request = opal.core.OpalClient.build(opal.core.OpalClient.LoginInfo.parse(args)).new_request()
-        request.fail_on_error()
+    request = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args)).new_request()
+    request.fail_on_error()
 
-        if args.verbose:
-            request.verbose()
+    if args.verbose:
+        request.verbose()
 
-        if args.add:
-            if not args.name:
-                raise Exception('A project name is required.')
-            # create project
-            project = {'name': args.name}
-            if args.database:
-                project['database'] = args.database
-            if args.title:
-                project['title'] = args.title
-            else:
-                project['title'] = args.name
-            if args.description:
-                project['description'] = args.description
-            if args.tags:
-                project['tags'] = args.tags
-            if args.export_folder:
-                project['exportFolder'] = args.export_folder
-            request.fail_on_error().accept_json().content_type_json()
-            request.post().resource(opal.core.UriBuilder(['projects']).build()).content(json.dumps(project)).send()
-        elif args.delete:
-            if not args.name:
-                raise Exception('A project name is required.')
-            # confirm
-            if args.force:
-                request.delete().resource(opal.core.UriBuilder(['project', args.name]).build()).send()
-            else:
-                confirmed = input('Delete the project "' + args.name + '"? [y/N]: ')
-                if confirmed == 'y':
-                    request.delete().resource(opal.core.UriBuilder(['project', args.name]).build()).send()
-                else:
-                    print('Aborted.')
-                    sys.exit(0)
-        elif not args.name:
-            response = request.get().resource(opal.core.UriBuilder(['projects']).build()).send()
-            # format response
-            res = response.content
-            if args.json:
-                res = response.pretty_json()
-            # output to stdout
-            print(res)
+    if args.add:
+        if not args.name:
+            raise Exception('A project name is required.')
+        # create project
+        project = {'name': args.name}
+        if args.database:
+            project['database'] = args.database
+        if args.title:
+            project['title'] = args.title
         else:
-            response = request.get().resource(opal.core.UriBuilder(['project', args.name]).build()).send()
-            # format response
-            res = response.content
-            if args.json:
-                res = response.pretty_json()
-            # output to stdout
-            print(res)
-
-    except Exception as e:
-        print(e)
-        sys.exit(2)
-    except pycurl.error as error:
-        errno, errstr = error
-        print('An error occurred: ', errstr, file=sys.stderr)
-        sys.exit(2)
+            project['title'] = args.name
+        if args.description:
+            project['description'] = args.description
+        if args.tags:
+            project['tags'] = args.tags
+        if args.export_folder:
+            project['exportFolder'] = args.export_folder
+        request.fail_on_error().accept_json().content_type_json()
+        request.post().resource(core.UriBuilder(['projects']).build()).content(json.dumps(project)).send()
+    elif args.delete:
+        if not args.name:
+            raise Exception('A project name is required.')
+        # confirm
+        if args.force:
+            request.delete().resource(core.UriBuilder(['project', args.name]).build()).send()
+        else:
+            confirmed = input('Delete the project "' + args.name + '"? [y/N]: ')
+            if confirmed == 'y':
+                request.delete().resource(core.UriBuilder(['project', args.name]).build()).send()
+            else:
+                print('Aborted.')
+                sys.exit(0)
+    elif not args.name:
+        response = request.get().resource(core.UriBuilder(['projects']).build()).send()
+        # format response
+        res = response.content
+        if args.json:
+            res = response.pretty_json()
+        # output to stdout
+        print(res)
+    else:
+        response = request.get().resource(core.UriBuilder(['project', args.name]).build()).send()
+        # format response
+        res = response.content
+        if args.json:
+            res = response.pretty_json()
+        # output to stdout
+        print(res)

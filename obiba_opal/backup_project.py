@@ -3,10 +3,8 @@ Backup a project: launch a backup task.
 """
 
 import json
-import opal.core
-import opal.io
+import obiba_opal.core as core
 import re
-import sys
 
 
 def add_arguments(parser):
@@ -27,46 +25,37 @@ def do_command(args):
     """
 
     # Build and send request
-    try:
-        # backup options
-        options = {'archive': args.archive}
-        if args.views_as_tables:
-            options['viewsAsTables'] = args.views_as_tables
-        if args.force:
-            options['override'] = args.force
+    # backup options
+    options = {'archive': args.archive}
+    if args.views_as_tables:
+        options['viewsAsTables'] = args.views_as_tables
+    if args.force:
+        options['override'] = args.force
 
-        client = opal.core.OpalClient.build(opal.core.OpalClient.LoginInfo.parse(args))
-        uri = opal.core.UriBuilder(['project', args.project, 'commands', '_backup']).build()
-        request = client.new_request()
-        request.fail_on_error().accept_json().content_type_json()
-        if args.verbose:
-            request.verbose()
-        response = request.post().resource(uri).content(json.dumps(options)).send()
+    client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
+    uri = core.UriBuilder(['project', args.project, 'commands', '_backup']).build()
+    request = client.new_request()
+    request.fail_on_error().accept_json().content_type_json()
+    if args.verbose:
+        request.verbose()
+    response = request.post().resource(uri).content(json.dumps(options)).send()
 
-        # get job status
-        location = None
-        if 'Location' in response.headers:
-            location = response.headers['Location']
-        elif 'location' in response.headers:
-            location = response.headers['location']
-        job_resource = re.sub(r'http.*\/ws', r'', location)
-        request = client.new_request()
-        request.fail_on_error().accept_json()
-        if args.verbose:
-            request.verbose()
-        response = request.get().resource(job_resource).send()
-        # format response
-        res = response.content
-        if args.json:
-            res = response.pretty_json()
+    # get job status
+    location = None
+    if 'Location' in response.headers:
+        location = response.headers['Location']
+    elif 'location' in response.headers:
+        location = response.headers['location']
+    job_resource = re.sub(r'http.*\/ws', r'', location)
+    request = client.new_request()
+    request.fail_on_error().accept_json()
+    if args.verbose:
+        request.verbose()
+    response = request.get().resource(job_resource).send()
+    # format response
+    res = response.content
+    if args.json:
+        res = response.pretty_json()
 
-        # output to stdout
-        print(res)
-
-    except Exception as e:
-        print(e)
-        sys.exit(2)
-    except pycurl.error as error:
-        errno, errstr = error
-        print('An error occurred: ', errstr, file=sys.stderr)
-        sys.exit(2)
+    # output to stdout
+    print(res)

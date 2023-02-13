@@ -2,9 +2,8 @@
 Opal CSV data import.
 """
 
-import opal.core
-import opal.io
-import sys
+import obiba_opal.core as core
+import obiba_opal.io as io
 
 
 def add_arguments(parser):
@@ -21,7 +20,7 @@ def add_arguments(parser):
     parser.add_argument('--type', '-ty', required=True, help='Entity type (e.g. Participant)')
 
     # non specific import arguments
-    opal.io.add_import_arguments(parser)
+    io.add_import_arguments(parser)
 
 
 def do_command(args):
@@ -29,39 +28,31 @@ def do_command(args):
     Execute import data command
     """
     # Build and send request
-    try:
-        client = opal.core.OpalClient.build(opal.core.OpalClient.LoginInfo.parse(args))
-        importer = opal.io.OpalImporter.build(client=client, destination=args.destination, tables=args.tables,
-                                              incremental=args.incremental, limit=args.limit,
-                                              identifiers=args.identifiers,
-                                              policy=args.policy, merge=args.merge, verbose=args.verbose)
-        # print result
-        extension_factory = OpalExtensionFactory(characterSet=args.characterSet, separator=args.separator,
-                                                 quote=args.quote,
-                                                 firstRow=args.firstRow, path=args.path, valueType=args.valueType,
-                                                 type=args.type,
-                                                 tables=args.tables,
-                                                 destination=args.destination)
+    client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
+    importer = io.OpalImporter.build(client=client, destination=args.destination, tables=args.tables,
+                                            incremental=args.incremental, limit=args.limit,
+                                            identifiers=args.identifiers,
+                                            policy=args.policy, merge=args.merge, verbose=args.verbose)
+    # print result
+    extension_factory = OpalExtensionFactory(characterSet=args.characterSet, separator=args.separator,
+                                                quote=args.quote,
+                                                firstRow=args.firstRow, path=args.path, valueType=args.valueType,
+                                                type=args.type,
+                                                tables=args.tables,
+                                                destination=args.destination)
 
-        response = importer.submit(extension_factory)
+    response = importer.submit(extension_factory)
 
-        # format response
-        res = response.content
-        if args.json:
-            res = response.pretty_json()
+    # format response
+    res = response.content
+    if args.json:
+        res = response.pretty_json()
 
-        # output to stdout
-        print(res)
-    except Exception as e:
-        print(e)
-        sys.exit(2)
-    except pycurl.error as error:
-        errno, errstr = error
-        print('An error occurred: ', errstr, file=sys.stderr)
-        sys.exit(2)
+    # output to stdout
+    print(res)
 
 
-class OpalExtensionFactory(opal.io.OpalImporter.ExtensionFactoryInterface):
+class OpalExtensionFactory(io.OpalImporter.ExtensionFactoryInterface):
     def __init__(self, characterSet, separator, quote, firstRow, path, valueType, type, tables, destination):
         self.characterSet = characterSet
         self.separator = separator

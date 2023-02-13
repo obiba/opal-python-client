@@ -2,10 +2,8 @@
 Restore views of a project: upload view's JSON representation and make it a view.
 """
 
-import opal.core
-import opal.io
+import obiba_opal.core as core
 import os
-import sys
 import zipfile
 
 
@@ -23,12 +21,12 @@ def add_arguments(parser):
 
 
 def retrieve_datasource_views(args):
-    request = opal.core.OpalClient.build(opal.core.OpalClient.LoginInfo.parse(args)).new_request()
+    request = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args)).new_request()
     request.fail_on_error()
     if args.verbose:
         request.verbose()
     response = request.get().resource(
-        opal.core.UriBuilder(['datasource', args.project, 'tables']).build()).send().as_json()
+        core.UriBuilder(['datasource', args.project, 'tables']).build()).send().as_json()
 
     views = []
     for table in response:
@@ -51,7 +49,7 @@ def restore_view(args, obsviews, infile):
     if dowrite:
         print('Restore of', view, 'from', infile, '...')
 
-        request = opal.core.OpalClient.build(opal.core.OpalClient.LoginInfo.parse(args)).new_request()
+        request = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args)).new_request()
         request.fail_on_error()
         with open(infile, 'r') as inf:
             request.content(inf.read())
@@ -59,11 +57,11 @@ def restore_view(args, obsviews, infile):
 
         if view in obsviews:
             request.put().resource(
-                opal.core.UriBuilder(['datasource', args.project, 'view', view]).query('comment',
+                core.UriBuilder(['datasource', args.project, 'view', view]).query('comment',
                                                                                        'restore-view').build()).send()
         else:
             request.post().resource(
-                opal.core.UriBuilder(['datasource', args.project, 'views']).query('comment',
+                core.UriBuilder(['datasource', args.project, 'views']).query('comment',
                                                                                   'restore-view').build()).send()
 
 
@@ -80,18 +78,18 @@ def restore_zipped_view(args, obsviews, infile, zippedinput):
     if dowrite:
         print('Restore of', view, 'from', infile, '...')
 
-        request = opal.core.OpalClient.build(opal.core.OpalClient.LoginInfo.parse(args)).new_request()
+        request = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args)).new_request()
         request.fail_on_error()
         request.content(zippedinput.read(infile))
         request.content_type_json()
 
         if view in obsviews:
             request.put().resource(
-                opal.core.UriBuilder(['datasource', args.project, 'view', view]).query('comment',
+                core.UriBuilder(['datasource', args.project, 'view', view]).query('comment',
                                                                                        'restore-view').build()).send()
         else:
             request.post().resource(
-                opal.core.UriBuilder(['datasource', args.project, 'views']).query('comment',
+                core.UriBuilder(['datasource', args.project, 'views']).query('comment',
                                                                                   'restore-view').build()).send()
 
 
@@ -111,31 +109,22 @@ def do_command(args):
     """
 
     # Build and send request
-    try:
-        views = args.views
-        obsviews = retrieve_datasource_views(args)
+    views = args.views
+    obsviews = retrieve_datasource_views(args)
 
-        # list input directory content
-        indir = args.input
-        if not indir:
-            indir = os.getcwd()
-        else:
-            indir = os.path.normpath(indir)
-        print('Input directory is', indir)
+    # list input directory content
+    indir = args.input
+    if not indir:
+        indir = os.getcwd()
+    else:
+        indir = os.path.normpath(indir)
+    print('Input directory is', indir)
 
-        if indir.endswith('.zip'):
-            with zipfile.ZipFile(indir, 'r') as inzip:
-                for viewfile in [filename for filename in inzip.namelist() if
-                                 filename.endswith('.json') and (not views or filename[:-5] in views)]:
-                    restore_zipped_view(args, obsviews, viewfile, inzip)
-        else:
-            for viewfile in list_json_files(indir, views):
-                restore_view(args, obsviews, viewfile)
-
-    except Exception as e:
-        print(e)
-        sys.exit(2)
-    except pycurl.error as error:
-        errno, errstr = error
-        print('An error occurred: ', errstr, file=sys.stderr)
-        sys.exit(2)
+    if indir.endswith('.zip'):
+        with zipfile.ZipFile(indir, 'r') as inzip:
+            for viewfile in [filename for filename in inzip.namelist() if
+                                filename.endswith('.json') and (not views or filename[:-5] in views)]:
+                restore_zipped_view(args, obsviews, viewfile, inzip)
+    else:
+        for viewfile in list_json_files(indir, views):
+            restore_view(args, obsviews, viewfile)

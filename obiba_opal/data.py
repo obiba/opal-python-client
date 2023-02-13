@@ -2,7 +2,7 @@
 Opal data.
 """
 
-import opal.core
+import obiba_opal.core as core
 import sys
 import os
 
@@ -24,7 +24,7 @@ def do_ws(args):
     """
     Build the web service resource path
     """
-    resolver = opal.core.MagmaNameResolver(args.name)
+    resolver = core.MagmaNameResolver(args.name)
     ws = resolver.get_table_ws()
     if args.id:
         ws = ws + '/valueSet/' + args.id
@@ -44,32 +44,24 @@ def do_command(args):
     Execute data command
     """
     # Build and send request
-    try:
-        request = opal.core.OpalClient.build(opal.core.OpalClient.LoginInfo.parse(args)).new_request()
-        request.fail_on_error()
+    request = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args)).new_request()
+    request.fail_on_error()
 
-        if args.verbose:
-            request.verbose()
+    if args.verbose:
+        request.verbose()
 
-        # send request
-        if args.raw:
-            fp = os.fdopen(sys.stdout.fileno(), 'wb')
-            response = request.get().resource(do_ws(args)).accept('*/*').send(fp)
-            fp.flush()
-        else:
-            response = request.get().resource(do_ws(args)).send()
+    # send request
+    if args.raw:
+        fp = os.fdopen(sys.stdout.fileno(), 'wb')
+        response = request.get().resource(do_ws(args)).accept('*/*').send(fp)
+        fp.flush()
+    else:
+        response = request.get().resource(do_ws(args)).send()
 
-            # format response
-            res = response.content
-            if args.json:
-                res = response.pretty_json()
+        # format response
+        res = response.content
+        if args.json:
+            res = response.pretty_json()
 
-            # output to stdout
-            print(res)
-    except Exception as e:
-        print(e)
-        sys.exit(2)
-    except pycurl.error as error:
-        errno, errstr = error
-        print('An error occurred: ', errstr, file=sys.stderr)
-        sys.exit(2)
+        # output to stdout
+        print(res)
