@@ -16,6 +16,7 @@ before_install:
 install:
 - poetry install -v
 - poetry run pytest
+- poetry build
 before_deploy:
 - poetry config http-basic.pypi $PYPI_USER $PYPI_PASSWORD
 - poetry build
@@ -25,3 +26,9 @@ deploy:
   on:
     tags: true
     condition: "$TRAVIS_PYTHON_VERSION == 3.7"
+notifications:
+  email:
+    recipients:
+    - dev@obiba.org
+    on_success: change
+    on_failure: always
