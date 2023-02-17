@@ -1,11 +1,18 @@
 [tool.poetry]
 name = "obiba-opal"
-version = "5.0.1"
+version = "5.0.2"
 description = "OBiBa/Opal python client."
 authors = ["Yannick Marcon <yannick.marcon@obiba.org>"]
+maintainers = ["Yannick Marcon <yannick.marcon@obiba.org>"]
 license = "GPL-v3"
 readme = "README.md"
 packages = [{include = "obiba_opal"}]
+homepage = "https://www.obiba.org"
+repository = "https://github.com/obiba/opal-python-client"
+documentation = "https://opaldoc.obiba.org/en/latest/python-user-guide/"
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/obiba/opal-python-client/issues"
 
 [tool.poetry.dependencies]
 python = "^3.7"
