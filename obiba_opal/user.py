@@ -41,7 +41,7 @@ def do_ws(args):
 def get_user_information(args):
     request = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args)).new_request()
     request.fail_on_error()
-    userInfo = request.get().resource(do_ws(args)).send().as_json()
+    userInfo = request.get().resource(do_ws(args)).send().from_json()
     return userInfo
 
 

@@ -27,7 +27,7 @@ def retrieve_datasource_tables(args):
     if args.verbose:
         request.verbose()
     response = request.get().resource(
-        core.UriBuilder(['datasource', args.project, 'tables']).build()).send().as_json()
+        core.UriBuilder(['datasource', args.project, 'tables']).build()).send().from_json()
 
     tables = []
     for table in response:

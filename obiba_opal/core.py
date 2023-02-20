@@ -4,10 +4,11 @@ See also http://www.angryobjects.com/2011/10/15/http-with-python-pycurl-by-examp
 Curl options http://curl.haxx.se/libcurl/c/curl_easy_setopt.html
 """
 
+import random
 import base64
 import getpass
 import json
-import os.path
+import os
 import pycurl
 import urllib.error
 import urllib.parse
@@ -24,6 +25,9 @@ class OpalClient:
         self.curl_options = {}
         self.headers = {}
         self.base_url = self.__ensure_entry('Opal address', server)
+        self.id = None
+        self.sid = None
+        self.rid = None
 
     @classmethod
     def build(cls, loginInfo):
@@ -76,9 +80,9 @@ class OpalClient:
         u = self.__ensure_entry('User name', user)
         p = self.__ensure_entry('Password', password, True)
         if otp:
-            val = input("Enter 6-digits code: ")
+            val = input('Enter 6-digits code: ')
             self.header('X-Opal-TOTP', val)
-        return self.header('Authorization', 'Basic ' + base64.b64encode((u + ':' + p).encode("utf-8")).decode("utf-8"))
+        return self.header('Authorization', 'Basic ' + base64.b64encode((u + ':' + p).encode('utf-8')).decode('utf-8'))
 
     def token(self, token):
         tk = self.__ensure_entry('Token', token, True)
@@ -112,7 +116,35 @@ class OpalClient:
         return self
 
     def new_request(self):
+        if self.id is None:
+            # iterate until file does not exists
+            self.id = random.choice(list(range(1, 999, 1)))
+            self.cookie_file = "%s/opal-cookie-%s.dat" % (self.get_app_home(), self.id)
+            while os.path.exists(self.cookie_file):
+                self.id = random.choice(list(range(1, 999, 1)))
+                self.cookie_file = "/tmp/opal-cookie-%s.dat" % self.id
         return OpalRequest(self)
+
+    def get_app_home(self):
+        app_home = '/tmp/.obiba_opal'
+        try:
+            app_home = os.path.expanduser('~/.obiba_opal')
+        except Exception as e:
+            pass
+        os.makedirs(app_home, exist_ok=True)
+        return app_home
+
+    def close(self):
+        if self.id is not None:
+            # request to close session
+            try:
+                self.new_request().resource('/auth/session/_current').delete().send()
+            except Exception as e:
+                pass
+            self.sid = None
+            self.id = None
+            if os.path.exists(self.cookie_file):
+                os.remove(self.cookie_file)
 
     class LoginInfo:
         data = None
@@ -125,7 +157,7 @@ class OpalClient:
             if argv.get('opal'):
                 data['server'] = argv['opal']
             else:
-                raise Exception('Opal server information is missing.')
+                raise ValueError('Opal server information is missing.')
 
             if argv.get('user') and argv.get('password'):
                 data['user'] = argv['user']
@@ -137,7 +169,7 @@ class OpalClient:
                 data['cert'] = argv['ssl_cert']
                 data['key'] = argv['ssl_key']
             else:
-                raise Exception(
+                raise ValueError(
                     'Invalid login information. Requires user-password or token or certificate-key information')
 
             setattr(cls, 'data', data)
@@ -211,13 +243,16 @@ class OpalRequest:
     def content_type_form_urlencoded(self):
         return self.content_type('application/x-www-form-urlencoded')
 
+    def content_type_rscript(self):
+        return self.content_type('application/x-rscript')
+
     def method(self, method):
         if not method:
             self.method = 'GET'
         elif method in ['GET', 'DELETE', 'PUT', 'POST', 'OPTIONS']:
             self.method = method
         else:
-            raise Exception('Not a valid method: ' + method)
+            raise ValueError('Not a valid method: ' + method)
         return self
 
     def get(self):
@@ -254,7 +289,7 @@ class OpalRequest:
         if self.resource:
             curl.setopt(pycurl.URL, self.client.base_url + '/ws' + self.resource)
         else:
-            raise Exception('Resource is missing')
+            raise ValueError('Resource is missing')
         return curl
 
     def resource(self, ws):
@@ -286,7 +321,7 @@ class OpalRequest:
             print('* File Content:')
             print('[file=' + filename + ', size=' + str(os.path.getsize(filename)) + ']')
             # self.curl_option(pycurl.POST,1)
-        self.curl_option(pycurl.HTTPPOST, [("file1", (pycurl.FORM_FILE, filename))])
+        self.curl_option(pycurl.HTTPPOST, [('file1', (pycurl.FORM_FILE, filename))])
         return self
 
     def send(self, buffer=None):
@@ -298,12 +333,35 @@ class OpalRequest:
         else:
             curl.setopt(curl.WRITEFUNCTION, cbuf.store)
         curl.setopt(curl.HEADERFUNCTION, hbuf.store)
+        curl.setopt(curl.COOKIEJAR, self.client.cookie_file)
+        curl.setopt(curl.COOKIEFILE, self.client.cookie_file)
         curl.perform()
-        response = OpalResponse(curl.getinfo(pycurl.HTTP_CODE), hbuf.headers, cbuf.content.decode("utf-8"))
+        response = OpalResponse(curl.getinfo(pycurl.HTTP_CODE), hbuf.headers, cbuf.content.decode('utf-8'))
         curl.close()
+
+        if self.client.sid == None:
+            self.client.sid = self._extract_cookie_value('opalsid', response.headers)
 
         return response
 
+    def _extract_cookie_value(self, name: str, headers: dict):
+        if 'set-cookie' in headers:
+            if type(headers['set-cookie']) == str:
+                return self._extract_cookie_single_value(name, headers['set-cookie'])
+            else:
+                for header in headers['set-cookie']:
+                    rval = self._extract_cookie_single_value(name, header)
+                    if rval is not None:
+                        return rval
+        return None
+
+    def _extract_cookie_single_value(self, name: str, header: str):
+        cookie_parts = header.split(';')
+        if len(cookie_parts) > 0:
+            cookie_parts = cookie_parts[0].split('=')
+            if len(cookie_parts) == 2 and cookie_parts[0] == name:
+                return cookie_parts[1]
+        return None
 
 class Storage:
     """
@@ -319,7 +377,7 @@ class Storage:
         self.content = self.content + buf
 
     def __str__(self):
-        return self.contents.decode("utf-8")
+        return self.contents.decode('utf-8')
 
 
 class HeaderStorage(Storage):
@@ -334,13 +392,13 @@ class HeaderStorage(Storage):
 
     def store(self, buf):
         Storage.store(self, buf)
-        header = buf.decode("utf-8").partition(':')
+        header = buf.decode('utf-8').partition(':')
         if header[1]:
             value = header[2].rstrip().strip()
             if header[0] in self.headers:
                 current_value = self.headers[header[0]]
                 if isinstance(current_value, str):
-                    self.headers[header[0]] = [current_value]
+                    self.headers[header[0]] = list(current_value)
                 self.headers[header[0]].append(value)
             else:
                 self.headers[header[0]] = value
@@ -356,11 +414,11 @@ class OpalResponse:
         self.headers = headers
         self.content = content
 
-    def as_json(self):
+    def from_json(self):
         return json.loads(self.content)
 
     def pretty_json(self):
-        return json.dumps(self.as_json(), sort_keys=True, indent=2)
+        return json.dumps(self.from_json(), sort_keys=True, indent=2)
 
     def __str__(self):
         return self.content
@@ -453,23 +511,26 @@ class UriBuilder:
         return self
 
     def query(self, key, value):
-        self.params.update([(key, value), ])
+        val = '%s' % value
+        if type(value) == bool:
+            val = val.lower()
+        self.params.update([(key, val), ])
         return self
 
     def __str__(self):
         def concat_segment(p, s):
-            return p + '/' + s
+            return '%s/%s' % (p, s)
 
         def concat_params(k):
-            return urllib.parse.quote(k) + '=' + urllib.parse.quote(str(self.params[k]))
+            return '%s=%s' % (urllib.parse.quote(k), urllib.parse.quote(str(self.params[k])))
 
         def concat_query(q, p):
-            return q + '&' + p
+            return '%s&%s' % (q, p)
 
         p = urllib.parse.quote('/' + reduce(concat_segment, self.path))
         if len(self.params):
             q = reduce(concat_query, list(map(concat_params, list(self.params.keys()))))
-            return p + '?' + q
+            return '%s?%s' % (p, q)
         else:
             return p
 

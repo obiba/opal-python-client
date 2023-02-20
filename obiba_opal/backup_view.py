@@ -24,7 +24,7 @@ def retrieve_datasource_views(args):
     if args.verbose:
         request.verbose()
     response = request.get().resource(
-        core.UriBuilder(['datasource', args.project, 'tables']).build()).send().as_json()
+        core.UriBuilder(['datasource', args.project, 'tables']).build()).send().from_json()
 
     views = []
     for table in response:

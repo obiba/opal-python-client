@@ -25,7 +25,7 @@ def retrieve_project_resources(args):
     if args.verbose:
         request.verbose()
     response = request.get().resource(
-        core.UriBuilder(['project', args.project, 'resources']).build()).send().as_json()
+        core.UriBuilder(['project', args.project, 'resources']).build()).send().from_json()
 
     resources = []
     for resource in response:
