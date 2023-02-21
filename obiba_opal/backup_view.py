@@ -91,9 +91,11 @@ def backup_views(client: core.OpalClient, project: str, views: list, output: str
             outdir = os.getcwd()
         else:
             outdir = os.path.normpath(outdir)
-        print('Output directory is', outdir)
+        if verbose:
+            print('Output directory is', outdir)
         if not os.path.exists(outdir):
-            print('Creating output directory ...')
+            if verbose:
+                print('Creating output directory ...')
             os.makedirs(outdir)
 
         # backup each view

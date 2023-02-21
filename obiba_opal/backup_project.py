@@ -32,7 +32,7 @@ def do_command(args):
         client.close()
 
 
-def backup_project(client: core.OpalClient, project: str, archive: str, views_as_tables: bool, force: bool, verbose: bool = False):
+def backup_project(client: core.OpalClient, project: str, archive: str, views_as_tables: bool = False, force: bool = False, verbose: bool = False):
     """
     Prepare the backup parameters and launch the backup task on the project
 

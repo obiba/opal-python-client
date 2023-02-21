@@ -34,19 +34,45 @@ def do_ws(args, table):
             .build()
 
 
-def retrieve_datasource_tables(args):
-    request = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args)).new_request()
+def retrieve_datasource_tables(client: core.OpalClient, project: str, verbose: bool = False):
+    request = client.new_request()
     request.fail_on_error()
-    if args.verbose:
+    if verbose:
         request.verbose()
-    response = request.get().resource(
-        core.UriBuilder(['datasource', args.project, 'tables']).build()).send().from_json()
+    response = request.get().resource(core.UriBuilder(['datasource', project, 'tables']).build()).send()
 
     tables = []
-    for table in response:
+    for table in response.from_json():
         tables.append(str(table['name']))
 
     return tables
+
+
+def delete_tables(client: core.OpalClient, project: str, tables: list, verbose: bool = False):
+    """
+    Execute delete table command
+
+    :param client: Opal connection object
+    :param project: The project name
+    :param tables: List of table names to be deleted (default is all)
+    :param verbose: Verbose requests
+    """
+    tables_ = tables
+    if not tables:
+        tables_ = retrieve_datasource_tables(client, args)
+    
+    for table in tables_:
+        request = client.new_request()
+        if verbose:
+            request.verbose()
+        # send request
+        try:
+            response = request.delete().resource(core.UriBuilder(['datasource', project, 'table', table]).build()).send()
+            # format response
+            if verbose and response.code != 200:
+                print(response.content)
+        except Exception as e:
+            print(Exception, e)
 
 
 def do_command(args):
@@ -54,25 +80,8 @@ def do_command(args):
     Execute delete command
     """
     # Build and send requests
-    tables = args.tables
-    if not tables:
-        tables = retrieve_datasource_tables(args)
-
-    for table in tables:
-        request = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args)).new_request()
-
-        if args.verbose:
-            request.verbose()
-
-        request.delete()
-
-        # send request
-        try:
-            response = request.resource(
-                core.UriBuilder(['datasource', args.project, 'table', table]).build()).send()
-        except Exception as e:
-            print(Exception, e)
-
-        # format response
-        if response.code != 200:
-            print(response.content)
+    client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
+    try:
+        delete_tables(client, args.project, args.tables, args.verbose)
+    finally:
+        client.close()

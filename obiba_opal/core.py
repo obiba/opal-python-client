@@ -463,7 +463,8 @@ class Formatter:
 
     @classmethod
     def print_json(self, data: any, pretty: bool = False):
-        print(self.to_json(data, pretty))
+        if data is not None:
+            print(self.to_json(data, pretty))
 
 class MagmaNameResolver:
     """
