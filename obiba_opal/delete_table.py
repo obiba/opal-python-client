@@ -15,25 +15,6 @@ def add_arguments(parser):
                         help='List of table names which will be deleted (default is all)')
 
 
-def do_ws(args, table):
-    """
-    Build the web service resource path
-    """
-
-    if args.add:
-        return core.UriBuilder(['project', args.project, 'permissions', 'table', table]) \
-            .query('type', args.type.upper()) \
-            .query('permission', perm.map_permission(args.permission)) \
-            .query('principal', args.subject) \
-            .build()
-
-    if args.delete:
-        return core.UriBuilder(['project', args.project, 'permissions', 'table', table]) \
-            .query('type', args.type.upper()) \
-            .query('principal', args.subject) \
-            .build()
-
-
 def retrieve_datasource_tables(client: core.OpalClient, project: str, verbose: bool = False):
     request = client.new_request()
     request.fail_on_error()
@@ -59,7 +40,7 @@ def delete_tables(client: core.OpalClient, project: str, tables: list, verbose: 
     """
     tables_ = tables
     if not tables:
-        tables_ = retrieve_datasource_tables(client, args)
+        tables_ = retrieve_datasource_tables(client, project, verbose)
     
     for table in tables_:
         request = client.new_request()
