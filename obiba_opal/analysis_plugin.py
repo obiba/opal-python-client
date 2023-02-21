@@ -20,9 +20,13 @@ def do_command(args):
     """
     Execute analysis
     """
-    res = analyse(core.OpalClient.build(core.OpalClient.LoginInfo.parse(args)), args.project, args.config, args.verbose)
-    # format response
-    core.Formatter.print_json(res, args.json)
+    client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
+    try:
+        res = analyse(client, args.project, args.config, args.verbose)
+        # format response
+        core.Formatter.print_json(res, args.json)
+    finally:
+        client.close
 
 
 def analyse(client: core.OpalClient, project: str, config: str, verbose: bool = False):

@@ -24,12 +24,15 @@ def do_command(args):
     Prepare the backup parameters and launch the backup task on the project
     """
     client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
-    res = backup(client, args.project, args.archive, args.views_as_tables, args.force, args.verbose)
-    # format response
-    core.Formatter.print_json(res, args.json)
+    try:
+        res = backup_project(client, args.project, args.archive, args.views_as_tables, args.force, args.verbose)
+        # format response
+        core.Formatter.print_json(res, args.json)
+    finally:
+        client.close()
 
 
-def backup(client: core.OpalClient, project: str, archive: str, views_as_tables: bool, force: bool, verbose: bool = False):
+def backup_project(client: core.OpalClient, project: str, archive: str, views_as_tables: bool, force: bool, verbose: bool = False):
     """
     Prepare the backup parameters and launch the backup task on the project
 

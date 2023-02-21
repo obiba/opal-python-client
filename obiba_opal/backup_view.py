@@ -18,13 +18,13 @@ def add_arguments(parser):
                         help='Skip confirmation when overwriting the backup file.')
 
 
-def retrieve_datasource_views(args):
-    request = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args)).new_request()
+def retrieve_datasource_views(client: core.OpalClient, project: str, verbose: bool = False):
+    request = client.new_request()
     request.fail_on_error()
-    if args.verbose:
+    if verbose:
         request.verbose()
     response = request.get().resource(
-        core.UriBuilder(['datasource', args.project, 'tables']).build()).send().from_json()
+        core.UriBuilder(['datasource', project, 'tables']).build()).send().from_json()
 
     views = []
     for table in response:
@@ -34,21 +34,21 @@ def retrieve_datasource_views(args):
     return views
 
 
-def backup_view(args, view, outdir):
+def backup_view(client: core.OpalClient, project: str, view, outdir, force: bool, verbose: bool = False):
     outfile = view + '.json'
     print('Backup of', view, 'in', outfile, '...')
 
     outpath = os.path.join(outdir, outfile)
 
-    request = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args)).new_request()
+    request = client.new_request()
     request.fail_on_error()
-    if args.verbose:
+    if verbose:
         request.verbose()
     response = request.get().resource(
-        core.UriBuilder(['datasource', args.project, 'view', view]).build()).send()
+        core.UriBuilder(['datasource', project, 'view', view]).build()).send()
 
     dowrite = True
-    if os.path.exists(outpath) and not args.force:
+    if os.path.exists(outpath) and not force:
         dowrite = False
         confirmed = input('Overwrite the file "' + outpath + '"? [y/N]: ')
         if confirmed == 'y':
@@ -60,27 +60,33 @@ def backup_view(args, view, outdir):
         out.close()
 
 
-def do_command(args):
+def backup_views(client: core.OpalClient, project: str, views, output, force: bool, verbose: bool = False):
     """
     Retrieve table DTOs of the project, look for the views, download the views in JSON into a file in provided or current directory
+    
+    :param client: Opal connection object
+    :param project: The project name
+    :param views: List of view names to be backed up (default is all)
+    :param output: Output directory name (default is current directory)
+    :param force: Skip confirmation when overwriting the backup file
+    :param verbose: Verbose requests
     """
 
-    # Build and send request
-    views = args.views
-    obsviews = retrieve_datasource_views(args)
-    if not views:
-        views = obsviews
+    views_ = views
+    obsviews = retrieve_datasource_views(client, project, verbose)
+    if not views_:
+        views_ = obsviews
     else:
         safeviews = []
-        for view in views:
+        for view in views_:
             if view in obsviews:
                 safeviews.append(view)
-        views = safeviews
-    if not views:
-        print('No views to backup in project', args.project)
+        views_ = safeviews
+    if not views_:
+        print('No views to backup in project', project)
     else:
         # prepare output directory
-        outdir = args.output
+        outdir = output
         if not outdir:
             outdir = os.getcwd()
         else:
@@ -92,4 +98,17 @@ def do_command(args):
 
         # backup each view
         for view in views:
-            backup_view(args, view, outdir)
+            backup_view(client, project, view, outdir, force, verbose)
+
+
+def do_command(args):
+    """
+    Retrieve table DTOs of the project, look for the views, download the views in JSON into a file in provided or current directory
+    """
+
+    # Build and send request
+    client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
+    try:
+        backup_views(client, args.project, args.views, args.output, args.force, args.verbose)
+    finally:
+        client.close()
