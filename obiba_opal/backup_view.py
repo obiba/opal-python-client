@@ -60,7 +60,7 @@ def backup_view(client: core.OpalClient, project: str, view, outdir, force: bool
         out.close()
 
 
-def backup_views(client: core.OpalClient, project: str, views, output, force: bool, verbose: bool = False):
+def backup_views(client: core.OpalClient, project: str, views: list, output: str, force: bool, verbose: bool = False):
     """
     Retrieve table DTOs of the project, look for the views, download the views in JSON into a file in provided or current directory
     
