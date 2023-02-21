@@ -23,39 +23,44 @@ def do_command(args):
     """
     Prepare the backup parameters and launch the backup task on the project
     """
+    client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
+    res = backup(client, args.project, args.archive, args.views_as_tables, args.force, args.verbose)
+    # format response
+    core.Formatter.print_json(res, args.json)
 
+
+def backup(client: core.OpalClient, project: str, archive: str, views_as_tables: bool, force: bool, verbose: bool = False):
+    """
+    Prepare the backup parameters and launch the backup task on the project
+
+    :param client: Opal connection object
+    :param project: The project name
+    :param archive: The archive directory path in the Opal file system
+    :param views_as_tables: Treat views as tables, i.e. export data instead of keeping derivation scripts
+    :param force: Force overwriting an existing backup folder
+    :param verbose: Verbose requests
+    """
     # Build and send request
     # backup options
-    options = {'archive': args.archive}
-    if args.views_as_tables:
-        options['viewsAsTables'] = args.views_as_tables
-    if args.force:
-        options['override'] = args.force
+    options = {'archive': archive}
+    if views_as_tables:
+        options['viewsAsTables'] = views_as_tables
+    if force:
+        options['override'] = force
 
-    client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
-    uri = core.UriBuilder(['project', args.project, 'commands', '_backup']).build()
+    uri = core.UriBuilder(['project', project, 'commands', '_backup']).build()
     request = client.new_request()
     request.fail_on_error().accept_json().content_type_json()
-    if args.verbose:
+    if verbose:
         request.verbose()
     response = request.post().resource(uri).content(json.dumps(options)).send()
 
     # get job status
-    location = None
-    if 'Location' in response.headers:
-        location = response.headers['Location']
-    elif 'location' in response.headers:
-        location = response.headers['location']
+    location = response.get_location()
     job_resource = re.sub(r'http.*\/ws', r'', location)
     request = client.new_request()
     request.fail_on_error().accept_json()
-    if args.verbose:
+    if verbose:
         request.verbose()
     response = request.get().resource(job_resource).send()
-    # format response
-    res = response.content
-    if args.json:
-        res = response.pretty_json()
-
-    # output to stdout
-    print(res)
+    return response.from_json()

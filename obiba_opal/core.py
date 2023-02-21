@@ -26,7 +26,6 @@ class OpalClient:
         self.headers = {}
         self.base_url = self.__ensure_entry('Opal address', server)
         self.id = None
-        self.sid = None
         self.rid = None
 
     @classmethod
@@ -126,9 +125,9 @@ class OpalClient:
         return OpalRequest(self)
 
     def get_app_home(self):
-        app_home = '/tmp/.obiba_opal'
+        app_home = '/tmp/.obiba'
         try:
-            app_home = os.path.expanduser('~/.obiba_opal')
+            app_home = os.path.expanduser('~/.obiba')
         except Exception as e:
             pass
         os.makedirs(app_home, exist_ok=True)
@@ -141,7 +140,6 @@ class OpalClient:
                 self.new_request().resource('/auth/session/_current').delete().send()
             except Exception as e:
                 pass
-            self.sid = None
             self.id = None
             if os.path.exists(self.cookie_file):
                 os.remove(self.cookie_file)
@@ -339,29 +337,9 @@ class OpalRequest:
         response = OpalResponse(curl.getinfo(pycurl.HTTP_CODE), hbuf.headers, cbuf.content.decode('utf-8'))
         curl.close()
 
-        if self.client.sid == None:
-            self.client.sid = self._extract_cookie_value('opalsid', response.headers)
+        # TODO check for TOTP
 
         return response
-
-    def _extract_cookie_value(self, name: str, headers: dict):
-        if 'set-cookie' in headers:
-            if type(headers['set-cookie']) == str:
-                return self._extract_cookie_single_value(name, headers['set-cookie'])
-            else:
-                for header in headers['set-cookie']:
-                    rval = self._extract_cookie_single_value(name, header)
-                    if rval is not None:
-                        return rval
-        return None
-
-    def _extract_cookie_single_value(self, name: str, header: str):
-        cookie_parts = header.split(';')
-        if len(cookie_parts) > 0:
-            cookie_parts = cookie_parts[0].split('=')
-            if len(cookie_parts) == 2 and cookie_parts[0] == name:
-                return cookie_parts[1]
-        return None
 
 class Storage:
     """
@@ -415,14 +393,63 @@ class OpalResponse:
         self.content = content
 
     def from_json(self):
-        return json.loads(self.content)
+        if self.content is None:
+            return None
+        else:
+            try:
+                return json.loads(self.content)
+            except Exception as e:
+                if type(self.content) == str:
+                    return self.content
+                else:
+                    # FIXME silently fail
+                    return None
 
     def pretty_json(self):
         return json.dumps(self.from_json(), sort_keys=True, indent=2)
 
+    def get_location(self):
+        location = None
+        if 'Location' in self.headers:
+            location = self.headers['Location']
+        elif 'location' in self.headers:
+            location = self.headers['location']
+        return location
+
+    def extract_cookie_value(self, name: str):
+        if 'set-cookie' in self.headers:
+            if type(self.headers['set-cookie']) == str:
+                return self._extract_cookie_single_value(name, self.headers['set-cookie'])
+            else:
+                for header in self.headers['set-cookie']:
+                    rval = self._extract_cookie_single_value(name, header)
+                    if rval is not None:
+                        return rval
+        return None
+
+    def _extract_cookie_single_value(self, name: str, header: str):
+        cookie_parts = header.split(';')
+        if len(cookie_parts) > 0:
+            cookie_parts = cookie_parts[0].split('=')
+            if len(cookie_parts) == 2 and cookie_parts[0] == name:
+                return cookie_parts[1]
+        return None
+
     def __str__(self):
         return self.content
 
+class Formatter:
+
+    @classmethod
+    def to_json(self, data: any, pretty: bool = False):
+        if pretty:
+            return json.dumps(data, sort_keys=True, indent=2)
+        else:
+            return json.dumps(data, sort_keys=True)
+
+    @classmethod
+    def print_json(self, data: any, pretty: bool = False):
+        print(self.to_json(data, pretty))
 
 class MagmaNameResolver:
     """
