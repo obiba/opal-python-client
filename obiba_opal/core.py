@@ -37,7 +37,7 @@ class OpalClient:
             return OpalClient.buildWithToken(loginInfo.data['server'], loginInfo.data['token'])
         else:
             return OpalClient.buildWithAuthentication(loginInfo.data['server'], loginInfo.data['user'],
-                                                      loginInfo.data['password'], loginInfo.data['otp'])
+                                                      loginInfo.data['password'])
 
     @classmethod
     def buildWithCertificate(cls, server, cert, key):
@@ -49,12 +49,16 @@ class OpalClient:
         return client
 
     @classmethod
-    def buildWithAuthentication(cls, server, user, password, otp=None):
+    def buildWithAuthentication(cls, server, user, password):
         client = cls(server)
         if client.base_url.startswith('https:'):
             client.verify_peer(0)
             client.verify_host(0)
-        client.credentials(user, password, otp)
+        client.credentials(user, password)
+        
+        # need to know whether a OTP is needed
+        client.init_otp()
+
         return client
 
     @classmethod
@@ -75,17 +79,27 @@ class OpalClient:
                 e = input(text + ': ')
         return e
 
-    def credentials(self, user, password, otp):
+    def credentials(self, user, password):
         u = self.__ensure_entry('User name', user)
         p = self.__ensure_entry('Password', password, True)
-        if otp:
-            val = input('Enter 6-digits code: ')
-            self.header('X-Opal-TOTP', val)
         return self.header('Authorization', 'Basic ' + base64.b64encode((u + ':' + p).encode('utf-8')).decode('utf-8'))
 
     def token(self, token):
         tk = self.__ensure_entry('Token', token, True)
         return self.header('X-Opal-Auth', tk)
+
+    def init_otp(self):
+        # check if an OTP is needed
+        request = self.new_request()
+        profile_url = '/system/subject-profile/_current'
+        response = request.accept_json().get().resource(profile_url).send()
+        if response.code == 401:
+            otp_header = response.get_header('WWW-Authenticate').split(' ')[0]
+            if otp_header == 'X-Opal-TOTP' or otp_header == 'X-Obiba-TOTP':
+                val = input('Enter 6-digits code: ')
+                # validate code and get the opalsid cookie for further requests
+                request = self.new_request()
+                request.header(otp_header, val).accept_json().get().resource(profile_url).send()
 
     def keys(self, cert_file, key_file, key_pwd=None, ca_certs=None):
         self.curl_option(pycurl.SSLCERT, cert_file)
@@ -160,7 +174,6 @@ class OpalClient:
             if argv.get('user') and argv.get('password'):
                 data['user'] = argv['user']
                 data['password'] = argv['password']
-                data['otp'] = argv['otp']
             elif argv.get('token'):
                 data['token'] = argv['token']
             elif argv.get('ssl_cert') and argv.get('ssl_key'):
@@ -337,8 +350,6 @@ class OpalRequest:
         response = OpalResponse(curl.getinfo(pycurl.HTTP_CODE), hbuf.headers, cbuf.content.decode('utf-8'))
         curl.close()
 
-        # TODO check for TOTP
-
         return response
 
 class Storage:
@@ -408,13 +419,16 @@ class OpalResponse:
     def pretty_json(self):
         return json.dumps(self.from_json(), sort_keys=True, indent=2)
 
+    def get_header(self, header: str) -> str:
+        value = None
+        if header in self.headers:
+            value = self.headers[header]
+        elif header.lower() in self.headers:
+            value = self.headers[header.lower()]
+        return value
+
     def get_location(self):
-        location = None
-        if 'Location' in self.headers:
-            location = self.headers['Location']
-        elif 'location' in self.headers:
-            location = self.headers['location']
-        return location
+        return self.get_header('Location')
 
     def extract_cookie_value(self, name: str):
         if 'set-cookie' in self.headers:

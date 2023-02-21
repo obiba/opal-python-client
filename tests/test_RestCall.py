@@ -13,10 +13,13 @@ class OpalClientTestSSLConnection(unittest.TestCase):
         setattr(cls, 'SSL_KEY', './resources/certificates/privatekey.pem')
 
     def test_sendRestBadServer(self):
-        client = OpalClient.buildWithAuthentication(server='http://deadbeef:8080', user='administrator',
-                                                    password='password')
-
-        self.assertRaises(Exception, self.__sendSimpleRequest, client.new_request())
+        try:
+            # this one will make a request to check if an OTP is needed
+            OpalClient.buildWithAuthentication(server='http://deadbeef:8080', user='administrator',
+                                               password='password')
+            assert False
+        except Exception:
+            assert True
 
     def test_sendRestBadCredentials(self):
         client = OpalClient.buildWithAuthentication(server=self.SERVER, user='admin',
@@ -44,7 +47,7 @@ class OpalClientTestSSLConnection(unittest.TestCase):
 
     def test_validAuthLoginInfo(self):
         try:
-            args = Namespace(opal=self.SERVER, user='administrator', password='password', otp=None)
+            args = Namespace(opal=self.SERVER, user='administrator', password='password')
             client = OpalClient.build(loginInfo=OpalClient.LoginInfo.parse(args))
             self.__sendSimpleRequest(client.new_request())
         except Exception as e:
