@@ -2,130 +2,193 @@
 Opal user management.
 """
 
-import json
 import obiba_opal.core as core
+import json
 
-
-def add_arguments(parser):
+class UserService:
     """
-    Add data command specific options
+    Users management service.
     """
-    parser.add_argument('--name', '-n', required=False, help='User name.')
-    parser.add_argument('--upassword', '-upa', required=False, help='User password of at least six characters.')
-    parser.add_argument('--ucertificate', '-uc', required=False, help='User certificate (public key) file')
-    parser.add_argument('--disabled', '-di', action='store_true', required=False,
-                        help='Disable user account (if omitted the user is enabled by default).')
-    parser.add_argument('--groups', '-g', nargs='+', required=False, help='User groups')
 
-    parser.add_argument('--fetch', '-fe', action='store_true', required=False,
-                        help='Fetch one or multiple user(s).')
-    parser.add_argument('--add', '-a', action='store_true', help='Add a user.')
-    parser.add_argument('--update', '-ud', action='store_true', required=False, help='Update a user.')
-    parser.add_argument('--delete', '-de', action='store_true', required=False,
-                        help='Delete a user.')
-    parser.add_argument('--json', '-j', action='store_true', help='Pretty JSON formatting of the response')
+    def __init__(self, client: core.OpalClient, verbose: bool = False):
+        self.client = client
+        self.verbose = verbose
 
+    @classmethod
+    def add_arguments(self, parser):
+        """
+        Add data command specific options
+        """
+        parser.add_argument('--name', '-n', required=False, help='User name.')
+        parser.add_argument('--upassword', '-upa', required=False, help='User password of at least 8 characters, must contain at least one digit, one upper case alphabet, one lower case alphabet, one special character (which includes @#$%^&+=!) and no white space.')
+        parser.add_argument('--ucertificate', '-uc', required=False, help='User certificate (public key) file')
+        parser.add_argument('--disabled', '-di', action='store_true', required=False,
+                            help='Disable user account (if omitted the user is enabled by default).')
+        parser.add_argument('--groups', '-g', nargs='+', required=False, help='User groups')
 
-def do_ws(args):
-    """
-    Build the web service resource path
-    """
-    if args.add or (args.fetch and not args.name):
-        ws = "/system/subject-credentials"
-    else:
-        ws = "/system/subject-credential/" + args.name
+        parser.add_argument('--fetch', '-fe', action='store_true', required=False,
+                            help='Fetch one or multiple user(s).')
+        parser.add_argument('--add', '-a', action='store_true', help='Add a user.')
+        parser.add_argument('--update', '-ud', action='store_true', required=False, help='Update a user.')
+        parser.add_argument('--delete', '-de', action='store_true', required=False,
+                            help='Delete a user.')
+        parser.add_argument('--json', '-j', action='store_true', help='Pretty JSON formatting of the response')
 
-    return ws
+    @classmethod
+    def do_command(self, args):
+        """
+        Execute group command
+        """
+        # Build and send request
+        client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
+        try:
+            service = UserService(client, args.verbose)
+            if args.add:
+                service.add_user(args.name, args.upassword, args.ucertificate, args.groups, args.disabled)
+            elif args.update:
+                service.update_user(args.name, args.upassword, args.ucertificate, args.groups, args.disabled)
+            elif args.delete:
+                service.delete_user(args.name)
+            else:
+                res = None
+                if args.name:
+                    res = service.get_user(args.name)
+                else:
+                    res = service.get_users()
+                core.Formatter.print_json(res, args.json)
+        finally:
+            client.close()
 
+    def get_users(self) -> dict:
+        """
+        Get the users.
+        """
+        request = self.client.new_request()
+        request.fail_on_error()
+        if self.verbose:
+            request.verbose()
+        response = request.get().resource(self._make_ws()).send()
+        return response.from_json()
+    
+    def get_user(self, name: str) -> dict:
+        """
+        Get a user, returns None if not found.
 
-def get_user_information(args):
-    request = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args)).new_request()
-    request.fail_on_error()
-    userInfo = request.get().resource(do_ws(args)).send().from_json()
-    return userInfo
+        :param name: The user name
+        """
+        if not name:
+            raise ValueError('The name of the user to fetch is required')
+        request = self.client.new_request()
+        if self.verbose:
+            request.verbose()
+        response = request.get().resource(self._make_ws(name)).send()
+        return response.from_json() if response.code == 200 else None
+    
+    def delete_user(self, name: str):
+        """
+        Delete a user.
 
+        :param name: The user name
+        """
+        if not name:
+            raise ValueError('The name of the user to delete is required')
+        request = self.client.new_request()
+        request.fail_on_error()
+        if self.verbose:
+            request.verbose()
+        request.delete().resource(self._make_ws(name)).send()
 
-def do_command(args):
-    """
-    Execute group command
-    """
-    # Build and send request
-    request = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args)).new_request()
-    request.fail_on_error()
+    def update_user(self, name: str, upassword: str = None, ucertificate: str = None, groups: list = [], disabled: bool = False):
+        """
+        Update a user.
 
-    if args.verbose:
-        request.verbose()
+        :param name: The user name
+        :param upassword: The user password of at least 8 characters, must contain at least one digit, one upper case alphabet, one lower case alphabet, one special character (which includes @#$%^&+=!) and no white space
+        :param ucertificate: The user certificate file.
+        :param groups: The list of groups
+        :param disabled: Not enabled
+        """
+        if not name:
+            raise ValueError('The name of the user to update is required')
 
-    if args.fetch:
-        # send request
-        response = request.get().resource(do_ws(args)).send()
-    elif args.add:
-        if not args.name:
-            raise Exception('A user name is required.')
-        if not args.upassword and not args.ucertificate:
-            raise Exception('A user password or a certificate file is required.')
+        userInfo = self.get_user(name)
+        user = {'name': name}
 
-        # create user
-        user = {'name': args.name}
-        if args.upassword:
-            if len(args.upassword) < 6:
-                raise Exception('Password must contain at least 6 characters.')
-            user['authenticationType'] = 'PASSWORD'
-            user['password'] = args.upassword
-        else:
-            user['authenticationType'] = 'CERTIFICATE'
-            with open(args.ucertificate, 'rb') as cert:
-                user['certificate'] = cert.read()
-
-        if args.disabled:
-            user.enabled = False
-
-        if args.groups:
-            user.groups.extend(args.groups)
-
-        request.fail_on_error().accept_json().content_type_json()
-        response = request.post().resource(do_ws(args)).content(json.dumps(user)).send()
-    elif args.update:
-        if not args.name:
-            raise Exception('A user name is required.')
-
-        userInfo = get_user_information(args)
-        user = {'name': args.name}
-
-        if args.upassword:
+        request = self.client.new_request()
+        request.fail_on_error()
+        if self.verbose:
+            request.verbose()
+        
+        if upassword:
             if userInfo['authenticationType'] == "CERTIFICATE":
-                raise Exception("%s requires a certificate (public key) file" % user.name)
-            if len(args.upassword) < 6:
-                raise Exception('Password must contain at least 6 characters.')
+                raise ValueError("%s requires a certificate (public key) file" % user.name)
+            if len(upassword) < 8:
+                raise ValueError('Password must contain at least 8 characters.')
             user['authenticationType'] = 'PASSWORD'
-            user['password'] = args.upassword
-        elif args.ucertificate:
+            user['password'] = upassword
+        elif ucertificate:
             if userInfo['authenticationType'] == "PASSWORD":
-                raise Exception("%s requires a password" % user.name)
+                raise ValueError("%s requires a password" % user.name)
 
             user['authenticationType'] = 'CERTIFICATE'
-            with open(args.ucertificate, 'rb') as cert:
+            with open(ucertificate, 'rb') as cert:
                 user['certificate'] = cert.read()
         else:
             user['authenticationType'] = userInfo['authenticationType']
 
-        if args.disabled:
-            user['enabled'] = False
-        if args.groups:
-            user['groups'] = args.groups
+        user['enabled'] = not disabled
+        if groups:
+            user['groups'] = groups
 
         request.fail_on_error().accept_json().content_type_json()
-        response = request.put().resource(do_ws(args)).content(json.dumps(user)).send()
-    elif args.delete:
-        if not args.name:
-            raise Exception('A user name is required.')
+        request.put().resource(self._make_ws(name)).content(json.dumps(user)).send()
 
-        response = request.delete().resource(do_ws(args)).send()
+    def add_user(self, name: str, upassword: str = None, ucertificate: str = None, groups: list = [], disabled: bool = False):
+        """
+        Add a user.
 
-    # format response
-    res = response.content
-    if args.json:
-        res = response.pretty_json()
+        :param name: The user name
+        :param upassword: The user password of at least 8 characters, must contain at least one digit, one upper case alphabet, one lower case alphabet, one special character (which includes @#$%^&+=!) and no white space
+        :param ucertificate: The user certificate file.
+        :param groups: The list of groups
+        :param disabled: Not enabled
+        """
+        if not name:
+            raise ValueError('The name of the user to add is required')
+        if not upassword and not ucertificate:
+            raise ValueError('The user password or a certificate file is required.')
+        
+        request = self.client.new_request()
+        request.fail_on_error()
+        if self.verbose:
+            request.verbose()
+        
+        # create user
+        user = {'name': name}
+        if upassword:
+            if len(upassword) < 8:
+                raise Exception('Password must contain at least 8 characters.')
+            user['authenticationType'] = 'PASSWORD'
+            user['password'] = upassword
+        else:
+            user['authenticationType'] = 'CERTIFICATE'
+            with open(ucertificate, 'rb') as cert:
+                user['certificate'] = cert.read()
 
-    # output to stdout
-    print(res)
+        if disabled:
+            user['enabled'] = False
+        if groups:
+            user['groups'] = groups
+
+        request.fail_on_error().accept_json().content_type_json()
+        request.post().resource(self._make_ws()).content(json.dumps(user)).send()
+
+    def _make_ws(self, name: str = None):
+        """
+        Build the web service resource path
+        """
+        if not name:
+            ws = '/system/subject-credentials'
+        else:
+            ws = '/system/subject-credential/%s' % name
+        return ws

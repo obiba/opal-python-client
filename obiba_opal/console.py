@@ -36,8 +36,8 @@ from obiba_opal.export_annotations import ExportAnnotationsService
 from obiba_opal.copy_table import CopyTableCommand
 from obiba_opal.delete_table import DeleteTableService
 import obiba_opal.task as task
-import obiba_opal.user as user
-import obiba_opal.group as group
+from obiba_opal.user import UserService
+from obiba_opal.group import GroupService
 import obiba_opal.perm_project as perm_project
 import obiba_opal.perm_datasource as perm_datasource
 import obiba_opal.perm_table as perm_table
@@ -170,8 +170,8 @@ def run():
     add_subcommand(subparsers, 'copy-table', 'Copy a table into another table.', CopyTableCommand.add_arguments,
                   CopyTableCommand.do_command)
     add_subcommand(subparsers, 'delete-table', 'Delete some tables.', DeleteTableService.add_arguments, DeleteTableService.do_command)
-    add_subcommand(subparsers, 'user', 'Manage users.', user.add_arguments, user.do_command)
-    add_subcommand(subparsers, 'group', 'Manage groups.', group.add_arguments, group.do_command)
+    add_subcommand(subparsers, 'user', 'Manage users.', UserService.add_arguments, UserService.do_command)
+    add_subcommand(subparsers, 'group', 'Manage groups.', GroupService.add_arguments, GroupService.do_command)
     add_subcommand(subparsers, 'perm-project', 'Apply permission on a project.', perm_project.add_arguments,
                   perm_project.do_command)
     add_subcommand(subparsers, 'perm-datasource', 'Apply permission on a datasource.', perm_datasource.add_arguments,

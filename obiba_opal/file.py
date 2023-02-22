@@ -86,7 +86,7 @@ class FileService:
         """
         Upload a file to Opal.
 
-        :param path: The destination file path in Opal
+        :param path: The destination folder path in Opal
         :param upload: The source file path to upload
         """
         request = self.client.new_request()
