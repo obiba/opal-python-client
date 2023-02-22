@@ -40,7 +40,7 @@ class DataService:
             fd = None
             if args.raw:
                 fd = sys.stdout.fileno()
-            res = DataService(client, args.verbose).get_data(args.name, args.id, args.pos, fd)
+            res = DataService(client, args.verbose)._get_data(args.name, args.id, args.pos, fd)
             # format response
             core.Formatter.print_json(res, args.json)
         finally:
@@ -53,7 +53,7 @@ class DataService:
         :param project: The project name
         :param table: The table name
         """
-        return self.get_data('%s.%s' % (project, table))
+        return self._get_data('%s.%s' % (project, table))
 
     def get_valueset(self, project: str, table: str, id: str) -> dict:
         """
@@ -63,7 +63,7 @@ class DataService:
         :param table: The table name
         :param id: The entity identifier
         """
-        return self.get_data('%s.%s' % (project, table), id)
+        return self._get_data('%s.%s' % (project, table), id)
 
     def get_value(self, project: str, table: str, variable: str, id: str, pos: str = None, fd = None) -> dict:
         """
@@ -75,9 +75,9 @@ class DataService:
         :param pos: Position of the value to query in case of a repeatable variable (starting at 0)
         :param fd: Get raw value into the provided file descriptor (see os.fdopen()), useful for downloading a binary value
         """
-        return self.get_data('%s.%s:%s' % (project, table, variable), id, pos, fd)
+        return self._get_data('%s.%s:%s' % (project, table, variable), id, pos, fd)
     
-    def get_data(self, name: str, id: str = None, pos: str = None, fd = None) -> any:
+    def _get_data(self, name: str, id: str = None, pos: str = None, fd = None) -> any:
         """
         Execute data command
 

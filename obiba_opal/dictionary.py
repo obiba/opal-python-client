@@ -30,7 +30,7 @@ class DictionaryService:
         # Build and send request
         client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
         try:
-            res = DictionaryService(client, args.verbose).get_dictionary(args.name)
+            res = DictionaryService(client, args.verbose)._get_dictionary(args.name)
         
             # format response
             core.Formatter.print_json(res, args.json)
@@ -41,7 +41,7 @@ class DictionaryService:
         """
         Get the list of datasources.
         """
-        return self.get_dictionary('*')
+        return self._get_dictionary('*')
 
     def get_datasource(self, project: str) -> dict:
         """
@@ -49,7 +49,7 @@ class DictionaryService:
 
         :param project: The project name associated to the datasource
         """
-        return self.get_dictionary(project)
+        return self._get_dictionary(project)
     
     def get_tables(self, project: str) -> list:
         """
@@ -57,7 +57,7 @@ class DictionaryService:
         
         :param project: The project name associated to the datasource
         """
-        return self.get_dictionary('%s.*' % project)
+        return self._get_dictionary('%s.*' % project)
 
     def get_table(self, project: str, table: str) -> dict:
         """
@@ -66,7 +66,7 @@ class DictionaryService:
         :param project: The project name associated to the datasource
         :param table: The table name
         """
-        return self.get_dictionary('%s.%s' % (project, table))
+        return self._get_dictionary('%s.%s' % (project, table))
 
     def get_variables(self, project: str, table: str) -> list:
         """
@@ -75,7 +75,7 @@ class DictionaryService:
         :param project: The project name associated to the datasource
         :param table: The table name
         """
-        return self.get_dictionary('%s.%s:*' % (project, table))
+        return self._get_dictionary('%s.%s:*' % (project, table))
 
     def get_variable(self, project: str, table: str, variable: str) -> list:
         """
@@ -85,9 +85,9 @@ class DictionaryService:
         :param table: The table name
         :param variable: The variable name
         """
-        return self.get_dictionary('%s.%s:%s' % (project, table, variable))
+        return self._get_dictionary('%s.%s:%s' % (project, table, variable))
     
-    def get_dictionary(self, name: str) -> any:
+    def _get_dictionary(self, name: str) -> any:
         """
         Get dictionary items by their full name, with wild-card support.
 

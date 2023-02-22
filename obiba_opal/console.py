@@ -8,7 +8,7 @@ import obiba_opal.rest as rest
 from obiba_opal.dictionary import DictionaryService
 from obiba_opal.data import DataService
 import obiba_opal.file as file
-import obiba_opal.entity as entity
+from obiba_opal.entity import EntityService
 import obiba_opal.import_opal as import_opal
 import obiba_opal.import_csv as import_csv
 import obiba_opal.import_xml as import_xml
@@ -32,7 +32,7 @@ import obiba_opal.export_rstata as export_rstata
 import obiba_opal.export_rds as export_rds
 import obiba_opal.export_sql as export_sql
 import obiba_opal.export_vcf as export_vcf
-import obiba_opal.export_annotations as export_annotations
+from obiba_opal.export_annotations import ExportAnnotationsService
 from obiba_opal.copy_table import CopyTableCommand
 from obiba_opal.delete_table import DeleteTableService
 import obiba_opal.task as task
@@ -53,7 +53,7 @@ import obiba_opal.security.encrypt as encrypt
 import obiba_opal.security.decrypt as decrypt
 import obiba_opal.system as system
 from obiba_opal.analysis_plugin import AnalysisCommand
-import obiba_opal.export_analysis_plugin as export_analysis_plugin
+from obiba_opal.export_analysis_plugin import ExportAnalysisService
 from obiba_opal.backup_view import BackupViewService
 import obiba_opal.restore_view as restore_view
 from obiba_opal.backup_project import BackupProjectCommand
@@ -103,7 +103,7 @@ def run():
     add_subcommand(subparsers, 'project', 'Fetch, create, delete a project.', project.add_arguments, project.do_command)
     add_subcommand(subparsers, 'dict', 'Query for data dictionary.', DictionaryService.add_arguments, DictionaryService.do_command)
     add_subcommand(subparsers, 'data', 'Query for data.', DataService.add_arguments, DataService.do_command)
-    add_subcommand(subparsers, 'entity', 'Query for entities (Participant, etc.).', entity.add_arguments, entity.do_command)
+    add_subcommand(subparsers, 'entity', 'Query for entities (Participant, etc.).', EntityService.add_arguments, EntityService.do_command)
     add_subcommand(subparsers, 'file', 'Manage Opal file system.', file.add_arguments, file.do_command)
     add_subcommand(subparsers, 'taxonomy', 'Manage taxonomies: list available taxonomies, download, import or delete a taxonomy.', taxonomy.add_arguments, taxonomy.do_command)
     add_subcommand(subparsers, 'backup-project',
@@ -166,7 +166,7 @@ def run():
     add_subcommand(subparsers, 'export-vcf', 'Export genotypes data to VCF/BCF files.', export_vcf.add_arguments,
                   export_vcf.do_command)
     add_subcommand(subparsers, 'export-annot', 'Extract data dictionary annotations in CSV/TSV format.',
-                  export_annotations.add_arguments, export_annotations.do_command)
+                  ExportAnnotationsService.add_arguments, ExportAnnotationsService.do_command)
     add_subcommand(subparsers, 'copy-table', 'Copy a table into another table.', CopyTableCommand.add_arguments,
                   CopyTableCommand.do_command)
     add_subcommand(subparsers, 'delete-table', 'Delete some tables.', DeleteTableService.add_arguments, DeleteTableService.do_command)
@@ -203,8 +203,8 @@ def run():
                   AnalysisCommand.add_arguments,
                   AnalysisCommand.do_command)
     add_subcommand(subparsers, 'export-analysis-plugin', 'Exports analysis data of a project or specific tables.',
-                  export_analysis_plugin.add_arguments,
-                  export_analysis_plugin.do_command)
+                  ExportAnalysisService.add_arguments,
+                  ExportAnalysisService.do_command)
     add_subcommand(subparsers, 'sql', 'Execute a SQL statement on project\'s tables.',
                   sql.add_arguments,
                   sql.do_command)
