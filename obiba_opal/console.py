@@ -7,7 +7,7 @@ import sys
 import obiba_opal.rest as rest
 from obiba_opal.dictionary import DictionaryService
 from obiba_opal.data import DataService
-import obiba_opal.file as file
+from obiba_opal.file import FileService
 from obiba_opal.entity import EntityService
 import obiba_opal.import_opal as import_opal
 import obiba_opal.import_csv as import_csv
@@ -104,7 +104,7 @@ def run():
     add_subcommand(subparsers, 'dict', 'Query for data dictionary.', DictionaryService.add_arguments, DictionaryService.do_command)
     add_subcommand(subparsers, 'data', 'Query for data.', DataService.add_arguments, DataService.do_command)
     add_subcommand(subparsers, 'entity', 'Query for entities (Participant, etc.).', EntityService.add_arguments, EntityService.do_command)
-    add_subcommand(subparsers, 'file', 'Manage Opal file system.', file.add_arguments, file.do_command)
+    add_subcommand(subparsers, 'file', 'Manage Opal file system.', FileService.add_arguments, FileService.do_command)
     add_subcommand(subparsers, 'taxonomy', 'Manage taxonomies: list available taxonomies, download, import or delete a taxonomy.', taxonomy.add_arguments, taxonomy.do_command)
     add_subcommand(subparsers, 'backup-project',
                   'Backup project data: tables (data export), views, resources, report templates, files.',
