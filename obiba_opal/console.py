@@ -23,15 +23,15 @@ import obiba_opal.import_vcf as import_vcf
 import obiba_opal.import_ids as import_ids
 import obiba_opal.import_idsmap as import_idsmap
 import obiba_opal.import_annotations as import_annotations
-import obiba_opal.export_xml as export_xml
-import obiba_opal.export_csv as export_csv
-import obiba_opal.export_plugin as export_plugin
-import obiba_opal.export_rsas as export_rsas
-import obiba_opal.export_rspss as export_rspss
-import obiba_opal.export_rstata as export_rstata
-import obiba_opal.export_rds as export_rds
-import obiba_opal.export_sql as export_sql
-import obiba_opal.export_vcf as export_vcf
+from obiba_opal.export_xml import ExportXMLCommand
+from obiba_opal.export_csv import ExportCSVCommand
+from obiba_opal.export_plugin import ExportPluginCommand
+from obiba_opal.export_rsas import ExportRSASCommand
+from obiba_opal.export_rspss import ExportRSPSSCommand
+from obiba_opal.export_rstata import ExportRSTATACommand
+from obiba_opal.export_rds import ExportRDSCommand
+from obiba_opal.export_sql import ExportSQLCommand
+from obiba_opal.export_vcf import ExportVCFCommand
 from obiba_opal.export_annotations import ExportAnnotationsService
 from obiba_opal.copy_table import CopyTableCommand
 from obiba_opal.delete_table import DeleteTableService
@@ -146,25 +146,25 @@ def run():
     add_subcommand(subparsers, 'import-annot',
                   'Apply data dictionary annotations specified in a file in CSV/TSV format (see export-annot).',
                   import_annotations.add_arguments, import_annotations.do_command)
-    add_subcommand(subparsers, 'export-xml', 'Export data to a zip of Opal XML files.', export_xml.add_arguments,
-                  export_xml.do_command)
-    add_subcommand(subparsers, 'export-csv', 'Export data to a folder of CSV files.', export_csv.add_arguments,
-                  export_csv.do_command)
-    add_subcommand(subparsers, 'export-r-sas', 'Export data to a SAS or SAS Transport file (using R).', export_rsas.add_arguments,
-                  export_rsas.do_command)
-    add_subcommand(subparsers, 'export-r-stata', 'Export data to a Stata file (using R).', export_rstata.add_arguments,
-                  export_rstata.do_command)
+    add_subcommand(subparsers, 'export-xml', 'Export data to a zip of Opal XML files.', ExportXMLCommand.add_arguments,
+                  ExportXMLCommand.do_command)
+    add_subcommand(subparsers, 'export-csv', 'Export data to a folder of CSV files.', ExportCSVCommand.add_arguments,
+                  ExportCSVCommand.do_command)
+    add_subcommand(subparsers, 'export-r-sas', 'Export data to a SAS or SAS Transport file (using R).', ExportRSASCommand.add_arguments,
+                  ExportRSASCommand.do_command)
+    add_subcommand(subparsers, 'export-r-stata', 'Export data to a Stata file (using R).', ExportRSTATACommand.add_arguments,
+                  ExportRSTATACommand.do_command)
     add_subcommand(subparsers, 'export-r-spss', 'Export data to a SPSS or compressed SPSS file (using R).',
-                  export_rspss.add_arguments,
-                  export_rspss.do_command)
-    add_subcommand(subparsers, 'export-r-rds', 'Export data to a RDS file (single serialized R object, using R).', export_rds.add_arguments,
-                  export_rds.do_command)
-    add_subcommand(subparsers, 'export-sql', 'Export data to a SQL database.', export_sql.add_arguments,
-                  export_sql.do_command)
-    add_subcommand(subparsers, 'export-plugin', 'Export data to a Opal datasource plugin.', export_plugin.add_arguments,
-                  export_plugin.do_command)
-    add_subcommand(subparsers, 'export-vcf', 'Export genotypes data to VCF/BCF files.', export_vcf.add_arguments,
-                  export_vcf.do_command)
+                  ExportRSPSSCommand.add_arguments,
+                  ExportRSPSSCommand.do_command)
+    add_subcommand(subparsers, 'export-r-rds', 'Export data to a RDS file (single serialized R object, using R).', ExportRDSCommand.add_arguments,
+                  ExportRDSCommand.do_command)
+    add_subcommand(subparsers, 'export-sql', 'Export data to a SQL database.', ExportSQLCommand.add_arguments,
+                  ExportSQLCommand.do_command)
+    add_subcommand(subparsers, 'export-plugin', 'Export data to a Opal datasource plugin.', ExportPluginCommand.add_arguments,
+                  ExportPluginCommand.do_command)
+    add_subcommand(subparsers, 'export-vcf', 'Export genotypes data to VCF/BCF files.', ExportVCFCommand.add_arguments,
+                  ExportVCFCommand.do_command)
     add_subcommand(subparsers, 'export-annot', 'Extract data dictionary annotations in CSV/TSV format.',
                   ExportAnnotationsService.add_arguments, ExportAnnotationsService.do_command)
     add_subcommand(subparsers, 'copy-table', 'Copy a table into another table.', CopyTableCommand.add_arguments,

@@ -98,6 +98,6 @@ class ExportAnalysisService:
         elif analysis_id is None:
             ws = '/project/%s/table/%s/analyses/_export' % (project, table)
         else:
-            ws = '/project/%s/table/%s/analysis/%s/_export' % (args.project, args.table, args.analysis_id)
+            ws = '/project/%s/table/%s/analysis/%s/_export' % (project, table, analysis_id)
 
         return '%s?all=true' % ws if all_results else ws
