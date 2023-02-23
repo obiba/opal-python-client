@@ -41,7 +41,7 @@ class ExportPluginCommand:
         finally:
             client.close()
 
-    def export(self, name: str, project: str, tables: list, config: str, identifiers: str = None, incremental: bool = False) -> dict:
+    def export_data(self, name: str, project: str, tables: list, config: str, identifiers: str = None, incremental: bool = False) -> dict:
         """
         Export tables using a plugin.
 
@@ -99,7 +99,7 @@ class ExportCSVCommand:
         finally:
             client.close()
 
-    def export(self, project: str, tables: list, output: str, id_name: str = None, identifiers: str = None, incremental: bool = False, multilines: bool = True) -> dict:
+    def export_data(self, project: str, tables: list, output: str, id_name: str = None, identifiers: str = None, incremental: bool = False, multilines: bool = True) -> dict:
         """
         Export tables in CSV files.
 
@@ -156,7 +156,7 @@ class ExportRDSCommand:
         finally:
             client.close()
 
-    def export(self, project: str, tables: list, output: str, id_name: str = None, identifiers: str = None, incremental: bool = False, multilines: bool = True) -> dict:
+    def export_data(self, project: str, tables: list, output: str, id_name: str = None, identifiers: str = None, incremental: bool = False, multilines: bool = True) -> dict:
         """
         Export tables in a RDS file.
 
@@ -217,7 +217,7 @@ class ExportRSASCommand:
         finally:
             client.close()
 
-    def export(self, project: str, tables: list, output: str, id_name: str = None, identifiers: str = None, incremental: bool = False, multilines: bool = True) -> dict:
+    def export_data(self, project: str, tables: list, output: str, id_name: str = None, identifiers: str = None, incremental: bool = False, multilines: bool = True) -> dict:
         """
         Export tables in a SAS file.
 
@@ -282,7 +282,7 @@ class ExportRSPSSCommand:
         finally:
             client.close()
 
-    def export(self, project: str, tables: list, output: str, id_name: str = None, identifiers: str = None, incremental: bool = False, multilines: bool = True) -> dict:
+    def export_data(self, project: str, tables: list, output: str, id_name: str = None, identifiers: str = None, incremental: bool = False, multilines: bool = True) -> dict:
         """
         Export tables in a SPSS file.
 
@@ -347,7 +347,7 @@ class ExportRSTATACommand:
         finally:
             client.close()
 
-    def export(self, project: str, tables: list, output: str, id_name: str = None, identifiers: str = None, incremental: bool = False, multilines: bool = True) -> dict:
+    def export_data(self, project: str, tables: list, output: str, id_name: str = None, identifiers: str = None, incremental: bool = False, multilines: bool = True) -> dict:
         """
         Export tables in a STATA file.
 
@@ -406,7 +406,7 @@ class ExportSQLCommand:
         finally:
             client.close()
     
-    def export(self, project: str, tables: list, database: str, identifiers: str = None, incremental: bool = False):
+    def export_data(self, project: str, tables: list, database: str, identifiers: str = None, incremental: bool = False):
         """
         Export tables in a SQL database.
 
@@ -458,7 +458,7 @@ class ExportXMLCommand:
         finally:
             client.close()
 
-    def export(self, project: str, tables: list, output: str, identifiers: str = None, incremental: bool = False) -> dict:
+    def export_data(self, project: str, tables: list, output: str, identifiers: str = None, incremental: bool = False) -> dict:
         """
         Export tables in an Opal archive file.
 
@@ -517,7 +517,7 @@ class ExportVCFCommand:
         finally:
             client.close()
 
-    def export(self, project: str, vcf: list, destination: str, case_controls: bool = True, filter_table: str = None) -> dict:
+    def export_data(self, project: str, vcf: list, destination: str, case_controls: bool = True, filter_table: str = None) -> dict:
         """
         Export VCF/BCF files.
 

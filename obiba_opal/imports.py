@@ -2,14 +2,19 @@
 Opal datasource plugin import.
 """
 
-import json
 import obiba_opal.core as core
 import obiba_opal.io as io
+import sys
+import json
 
 class ImportPluginCommand:
     """
     Import from a plugin.
     """
+
+    def __init__(self, client: core.OpalClient, verbose: bool = False):
+        self.client = client
+        self.verbose = verbose
 
     @classmethod
     def add_arguments(cls, parser):
@@ -25,34 +30,45 @@ class ImportPluginCommand:
     @classmethod
     def do_command(cls, args):
         """
-        Execute import data command
+        Execute import data command.
         """
         # Build and send request
         client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
         try:
-            importer = io.OpalImporter.build(client=client, destination=args.destination, tables=args.tables,
-                                                    incremental=args.incremental, limit=args.limit,
-                                                    identifiers=args.identifiers,
-                                                    policy=args.policy, merge=args.merge, verbose=args.verbose)
-            # print result
-            extension_factory = cls.OpalExtensionFactory(name=args.name, config=args.config)
-
-            response = importer.submit(extension_factory)
-
+            config = json.loads(open(args.config).read())
+            res = cls(client, args.verbose).import_data(args.name, config, args.destination, args.tables, args.incremental, args.limit, args.identifiers, args.policy, args.merge)
             # format response
-            res = response.content
-            if args.json:
-                res = response.pretty_json()
-
-            # output to stdout
-            print(res)
+            core.Formatter.print_json(res, args.json)
         finally:
             client.close()
+    
+    def import_data(self, name: str, config: dict, destination: str, tables: list = None, incremental: bool = None, limit: int = None, identifiers: str = None, policy: str = None, merge: bool = None) -> dict:
+        """
+        Import tables using a plugin.
+        
+        :param name: The plugin name
+        :param config: The plugin configuration
+        :param destination: The destination project
+        :param tables: The tables names to be imported (default is all)
+        :param incremental: Incremental import (new and updated value sets)
+        :param limit: Import limit (maximum number of value sets)
+        :param identifiers: The name of the ID mapping
+        :param policy: The ID mapping policy: "required" (each identifiers must be mapped prior importation, default), "ignore" (ignore unknown identifiers), "generate" (generate a system identifier for each unknown identifier)
+        :param merge: Merge imported data dictionary with the destination one (default is false, i.e. data dictionary is overridden) 
+        """
+        importer = io.OpalImporter.build(client=self.client, destination=destination, tables=tables,
+                                                    incremental=incremental, limit=limit,
+                                                    identifiers=identifiers,
+                                                    policy=policy, merge=merge, verbose=self.verbose)
+        extension_factory = self.OpalExtensionFactory(name, config)
+
+        response = importer.submit(extension_factory)
+        return response.from_json()
 
     class OpalExtensionFactory(io.OpalImporter.ExtensionFactoryInterface):
         def __init__(self, name, config):
             self.name = name
-            self.config = json.loads(open(config).read())
+            self.config = config
 
         def add(self, factory):
             """
@@ -72,6 +88,10 @@ class ImportCSVCommand:
     """
     Import CSV file data.
     """
+
+    def __init__(self, client: core.OpalClient, verbose: bool = False):
+        self.client = client
+        self.verbose = verbose
 
     @classmethod
     def add_arguments(cls, parser):
@@ -98,30 +118,46 @@ class ImportCSVCommand:
         # Build and send request
         client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
         try:
-            importer = io.OpalImporter.build(client=client, destination=args.destination, tables=args.tables,
-                                                    incremental=args.incremental, limit=args.limit,
-                                                    identifiers=args.identifiers,
-                                                    policy=args.policy, merge=args.merge, verbose=args.verbose)
-            # print result
-            extension_factory = cls.OpalExtensionFactory(characterSet=args.characterSet, separator=args.separator,
-                                                        quote=args.quote,
-                                                        firstRow=args.firstRow, path=args.path, valueType=args.valueType,
-                                                        type=args.type,
-                                                        tables=args.tables,
-                                                        destination=args.destination)
-
-            response = importer.submit(extension_factory)
-
+            res = cls(client, args.verbose).import_data(
+                args.path, args.destination, args.characterSet, args.separator, args.quote, args.firstRow, args.valueType, args.type, 
+                args.tables, args.incremental, args.limit, args.identifiers, args.policy, args.merge)
             # format response
-            res = response.content
-            if args.json:
-                res = response.pretty_json()
-
-            # output to stdout
-            print(res)
+            core.Formatter.print_json(res, args.json)
         finally:
             client.close()
 
+    def import_data(self, path: str, destination: str, characterSet: str = None, separator: str = None, quote: str = None, firstRow: int = None, valueType: str = None, type: str = None, 
+                    tables: list = None, incremental: bool = None, limit: int = None, identifiers: str = None, policy: str = None, merge: bool = None) -> dict:
+        """
+        Import tables from a CSV file.
+        
+        :param characterSet: The cheracter set
+        :param separator: The separator char
+        :param quote: The quote char
+        :param firstRow: From row
+        :param path: File to import in Opal file system
+        :param valueType: Default value type (text, integer, decimal, boolean etc.). When not specified, "text" is the default
+        :param type: Entity type (e.g. Participant)
+        :param destination: The destination project
+        :param tables: The tables names to be imported (default is all)
+        :param incremental: Incremental import (new and updated value sets)
+        :param limit: Import limit (maximum number of value sets)
+        :param identifiers: The name of the ID mapping
+        :param policy: The ID mapping policy: "required" (each identifiers must be mapped prior importation, default), "ignore" (ignore unknown identifiers), "generate" (generate a system identifier for each unknown identifier)
+        :param merge: Merge imported data dictionary with the destination one (default is false, i.e. data dictionary is overridden) 
+        """
+        importer = io.OpalImporter.build(self.client, destination=destination, tables=tables,
+                                                    incremental=incremental, limit=limit,
+                                                    identifiers=identifiers,
+                                                    policy=policy, merge=merge, verbose=self.verbose)
+        extension_factory = self.OpalExtensionFactory(characterSet=characterSet, separator=separator,
+                                                    quote=quote,
+                                                    firstRow=firstRow, path=path, valueType=valueType,
+                                                    type=type,
+                                                    tables=tables,
+                                                    destination=destination)
+        response = importer.submit(extension_factory)
+        return response.from_json()
 
     class OpalExtensionFactory(io.OpalImporter.ExtensionFactoryInterface):
         def __init__(self, characterSet, separator, quote, firstRow, path, valueType, type, tables, destination):
@@ -183,6 +219,10 @@ class ImportLimeSurveyCommand:
     Import from LimeSurvey.
     """
 
+    def __init__(self, client: core.OpalClient, verbose: bool = False):
+        self.client = client
+        self.verbose = verbose
+
     @classmethod
     def add_arguments(cls, parser):
         """
@@ -205,24 +245,39 @@ class ImportLimeSurveyCommand:
         # Build and send request
         client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
         try:
-            importer = io.OpalImporter.build(client=client, destination=args.destination, tables=args.tables,
-                                                    incremental=args.incremental, limit=args.limit,
-                                                    identifiers=args.identifiers,
-                                                    policy=args.policy, merge=args.merge, verbose=args.verbose)
-            # print result
-            extension_factory = cls.OpalExtensionFactory(url=args.url, uname=args.uname, pword=args.pword, prefix=args.prefix, properties=args.properties)
-
-            response = importer.submit(extension_factory)
-
+            res = cls(client, args.verbose).import_data(
+                args.url, args.uname, args.pword, args.prefix, args.properties,
+                args.destination, args.tables, args.incremental, args.limit, args.identifiers, args.policy, args.merge)
             # format response
-            res = response.content
-            if args.json:
-                res = response.pretty_json()
-
-            # output to stdout
-            print(res)
+            core.Formatter.print_json(res, args.json)
         finally:
             client.close()
+    
+    def import_data(self, url: str, uname: str, pword: str, prefix: str, properties: str, 
+                    destination: str, tables: list = None, incremental: bool = None, limit: int = None, identifiers: str = None, policy: str = None, merge: bool = None) -> dict:
+        """
+        Import tables from a LimeSurvey database.
+        
+        :param url: LimeSurvey SQL database JDBC url (if not provided, plugin defaults will be used)
+        :param uname: LimeSurvey SQL database user name (if not provided, plugin defaults will be used)
+        :param pword: LimeSurvey SQL database user password (if not provided, plugin defaults will be used)
+        :param prefix: Table prefix (if not provided, plugin defaults will be used)
+        :param properties: SQL properties (if not provided, plugin defaults will be used)
+        :param destination: The destination project
+        :param tables: The tables names to be imported (default is all)
+        :param incremental: Incremental import (new and updated value sets)
+        :param limit: Import limit (maximum number of value sets)
+        :param identifiers: The name of the ID mapping
+        :param policy: The ID mapping policy: "required" (each identifiers must be mapped prior importation, default), "ignore" (ignore unknown identifiers), "generate" (generate a system identifier for each unknown identifier)
+        :param merge: Merge imported data dictionary with the destination one (default is false, i.e. data dictionary is overridden) 
+        """
+        importer = io.OpalImporter.build(self.client, destination=destination, tables=tables,
+                                                incremental=incremental, limit=limit,
+                                                identifiers=identifiers,
+                                                policy=policy, merge=merge, verbose=self.verbose)
+        extension_factory = self.OpalExtensionFactory(url, uname, pword, prefix, properties)
+        response = importer.submit(extension_factory)
+        return response.from_json()
 
     class OpalExtensionFactory(io.OpalImporter.ExtensionFactoryInterface):
         def __init__(self, url, uname, pword, prefix, properties):
@@ -260,6 +315,10 @@ class ImportOpalCommand:
     Import from an Opal server.
     """
 
+    def __init__(self, client: core.OpalClient, verbose: bool = False):
+        self.client = client
+        self.verbose = verbose
+
     @classmethod
     def add_arguments(cls, parser):
         """
@@ -279,30 +338,45 @@ class ImportOpalCommand:
         """
         Execute import data command
         """
+        if (args.rtoken and args.ruser) or (not args.rtoken and not args.ruser):
+            raise ValueError('Either specify token OR user credentials (user name and password)')
         # Build and send request
         client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
         try:
-            importer = io.OpalImporter.build(client=client, destination=args.destination, tables=args.tables,
-                                                    incremental=args.incremental, limit=args.limit,
-                                                    identifiers=args.identifiers,
-                                                    policy=args.policy, merge=args.merge, verbose=args.verbose)
-            # remote opal client factory
-            if (args.rtoken and args.ruser) or (not args.rtoken and not args.ruser):
-                print("Either specify token OR user credentials (user name and password)")
-            else:
-                extension_factory = cls.OpalExtensionFactory(ropal=args.ropal, rdatasource=args.rdatasource, ruser=args.ruser,
-                                                            rpassword=args.rpassword, rtoken=args.rtoken)
-                response = importer.submit(extension_factory)
-
-                # format response
-                res = response.content
-                if args.json:
-                    res = response.pretty_json()
-
-                # output to stdout
-                print(res)
+            res = cls(client, args.vebose).import_data(
+                args.ropal, args.rdatasource, args.ruser, args.rpassword, args.rtoken,
+                args.destination, args.tables, args.incremental, args.limit, args.identifiers, args.policy, args.merge)
+            # format response
+            core.Formatter.print_json(res, args.json)
         finally:
             client.close()
+    
+    def import_data(self, ropal: str, rdatasource: str, ruser: str, rpassword: str, rtoken: str,
+                    destination: str, tables: list = None, incremental: bool = None, limit: int = None, identifiers: str = None, policy: str = None, merge: bool = None):
+        """
+        Import tables from a Opal server.
+        
+        :param ropal: Remote Opal server base url
+        :param rdatasource: Remote project's datasource name
+        :param ruser: Remote user name (exclusive from using token)
+        :param rpassword: Remote user password (exclusive from using token)
+        :param rtoken: Remote personal access token (exclusive from user credentials)
+        :param destination: The destination project
+        :param tables: The tables names to be imported (default is all)
+        :param incremental: Incremental import (new and updated value sets)
+        :param limit: Import limit (maximum number of value sets)
+        :param identifiers: The name of the ID mapping
+        :param policy: The ID mapping policy: "required" (each identifiers must be mapped prior importation, default), "ignore" (ignore unknown identifiers), "generate" (generate a system identifier for each unknown identifier)
+        :param merge: Merge imported data dictionary with the destination one (default is false, i.e. data dictionary is overridden) 
+        """
+        importer = io.OpalImporter.build(self.client, destination=destination, tables=tables,
+                                         incremental=incremental, limit=limit,
+                                         identifiers=identifiers,
+                                         policy=policy, merge=merge, verbose=self.verbose)
+        # remote opal client factory
+        extension_factory = self.OpalExtensionFactory(ropal, rdatasource, ruser, rpassword, rtoken)
+        response = importer.submit(extension_factory)
+        return response.from_json()
 
     class OpalExtensionFactory(io.OpalImporter.ExtensionFactoryInterface):
         def __init__(self, ropal, rdatasource, ruser, rpassword, rtoken):
@@ -334,6 +408,10 @@ class ImportRDSCommand:
     Import from a RDS file.
     """
 
+    def __init__(self, client: core.OpalClient, verbose: bool = False):
+        self.client = client
+        self.verbose = verbose
+
     @classmethod
     def add_arguments(cls, parser):
         """
@@ -359,24 +437,37 @@ class ImportRDSCommand:
 
         client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
         try:
-            importer = io.OpalImporter.build(client=client, destination=args.destination, tables=args.tables,
-                                                    incremental=args.incremental, limit=args.limit,
-                                                    identifiers=args.identifiers,
-                                                    policy=args.policy, merge=args.merge, verbose=args.verbose)
-            # print result
-            extension_factory = cls.OpalExtensionFactory(path=args.path, entityType=args.type, idVariable=args.idVariable)
-
-            response = importer.submit(extension_factory)
-
+            res = cls(client, args.verbose).import_data(
+                args.path, args.destination, args.type, args.idVariable,
+                args.tables, args.incremental, args.limit, args.identifiers, args.policy, args.merge)
             # format response
-            res = response.content
-            if args.json:
-                res = response.pretty_json()
-
-            # output to stdout
-            print(res)
+            core.Formatter.print_json(res, args.json)
         finally:
             client.close()
+
+    def import_data(self, path: str, destination: str, entityType: str = None, idVariable: str = None,
+                    tables: list = None, incremental: bool = None, limit: int = None, identifiers: str = None, policy: str = None, merge: bool = None):
+        """
+        Import tables from a RDS file.
+        
+        :param path: File to import in Opal file system
+        :param entityType: Entity type (e.g. Participant)
+        :param idVariable: R tibble column that provides the entity ID. If not specified, first column values are considered to be the entity identifiers
+        :param destination: The destination project
+        :param tables: The tables names to be imported (default is all)
+        :param incremental: Incremental import (new and updated value sets)
+        :param limit: Import limit (maximum number of value sets)
+        :param identifiers: The name of the ID mapping
+        :param policy: The ID mapping policy: "required" (each identifiers must be mapped prior importation, default), "ignore" (ignore unknown identifiers), "generate" (generate a system identifier for each unknown identifier)
+        :param merge: Merge imported data dictionary with the destination one (default is false, i.e. data dictionary is overridden) 
+        """
+        importer = io.OpalImporter.build(self.client, destination=destination, tables=tables,
+                                                incremental=incremental, limit=limit,
+                                                identifiers=identifiers,
+                                                policy=policy, merge=merge, verbose=self.verbose)
+        extension_factory = self.OpalExtensionFactory(path, entityType, idVariable)
+        response = importer.submit(extension_factory)
+        return response.from_json()
 
     class OpalExtensionFactory(io.OpalImporter.ExtensionFactoryInterface):
         def __init__(self, path, entityType, idVariable):
@@ -406,6 +497,10 @@ class ImportRSASCommand:
     Import from a SAS file using R.
     """
 
+    def __init__(self, client: core.OpalClient, verbose: bool = False):
+        self.client = client
+        self.verbose = verbose
+
     @classmethod
     def add_arguments(cls, parser):
         """
@@ -433,25 +528,38 @@ class ImportRSASCommand:
 
         client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
         try:
-            importer = io.OpalImporter.build(client=client, destination=args.destination, tables=args.tables,
-                                                    incremental=args.incremental, limit=args.limit,
-                                                    identifiers=args.identifiers,
-                                                    policy=args.policy, merge=args.merge, verbose=args.verbose)
-            # print result
-            extension_factory = cls.OpalExtensionFactory(path=args.path,
-                                                        locale=args.locale, entityType=args.type, idVariable=args.idVariable)
-
-            response = importer.submit(extension_factory)
-
+            res = cls(client, args.verbose).import_data(
+                args.path, args.destination, args.locale, args.type, args.idVariable,
+                args.tables, args.incremental, args.limit, args.identifiers, args.policy, args.merge)
             # format response
-            res = response.content
-            if args.json:
-                res = response.pretty_json()
-
-            # output to stdout
-            print(res)
+            core.Formatter.print_json(res, args.json)
         finally:
             client.close()
+
+    def import_data(self, path: str, destination: str, locale: str = None, entityType: str = None, idVariable: str = None,
+                    tables: list = None, incremental: bool = None, limit: int = None, identifiers: str = None, policy: str = None, merge: bool = None):
+        """
+        Import tables from a SAS file.
+        
+        :param path: File to import in Opal file system
+        :param locale: SAS file locale (e.g. fr, en...)
+        :param entityType: Entity type (e.g. Participant)
+        :param idVariable: R tibble column that provides the entity ID. If not specified, first column values are considered to be the entity identifiers
+        :param destination: The destination project
+        :param tables: The tables names to be imported (default is all)
+        :param incremental: Incremental import (new and updated value sets)
+        :param limit: Import limit (maximum number of value sets)
+        :param identifiers: The name of the ID mapping
+        :param policy: The ID mapping policy: "required" (each identifiers must be mapped prior importation, default), "ignore" (ignore unknown identifiers), "generate" (generate a system identifier for each unknown identifier)
+        :param merge: Merge imported data dictionary with the destination one (default is false, i.e. data dictionary is overridden) 
+        """
+        importer = io.OpalImporter.build(self.client, destination, tables,
+                                                incremental, limit, identifiers,
+                                                policy, merge, self.verbose)
+        extension_factory = self.OpalExtensionFactory(path, locale, entityType, idVariable)
+
+        response = importer.submit(extension_factory)
+        return response.from_json()
 
     class OpalExtensionFactory(io.OpalImporter.ExtensionFactoryInterface):
         def __init__(self, path, locale, entityType, idVariable):
@@ -484,6 +592,10 @@ class ImportRSPSSCommand:
     Import from a SPSS file using R.
     """
 
+    def __init__(self, client: core.OpalClient, verbose: bool = False):
+        self.client = client
+        self.verbose = verbose
+
     @classmethod
     def add_arguments(cls, parser):
         """
@@ -511,26 +623,39 @@ class ImportRSPSSCommand:
 
         client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
         try:
-            importer = io.OpalImporter.build(client=client, destination=args.destination, tables=args.tables,
-                                                    incremental=args.incremental, limit=args.limit,
-                                                    identifiers=args.identifiers,
-                                                    policy=args.policy, merge=args.merge, verbose=args.verbose)
-            # print result
-            extension_factory = cls.OpalExtensionFactory(path=args.path,
-                                                        locale=args.locale, entityType=args.type, idVariable=args.idVariable)
-
-            response = importer.submit(extension_factory)
-
+            res = cls(client, args.verbose).import_data(
+                args.path, args.destination, args.locale, args.type, args.idVariable,
+                args.tables, args.incremental, args.limit, args.identifiers, args.policy, args.merge)
             # format response
-            res = response.content
-            if args.json:
-                res = response.pretty_json()
-
-            # output to stdout
-            print(res)
+            core.Formatter.print_json(res, args.json)
         finally:
             client.close()
 
+    def import_data(self, path: str, destination: str, locale: str = None, entityType: str = None, idVariable: str = None,
+                    tables: list = None, incremental: bool = None, limit: int = None, identifiers: str = None, policy: str = None, merge: bool = None):
+        """
+        Import tables from a SPSS file.
+        
+        :param path: File to import in Opal file system
+        :param locale: SPSS file locale (e.g. fr, en...)
+        :param entityType: Entity type (e.g. Participant)
+        :param idVariable: R tibble column that provides the entity ID. If not specified, first column values are considered to be the entity identifiers
+        :param destination: The destination project
+        :param tables: The tables names to be imported (default is all)
+        :param incremental: Incremental import (new and updated value sets)
+        :param limit: Import limit (maximum number of value sets)
+        :param identifiers: The name of the ID mapping
+        :param policy: The ID mapping policy: "required" (each identifiers must be mapped prior importation, default), "ignore" (ignore unknown identifiers), "generate" (generate a system identifier for each unknown identifier)
+        :param merge: Merge imported data dictionary with the destination one (default is false, i.e. data dictionary is overridden) 
+        """
+        importer = io.OpalImporter.build(self.client, destination, tables,
+                                         incremental, limit, identifiers,
+                                         policy, merge, self.verbose)
+        extension_factory = self.OpalExtensionFactory(path, locale, entityType, idVariable)
+
+        response = importer.submit(extension_factory)
+        return response.from_json()
+    
     class OpalExtensionFactory(io.OpalImporter.ExtensionFactoryInterface):
         def __init__(self, path, locale, entityType, idVariable):
             self.path = path
@@ -562,6 +687,10 @@ class ImportRSTATACommand:
     Import from a STATA file using R.
     """
 
+    def __init__(self, client: core.OpalClient, verbose: bool = False):
+        self.client = client
+        self.verbose = verbose
+
     @classmethod
     def add_arguments(cls, parser):
         """
@@ -588,26 +717,39 @@ class ImportRSTATACommand:
 
         client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
         try:
-            importer = io.OpalImporter.build(client=client, destination=args.destination, tables=args.tables,
-                                                    incremental=args.incremental, limit=args.limit,
-                                                    identifiers=args.identifiers,
-                                                    policy=args.policy, merge=args.merge, verbose=args.verbose)
-            # print result
-            extension_factory = cls.OpalExtensionFactory(path=args.path,
-                                                        locale=args.locale, entityType=args.type, idVariable=args.idVariable)
-
-            response = importer.submit(extension_factory)
-
+            res = cls(client, args.verbose).import_data(
+                args.path, args.destination, args.locale, args.type, args.idVariable,
+                args.tables, args.incremental, args.limit, args.identifiers, args.policy, args.merge)
             # format response
-            res = response.content
-            if args.json:
-                res = response.pretty_json()
-
-            # output to stdout
-            print(res)
+            core.Formatter.print_json(res, args.json)
         finally:
             client.close()
 
+    def import_data(self, path: str, destination: str, locale: str = None, entityType: str = None, idVariable: str = None,
+                    tables: list = None, incremental: bool = None, limit: int = None, identifiers: str = None, policy: str = None, merge: bool = None):
+        """
+        Import tables from a STATA file.
+        
+        :param path: File to import in Opal file system
+        :param locale: STATA file locale (e.g. fr, en...)
+        :param entityType: Entity type (e.g. Participant)
+        :param idVariable: R tibble column that provides the entity ID. If not specified, first column values are considered to be the entity identifiers
+        :param destination: The destination project
+        :param tables: The tables names to be imported (default is all)
+        :param incremental: Incremental import (new and updated value sets)
+        :param limit: Import limit (maximum number of value sets)
+        :param identifiers: The name of the ID mapping
+        :param policy: The ID mapping policy: "required" (each identifiers must be mapped prior importation, default), "ignore" (ignore unknown identifiers), "generate" (generate a system identifier for each unknown identifier)
+        :param merge: Merge imported data dictionary with the destination one (default is false, i.e. data dictionary is overridden) 
+        """
+        importer = io.OpalImporter.build(self.client, destination, tables,
+                                         incremental, limit, identifiers,
+                                         policy, merge, self.verbose)
+        extension_factory = self.OpalExtensionFactory(path, locale, entityType, idVariable)
+
+        response = importer.submit(extension_factory)
+        return response.from_json()
+    
     class OpalExtensionFactory(io.OpalImporter.ExtensionFactoryInterface):
         def __init__(self, path, locale, entityType, idVariable):
             self.path = path
@@ -639,6 +781,10 @@ class ImportSQLCommand:
     Import from a SQL database.
     """
 
+    def __init__(self, client: core.OpalClient, verbose: bool = False):
+        self.client = client
+        self.verbose = verbose
+
     @classmethod
     def add_arguments(cls, parser):
         """
@@ -656,24 +802,35 @@ class ImportSQLCommand:
         # Build and send request
         client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
         try:
-            importer = io.OpalImporter.build(client=client, destination=args.destination, tables=args.tables,
-                                                    incremental=args.incremental, limit=args.limit,
-                                                    identifiers=args.identifiers,
-                                                    policy=args.policy, merge=args.merge, verbose=args.verbose)
-            # print result
-            extension_factory = cls.OpalExtensionFactory(database=args.database)
-
-            response = importer.submit(extension_factory)
-
+            res = cls(client, args.verbose).import_data(
+                args.database,
+                args.destination, args.tables, args.incremental, args.limit, args.identifiers, args.policy, args.merge)
             # format response
-            res = response.content
-            if args.json:
-                res = response.pretty_json()
-
-            # output to stdout
-            print(res)
+            core.Formatter.print_json(res, args.json)
         finally:
             client.close()
+
+    def import_data(self, database: str,
+                    destination: str, tables: list = None, incremental: bool = None, limit: int = None, identifiers: str = None, policy: str = None, merge: bool = None):
+        """
+        Import tables from a SQL database.
+        
+        :param database: The database name as declared in Opal
+        :param destination: The destination project
+        :param tables: The tables names to be imported (default is all)
+        :param incremental: Incremental import (new and updated value sets)
+        :param limit: Import limit (maximum number of value sets)
+        :param identifiers: The name of the ID mapping
+        :param policy: The ID mapping policy: "required" (each identifiers must be mapped prior importation, default), "ignore" (ignore unknown identifiers), "generate" (generate a system identifier for each unknown identifier)
+        :param merge: Merge imported data dictionary with the destination one (default is false, i.e. data dictionary is overridden) 
+        """
+        importer = io.OpalImporter.build(self.client, destination, tables,
+                                         incremental, limit, identifiers,
+                                         policy, merge, self.verbose)
+        extension_factory = self.OpalExtensionFactory(database)
+
+        response = importer.submit(extension_factory)
+        return response.from_json()
 
     class OpalExtensionFactory(io.OpalImporter.ExtensionFactoryInterface):
         def __init__(self, database):
@@ -690,6 +847,10 @@ class ImportXMLCommand:
     """
     Import from an Opal archive (zipped XML files).
     """
+
+    def __init__(self, client: core.OpalClient, verbose: bool = False):
+        self.client = client
+        self.verbose = verbose
 
     @classmethod
     def add_arguments(cls, parser):
@@ -708,24 +869,35 @@ class ImportXMLCommand:
         # Build and send request
         client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
         try:
-            importer = io.OpalImporter.build(client=client, destination=args.destination, tables=args.tables,
-                                                    incremental=args.incremental, limit=args.limit,
-                                                    identifiers=args.identifiers,
-                                                    policy=args.policy, merge=args.merge, verbose=args.verbose)
-            # print result
-            extension_factory = cls.OpalExtensionFactory(path=args.path)
-
-            response = importer.submit(extension_factory)
-
+            res = cls(client, args.verbose).import_data(
+                args.path,
+                args.destination, args.tables, args.incremental, args.limit, args.identifiers, args.policy, args.merge)
             # format response
-            res = response.content
-            if args.json:
-                res = response.pretty_json()
-
-            # output to stdout
-            print(res)
+            core.Formatter.print_json(res, args.json)
         finally:
             client.close()
+
+    def import_data(self, path: str,
+                    destination: str, tables: list = None, incremental: bool = None, limit: int = None, identifiers: str = None, policy: str = None, merge: bool = None):
+        """
+        Import tables from a Opal archive file.
+        
+        :param path: File to import in Opal file system
+        :param destination: The destination project
+        :param tables: The tables names to be imported (default is all)
+        :param incremental: Incremental import (new and updated value sets)
+        :param limit: Import limit (maximum number of value sets)
+        :param identifiers: The name of the ID mapping
+        :param policy: The ID mapping policy: "required" (each identifiers must be mapped prior importation, default), "ignore" (ignore unknown identifiers), "generate" (generate a system identifier for each unknown identifier)
+        :param merge: Merge imported data dictionary with the destination one (default is false, i.e. data dictionary is overridden) 
+        """
+        importer = io.OpalImporter.build(self.client, destination, tables,
+                                         incremental, limit, identifiers,
+                                         policy, merge, self.verbose)
+        extension_factory = self.OpalExtensionFactory(path)
+
+        response = importer.submit(extension_factory)
+        return response.from_json()
 
     class OpalExtensionFactory(io.OpalImporter.ExtensionFactoryInterface):
         def __init__(self, path):
@@ -780,6 +952,14 @@ class ImportIDService:
     """
     Import identifiers in the identifiers database.
     """
+
+    def __init__(self, client: core.OpalClient, verbose: bool = False):
+        self.client = client
+        self.verbose = verbose
+
+    def __init__(self, client: core.OpalClient, verbose: bool = False):
+        self.client = client
+        self.verbose = verbose
     
     @classmethod
     def add_arguments(cls, parser):
@@ -796,27 +976,43 @@ class ImportIDService:
         # Build and send request
         client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
         try:
-            request = client.new_request()
-            request.fail_on_error()
-
-            if args.verbose:
-                request.verbose()
-
-            request.content_type_text_plain()
             print('Enter identifiers (one identifier per line, Ctrl-D to end input):')
-            request.content(sys.stdin.read())
-
-            # send request
-            uri = core.UriBuilder(['identifiers', 'mappings', 'entities', '_import']).query('type', args.type).build()
-            request.post().resource(uri).send()
+            ids = sys.stdin.read()
+            cls(client, args.verbose).import_ids(ids.split('\n'), args.type)
         finally:
             client.close()
+
+    def import_ids(self, ids: list, type: str):
+        """
+        Import a list of identifiers in the IDs database.
+        
+        :param ids: The list of identifiers
+        :param type: Entity type (e.g. Participant)
+        """
+        request = self.client.new_request()
+        request.fail_on_error()
+        if self.verbose:
+            request.verbose()
+        request.content_type_text_plain()
+        request.content('\n'.join(ids))
+
+        # send request
+        uri = core.UriBuilder(['identifiers', 'mappings', 'entities', '_import']).query('type', type).build()
+        request.post().resource(uri).send()
 
 
 class ImportIDMapService:
     """
     Import identifiers mapping into the identifiers database.
     """
+
+    def __init__(self, client: core.OpalClient, verbose: bool = False):
+        self.client = client
+        self.verbose = verbose
+
+    def __init__(self, client: core.OpalClient, verbose: bool = False):
+        self.client = client
+        self.verbose = verbose
 
     @classmethod
     def add_arguments(cls, parser):
@@ -835,21 +1031,33 @@ class ImportIDMapService:
         # Build and send request
         client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
         try:
-            request = client.new_request()
-            request.fail_on_error()
-
-            if args.verbose:
-                request.verbose()
-
-            request.content_type_text_plain()
             print('Enter identifiers (one identifiers mapping per line, Ctrl-D to end input):')
-            request.content(sys.stdin.read())
-
-            # send request
-            builder = core.UriBuilder(['identifiers', 'mapping', args.map, '_import']).query('type', args.type)
-            if args.separator:
-                builder.query('separator', args.separator)
-            uri = builder.build()
-            request.post().resource(uri).send()
+            ids = sys.stdin.read()
+            cls(client, args.verbose).import_ids(ids.split('\n'), args.type, args.map, args.separator)
         finally:
             client.close()
+    
+    def import_ids(self, ids: list, type: str, map: str, separator: str = ','):
+        """
+        Import a list of identifiers mappings (each item is a string of separated IDs) in the IDs database.
+        
+        :param ids: The list of identifiers
+        :param type: Entity type (e.g. Participant)
+        :param map: The mapping name
+        :param separator: Field separator
+        """
+        request = self.client.new_request()
+        request.fail_on_error()
+
+        if self.verbose:
+            request.verbose()
+
+        request.content_type_text_plain()
+        request.content('\n'.join(ids))
+
+        # send request
+        builder = core.UriBuilder(['identifiers', 'mapping', map, '_import']).query('type', type)
+        if separator:
+            builder.query('separator', separator)
+        uri = builder.build()
+        request.post().resource(uri).send()

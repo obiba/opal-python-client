@@ -18,7 +18,7 @@ class TestClass:
         service = ExportCSVCommand(client)
         id = random.choice(list(range(1, 999, 1)))
         output = '/tmp/test%s' % id
-        task = service.export('CNSIM', ['CNSIM1'], output)
+        task = service.export_data('CNSIM', ['CNSIM1'], output)
         assert task['command'] == 'copy'
         assert 'id' in task
         status = TaskService(client).wait_task(task['id'])

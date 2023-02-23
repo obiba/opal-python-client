@@ -1,5 +1,6 @@
 from obiba_opal import TablePermService
 from tests.utils import make_client
+import random
 
 class TestClass:
 
@@ -15,12 +16,14 @@ class TestClass:
     def test_table(self):
         client = self.client
         service = TablePermService(client)
+        id = random.choice(list(range(1, 999, 1)))
+        name = 'pwel%s' % id
         perms = service.get_perms('CNSIM', 'CNSIM1', 'user')
         assert len(perms) > 0
-        service.add_perm('CNSIM', 'CNSIM1', 'pwel', 'user', 'view')
+        service.add_perm('CNSIM', 'CNSIM1', name, 'user', 'view')
         perms = service.get_perms('CNSIM', 'CNSIM1', 'user')
-        assert 'pwel' in [x['subject']['principal'] for x in perms]
-        service.delete_perm('CNSIM', 'CNSIM1', 'pwel', 'user')
+        assert name in [x['subject']['principal'] for x in perms]
+        service.delete_perm('CNSIM', 'CNSIM1', name, 'user')
         perms = service.get_perms('CNSIM', 'CNSIM1', 'user')
-        assert 'pwel' not in [x['subject']['principal'] for x in perms]
+        assert name not in [x['subject']['principal'] for x in perms]
         

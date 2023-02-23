@@ -19,7 +19,7 @@ def add_import_arguments(parser):
     parser.add_argument('--limit', '-li', required=False, type=int, help='Import limit (maximum number of value sets)')
     parser.add_argument('--identifiers', '-id', required=False, help='Name of the ID mapping')
     parser.add_argument('--policy', '-po', required=False,
-                        help='ID mapping policy: required (each identifiers must be mapped prior importation, default), ignore (ignore unknown identifiers), generate (generate a system identifier for each unknown identifier)')
+                        help='ID mapping policy: "required" (each identifiers must be mapped prior importation, default), "ignore" (ignore unknown identifiers), "generate" (generate a system identifier for each unknown identifier)')
     parser.add_argument('--merge', '-mg', action='store_true',
                         help='Merge imported data dictionary with the destination one (default is false, i.e. data dictionary is overridden).')
     parser.add_argument('--json', '-j', action='store_true', help='Pretty JSON formatting of the response')
@@ -35,8 +35,8 @@ class OpalImporter:
             raise Exception("ExtensionFactoryInterface.add() method must be implemented by a concrete class.")
 
     @classmethod
-    def build(cls, client, destination, tables=None, incremental=None, limit=None, identifiers=None, policy=None,
-              merge=None, verbose=None):
+    def build(cls, client: core.OpalClient, destination: str, tables: list = None, incremental: bool = None, limit: int = None, identifiers: str =None, policy: str = None,
+              merge: bool = None, verbose: bool = False):
         setattr(cls, 'client', client)
         setattr(cls, 'destination', destination)
         setattr(cls, 'tables', tables)
@@ -48,7 +48,7 @@ class OpalImporter:
         setattr(cls, 'verbose', verbose)
         return cls()
 
-    def submit(self, extension_factory):
+    def submit(self, extension_factory) -> core.OpalResponse:
         """
         Build a specific transient datasource, using extension_factory, and submit import job.
         """
@@ -193,7 +193,7 @@ class OpalExporter:
     """
 
     @classmethod
-    def build(cls, client, datasource: str, tables: list, output: str, incremental: bool = False, multilines: bool = True, identifiers: str = None,
+    def build(cls, client: core.OpalClient, datasource: str, tables: list, output: str, incremental: bool = False, multilines: bool = True, identifiers: str = None,
               entityIdNames = None, verbose: bool = False):
         setattr(cls, 'client', client)
         setattr(cls, 'datasource', datasource)
