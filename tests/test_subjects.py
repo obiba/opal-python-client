@@ -1,4 +1,4 @@
-from obiba_opal.subjects import UserService, GroupService
+from obiba_opal import UserService, GroupService
 from tests.utils import make_client
 import random
 

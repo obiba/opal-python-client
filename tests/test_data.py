@@ -1,4 +1,4 @@
-from obiba_opal.data import DataService, EntityService
+from obiba_opal import DataService, EntityService
 from tests.utils import make_client
 
 class TestClass:

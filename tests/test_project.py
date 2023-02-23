@@ -1,4 +1,4 @@
-from obiba_opal.project import ProjectService, BackupProjectCommand
+from obiba_opal import ProjectService, BackupProjectCommand
 from tests.utils import make_client
 import random
 

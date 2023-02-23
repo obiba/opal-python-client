@@ -1,4 +1,4 @@
-from obiba_opal.dictionary import DictionaryService, ExportAnnotationsService
+from obiba_opal import DictionaryService, ExportAnnotationsService
 from tests.utils import make_client
 import io
 

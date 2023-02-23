@@ -1,6 +1,6 @@
 from argparse import Namespace
 import unittest
-from obiba_opal.core import OpalClient
+from obiba_opal import OpalClient
 from os.path import exists
 
 class TestClass(unittest.TestCase):
