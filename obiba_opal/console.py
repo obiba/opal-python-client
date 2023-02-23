@@ -4,63 +4,19 @@
 import argparse
 import sys
 
-import obiba_opal.rest as rest
-from obiba_opal.dictionary import DictionaryService
-from obiba_opal.data import DataService
+from obiba_opal.project import ProjectService, BackupProjectCommand, RestoreProjectCommand
+from obiba_opal.table import CopyTableCommand, DeleteTableService, BackupViewService, RestoreViewService
+from obiba_opal.dictionary import DictionaryService, ExportAnnotationsService, ImportAnnotationsService
+from obiba_opal.data import DataService, EntityService
+from obiba_opal.analysis import AnalysisCommand, ExportAnalysisService
 from obiba_opal.file import FileService
-from obiba_opal.entity import EntityService
-import obiba_opal.import_opal as import_opal
-import obiba_opal.import_csv as import_csv
-import obiba_opal.import_xml as import_xml
-import obiba_opal.import_rsas as import_rsas
-import obiba_opal.import_rstata as import_rstata
-import obiba_opal.import_rspss as import_rspss
-import obiba_opal.import_rds as import_rds
-import obiba_opal.import_plugin as import_plugin
-import obiba_opal.import_limesurvey as import_limesurvey
-import obiba_opal.import_sql as import_sql
-import obiba_opal.import_vcf as import_vcf
-import obiba_opal.import_ids as import_ids
-import obiba_opal.import_idsmap as import_idsmap
-import obiba_opal.import_annotations as import_annotations
-from obiba_opal.export_xml import ExportXMLCommand
-from obiba_opal.export_csv import ExportCSVCommand
-from obiba_opal.export_plugin import ExportPluginCommand
-from obiba_opal.export_rsas import ExportRSASCommand
-from obiba_opal.export_rspss import ExportRSPSSCommand
-from obiba_opal.export_rstata import ExportRSTATACommand
-from obiba_opal.export_rds import ExportRDSCommand
-from obiba_opal.export_sql import ExportSQLCommand
-from obiba_opal.export_vcf import ExportVCFCommand
-from obiba_opal.export_annotations import ExportAnnotationsService
-from obiba_opal.copy_table import CopyTableCommand
-from obiba_opal.delete_table import DeleteTableService
-import obiba_opal.task as task
-from obiba_opal.user import UserService
-from obiba_opal.group import GroupService
-import obiba_opal.perm_project as perm_project
-import obiba_opal.perm_datasource as perm_datasource
-import obiba_opal.perm_table as perm_table
-import obiba_opal.perm_variable as perm_variable
-import obiba_opal.perm_resource as perm_resource
-import obiba_opal.perm_resources as perm_resources
-import obiba_opal.perm_r as perm_r
-import obiba_opal.perm_datashield as perm_datashield
-import obiba_opal.perm_system as perm_system
-import obiba_opal.project as project
-import obiba_opal.plugin as plugin
-import obiba_opal.security.encrypt as encrypt
-import obiba_opal.security.decrypt as decrypt
-import obiba_opal.system as system
-from obiba_opal.analysis_plugin import AnalysisCommand
-from obiba_opal.export_analysis_plugin import ExportAnalysisService
-from obiba_opal.backup_view import BackupViewService
-import obiba_opal.restore_view as restore_view
-from obiba_opal.backup_project import BackupProjectCommand
-import obiba_opal.restore_project as restore_project
-import obiba_opal.taxonomy as taxonomy
-import obiba_opal.sql as sql
-import obiba_opal.sql_history as sql_history
+from obiba_opal.exports import ExportPluginCommand, ExportCSVCommand, ExportXMLCommand, ExportRSASCommand, ExportRSPSSCommand, ExportRSTATACommand, ExportRDSCommand, ExportSQLCommand, ExportVCFCommand
+from obiba_opal.subjects import UserService, GroupService
+from obiba_opal.perm import ProjectPermService, DatasourcePermService, TablePermService, VariablePermService, ResourcePermService, ResourcesPermService, RPermService, DataSHIELDPermService, SystemPermService
+from obiba_opal.imports import ImportPluginCommand, ImportCSVCommand, ImportIDMapService, ImportIDService, ImportLimeSurveyCommand, ImportOpalCommand, ImportRDSCommand, ImportRSASCommand, ImportRSPSSCommand, ImportRSTATACommand, ImportSQLCommand, ImportVCFCommand, ImportXMLCommand
+from obiba_opal.system import PluginService, SystemService, TaxonomyService, TaskService, RESTService
+from obiba_opal.sql import SQLService, SQLHistoryService
+from obiba_opal.security import EncryptService, DecryptService
 
 
 def add_opal_arguments(parser):
@@ -100,52 +56,52 @@ def run():
                                             'for more details.')
 
     # Add subcommands
-    add_subcommand(subparsers, 'project', 'Fetch, create, delete a project.', project.add_arguments, project.do_command)
+    add_subcommand(subparsers, 'project', 'Fetch, create, delete a project.', ProjectService.add_arguments, ProjectService.do_command)
     add_subcommand(subparsers, 'dict', 'Query for data dictionary.', DictionaryService.add_arguments, DictionaryService.do_command)
     add_subcommand(subparsers, 'data', 'Query for data.', DataService.add_arguments, DataService.do_command)
     add_subcommand(subparsers, 'entity', 'Query for entities (Participant, etc.).', EntityService.add_arguments, EntityService.do_command)
     add_subcommand(subparsers, 'file', 'Manage Opal file system.', FileService.add_arguments, FileService.do_command)
-    add_subcommand(subparsers, 'taxonomy', 'Manage taxonomies: list available taxonomies, download, import or delete a taxonomy.', taxonomy.add_arguments, taxonomy.do_command)
+    add_subcommand(subparsers, 'taxonomy', 'Manage taxonomies: list available taxonomies, download, import or delete a taxonomy.', TaxonomyService.add_arguments, TaxonomyService.do_command)
     add_subcommand(subparsers, 'backup-project',
                   'Backup project data: tables (data export), views, resources, report templates, files.',
                   BackupProjectCommand.add_arguments, BackupProjectCommand.do_command)
     add_subcommand(subparsers, 'restore-project',
                   'Restore project data: tables (data import), views, resources, report templates, files.',
-                  restore_project.add_arguments, restore_project.do_command)
+                  RestoreProjectCommand.add_arguments, RestoreProjectCommand.do_command)
     add_subcommand(subparsers, 'backup-view', 'Backup views of a project.', BackupViewService.add_arguments, BackupViewService.do_command)
-    add_subcommand(subparsers, 'restore-view', 'Restore views of a project.', restore_view.add_arguments,
-                  restore_view.do_command)
-    add_subcommand(subparsers, 'import-opal', 'Import data from a remote Opal server.', import_opal.add_arguments,
-                  import_opal.do_command)
-    add_subcommand(subparsers, 'import-csv', 'Import data from a CSV file.', import_csv.add_arguments,
-                  import_csv.do_command)
-    add_subcommand(subparsers, 'import-xml', 'Import data from a ZIP file.', import_xml.add_arguments,
-                  import_xml.do_command)
+    add_subcommand(subparsers, 'restore-view', 'Restore views of a project.', RestoreViewService.add_arguments,
+                  RestoreViewService.do_command)
+    add_subcommand(subparsers, 'import-opal', 'Import data from a remote Opal server.', ImportOpalCommand.add_arguments,
+                  ImportOpalCommand.do_command)
+    add_subcommand(subparsers, 'import-csv', 'Import data from a CSV file.', ImportCSVCommand.add_arguments,
+                  ImportCSVCommand.do_command)
+    add_subcommand(subparsers, 'import-xml', 'Import data from a ZIP file.', ImportXMLCommand.add_arguments,
+                  ImportXMLCommand.do_command)
     add_subcommand(subparsers, 'import-r-sas', 'Import data from a SAS or SAS Transport file (using R).',
-                  import_rsas.add_arguments,
-                  import_rsas.do_command)
-    add_subcommand(subparsers, 'import-r-stata', 'Import data from a Stata file (using R).', import_rstata.add_arguments,
-                  import_rstata.do_command)
+                  ImportRSASCommand.add_arguments,
+                  ImportRSASCommand.do_command)
+    add_subcommand(subparsers, 'import-r-stata', 'Import data from a Stata file (using R).', ImportRSTATACommand.add_arguments,
+                  ImportRSTATACommand.do_command)
     add_subcommand(subparsers, 'import-r-spss', 'Import data from a SPSS or compressed SPSS file (using R).',
-                  import_rspss.add_arguments,
-                  import_rspss.do_command)
-    add_subcommand(subparsers, 'import-r-rds', 'Import data from a RDS file (single serialized R object, expected to be a tibble, using R).', import_rds.add_arguments,
-                  import_rds.do_command)
-    add_subcommand(subparsers, 'import-plugin', 'Import data from an Opal datasource plugin.', import_plugin.add_arguments,
-                  import_plugin.do_command)
-    add_subcommand(subparsers, 'import-limesurvey', 'Import data from a LimeSurvey database.', import_limesurvey.add_arguments,
-                  import_limesurvey.do_command)
-    add_subcommand(subparsers, 'import-sql', 'Import data from a SQL database.', import_sql.add_arguments,
-                  import_sql.do_command)
-    add_subcommand(subparsers, 'import-vcf', 'Import genotypes data from some VCF/BCF files.', import_vcf.add_arguments,
-                  import_vcf.do_command)
-    add_subcommand(subparsers, 'import-ids', 'Import system identifiers.', import_ids.add_arguments,
-                  import_ids.do_command)
-    add_subcommand(subparsers, 'import-ids-map', 'Import identifiers mappings.', import_idsmap.add_arguments,
-                  import_idsmap.do_command)
+                  ImportRSPSSCommand.add_arguments,
+                  ImportRSPSSCommand.do_command)
+    add_subcommand(subparsers, 'import-r-rds', 'Import data from a RDS file (single serialized R object, expected to be a tibble, using R).', ImportRDSCommand.add_arguments,
+                  ImportRDSCommand.do_command)
+    add_subcommand(subparsers, 'import-plugin', 'Import data from an Opal datasource plugin.', ImportPluginCommand.add_arguments,
+                  ImportPluginCommand.do_command)
+    add_subcommand(subparsers, 'import-limesurvey', 'Import data from a LimeSurvey database.', ImportLimeSurveyCommand.add_arguments,
+                  ImportLimeSurveyCommand.do_command)
+    add_subcommand(subparsers, 'import-sql', 'Import data from a SQL database.', ImportSQLCommand.add_arguments,
+                  ImportSQLCommand.do_command)
+    add_subcommand(subparsers, 'import-vcf', 'Import genotypes data from some VCF/BCF files.', ImportVCFCommand.add_arguments,
+                  ImportVCFCommand.do_command)
+    add_subcommand(subparsers, 'import-ids', 'Import system identifiers.', ImportIDService.add_arguments,
+                  ImportIDService.do_command)
+    add_subcommand(subparsers, 'import-ids-map', 'Import identifiers mappings.', ImportIDMapService.add_arguments,
+                  ImportIDMapService.do_command)
     add_subcommand(subparsers, 'import-annot',
                   'Apply data dictionary annotations specified in a file in CSV/TSV format (see export-annot).',
-                  import_annotations.add_arguments, import_annotations.do_command)
+                  ImportAnnotationsService.add_arguments, ImportAnnotationsService.do_command)
     add_subcommand(subparsers, 'export-xml', 'Export data to a zip of Opal XML files.', ExportXMLCommand.add_arguments,
                   ExportXMLCommand.do_command)
     add_subcommand(subparsers, 'export-csv', 'Export data to a folder of CSV files.', ExportCSVCommand.add_arguments,
@@ -172,33 +128,33 @@ def run():
     add_subcommand(subparsers, 'delete-table', 'Delete some tables.', DeleteTableService.add_arguments, DeleteTableService.do_command)
     add_subcommand(subparsers, 'user', 'Manage users.', UserService.add_arguments, UserService.do_command)
     add_subcommand(subparsers, 'group', 'Manage groups.', GroupService.add_arguments, GroupService.do_command)
-    add_subcommand(subparsers, 'perm-project', 'Apply permission on a project.', perm_project.add_arguments,
-                  perm_project.do_command)
-    add_subcommand(subparsers, 'perm-datasource', 'Apply permission on a datasource.', perm_datasource.add_arguments,
-                  perm_datasource.do_command)
-    add_subcommand(subparsers, 'perm-table', 'Apply permission on a set of tables.', perm_table.add_arguments,
-                  perm_table.do_command)
-    add_subcommand(subparsers, 'perm-variable', 'Apply permission on a set of variables.', perm_variable.add_arguments,
-                  perm_variable.do_command)
-    add_subcommand(subparsers, 'perm-resources', 'Apply permission on resources as a whole.', perm_resources.add_arguments,
-                  perm_resources.do_command)
-    add_subcommand(subparsers, 'perm-resource', 'Apply permission on a set of resources.', perm_resource.add_arguments,
-                  perm_resource.do_command)
-    add_subcommand(subparsers, 'perm-r', 'Apply R permission.', perm_r.add_arguments, perm_r.do_command)
-    add_subcommand(subparsers, 'perm-datashield', 'Apply DataSHIELD permission.', perm_datashield.add_arguments,
-                  perm_datashield.do_command)
-    add_subcommand(subparsers, 'perm-system', 'Apply system permission.', perm_system.add_arguments, perm_system.do_command)
-    add_subcommand(subparsers, 'plugin', 'Manage system plugins.', plugin.add_arguments,
-                  plugin.do_command)
-    add_subcommand(subparsers, 'encrypt', "Encrypt string using Opal's secret key.", encrypt.add_arguments,
-                  encrypt.do_command)
-    add_subcommand(subparsers, 'decrypt', "Decrypt string using Opal's secret key.", decrypt.add_arguments,
-                  decrypt.do_command)
-    add_subcommand(subparsers, 'task', 'Manage a task.', task.add_arguments, task.do_command)
-    add_subcommand(subparsers, 'system', 'Query for system status and configuration.', system.add_arguments,
-                  system.do_command)
-    add_subcommand(subparsers, 'rest', 'Request directly the Opal REST API, for advanced users.', rest.add_arguments,
-                  rest.do_command)
+    add_subcommand(subparsers, 'perm-project', 'Apply permission on a project.', ProjectPermService.add_arguments,
+                  ProjectPermService.do_command)
+    add_subcommand(subparsers, 'perm-datasource', 'Apply permission on a datasource.', DatasourcePermService.add_arguments,
+                  DatasourcePermService.do_command)
+    add_subcommand(subparsers, 'perm-table', 'Apply permission on a set of tables.', TablePermService.add_arguments,
+                  TablePermService.do_command)
+    add_subcommand(subparsers, 'perm-variable', 'Apply permission on a set of variables.', VariablePermService.add_arguments,
+                  VariablePermService.do_command)
+    add_subcommand(subparsers, 'perm-resources', 'Apply permission on resources as a whole.', ResourcesPermService.add_arguments,
+                  ResourcesPermService.do_command)
+    add_subcommand(subparsers, 'perm-resource', 'Apply permission on a set of resources.', ResourcePermService.add_arguments,
+                  ResourcePermService.do_command)
+    add_subcommand(subparsers, 'perm-r', 'Apply R permission.', RPermService.add_arguments, RPermService.do_command)
+    add_subcommand(subparsers, 'perm-datashield', 'Apply DataSHIELD permission.', DataSHIELDPermService.add_arguments,
+                  DataSHIELDPermService.do_command)
+    add_subcommand(subparsers, 'perm-system', 'Apply system permission.', SystemPermService.add_arguments, SystemPermService.do_command)
+    add_subcommand(subparsers, 'plugin', 'Manage system plugins.', PluginService.add_arguments,
+                  PluginService.do_command)
+    add_subcommand(subparsers, 'encrypt', "Encrypt string using Opal's secret key.", EncryptService.add_arguments,
+                  EncryptService.do_command)
+    add_subcommand(subparsers, 'decrypt', "Decrypt string using Opal's secret key.", DecryptService.add_arguments,
+                  DecryptService.do_command)
+    add_subcommand(subparsers, 'task', 'Manage a task.', TaskService.add_arguments, TaskService.do_command)
+    add_subcommand(subparsers, 'system', 'Query for system status and configuration.', SystemService.add_arguments,
+                  SystemService.do_command)
+    add_subcommand(subparsers, 'rest', 'Request directly the Opal REST API, for advanced users.', RESTService.add_arguments,
+                  RESTService.do_command)
     add_subcommand(subparsers, 'analysis-plugin', 'Analyses a project variables using external R plugins.',
                   AnalysisCommand.add_arguments,
                   AnalysisCommand.do_command)
@@ -206,11 +162,11 @@ def run():
                   ExportAnalysisService.add_arguments,
                   ExportAnalysisService.do_command)
     add_subcommand(subparsers, 'sql', 'Execute a SQL statement on project\'s tables.',
-                  sql.add_arguments,
-                  sql.do_command)
+                  SQLService.add_arguments,
+                  SQLService.do_command)
     add_subcommand(subparsers, 'sql-history', 'SQL execution history of current user or of other users (administrator only).',
-                  sql_history.add_arguments,
-                  sql_history.do_command)
+                  SQLHistoryService.add_arguments,
+                  SQLHistoryService.do_command)
 
     # Execute selected command
     args = parser.parse_args()

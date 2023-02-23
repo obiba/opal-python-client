@@ -55,10 +55,15 @@ class OpalClient:
             client.verify_peer(0)
             client.verify_host(0)
         client.credentials(user, password)
-        
+    
         # need to know whether a OTP is needed
-        client.init_otp()
-
+        try:
+            client.init_otp()
+        except Exception as e:
+            # do the close as the exception is raised in the builder
+            client.close()
+            raise e
+        
         return client
 
     @classmethod
@@ -132,20 +137,29 @@ class OpalClient:
         if self.id is None:
             # iterate until file does not exists
             self.id = random.choice(list(range(1, 999, 1)))
-            self.cookie_file = "%s/opal-cookie-%s.dat" % (self.get_app_home(), self.id)
+            self.cookie_file = "%s/opal-cookie-%s.dat" % (self.get_app_workdir(), self.id)
             while os.path.exists(self.cookie_file):
                 self.id = random.choice(list(range(1, 999, 1)))
                 self.cookie_file = "/tmp/opal-cookie-%s.dat" % self.id
         return OpalRequest(self)
 
     def get_app_home(self):
-        app_home = '/tmp/.obiba'
-        try:
-            app_home = os.path.expanduser('~/.obiba')
-        except Exception as e:
-            pass
+        app_home = os.environ['OBIBA_HOME'] if 'OBIBA_HOME' in os.environ else None
+        if not app_home:
+            app_home = '/tmp/.obiba'
+            try:
+                app_home = os.path.expanduser('~/.obiba')
+            except Exception as e:
+                pass
+        
         os.makedirs(app_home, exist_ok=True)
         return app_home
+
+    def get_app_workdir(self):
+        app_home = self.get_app_home()
+        workdir = '%s/work' % app_home
+        os.makedirs(workdir, exist_ok=True)
+        return workdir
 
     def close(self):
         if self.id is not None:
@@ -155,9 +169,12 @@ class OpalClient:
             except Exception as e:
                 pass
             self.id = None
-            if os.path.exists(self.cookie_file):
+        if self.cookie_file:
+            try:
                 os.remove(self.cookie_file)
-
+            except OSError:
+                pass
+        
     class LoginInfo:
         data = None
 
