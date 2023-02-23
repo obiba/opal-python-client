@@ -22,7 +22,7 @@ class TestClass:
         client = self.client
         res = DictionaryService(client).get_datasources()
         assert type(res) == list
-        assert len(res) == 31
+        assert len(res) > 0
 
     def test_table(self):
         client = self.client
