@@ -3,6 +3,7 @@ Opal system data
 """
 
 import obiba_opal.core as core
+from typing import Union
 import ast
 import json
 import sys
@@ -285,7 +286,8 @@ class TaskService:
                 res = service.get_task(args.id)
                 core.Formatter.print_json(res, args.json)
             if args.wait:
-                service.wait_task(args.id)
+                status = service.wait_task(args.id)
+                print('\r\033[K' + status)
             if args.status:
                 print(service.get_task(args.id)['status'])
             if args.cancel:
@@ -295,22 +297,22 @@ class TaskService:
         finally:
             client.close()
 
-    def get_task(self, id: str):
+    def get_task(self, id: Union[str, int]):
         request = self._make_request()
-        request.get().resource('/shell/command/' + id)
+        request.get().resource('/shell/command/%s' % id)
         response = request.send()
         return response.from_json()
 
-    def delete_task(self, id: str):
+    def delete_task(self, id: Union[str, int]):
         request = self._make_request()
-        request.delete().resource('/shell/command/' + id).send()
+        request.delete().resource('/shell/command/%s' % id).send()
 
-    def cancel_task(self, id: str):
+    def cancel_task(self, id: Union[str, int]):
         request = self._make_request().content_type_text_plain()
         request.content('CANCELED')
-        request.put().resource('/shell/command/' + id + '/status').send()
+        request.put().resource('/shell/command/%s/status' % id).send()
 
-    def wait_task(self, id: str):
+    def wait_task(self, id: Union[str, int]):
         task = self.get_task(id)
         while task['status'] not in ['SUCCEEDED', 'CANCELED', 'FAILED']:
             if 'progress' in task:
@@ -324,7 +326,7 @@ class TaskService:
             sys.stdout.flush()
             time.sleep(1)
             task = self.get_task(id)
-        print('\r\033[K' + task['status'])
+        return task['status']
 
     def _make_request(self):
         request = self.client.new_request()

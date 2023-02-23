@@ -193,8 +193,8 @@ class OpalExporter:
     """
 
     @classmethod
-    def build(cls, client, datasource, tables, output, incremental=None, multilines=True, identifiers=None,
-              entityIdNames=None, verbose=None):
+    def build(cls, client, datasource: str, tables: list, output: str, incremental: bool = False, multilines: bool = True, identifiers: str = None,
+              entityIdNames = None, verbose: bool = False):
         setattr(cls, 'client', client)
         setattr(cls, 'datasource', datasource)
         setattr(cls, 'tables', tables)
@@ -210,7 +210,7 @@ class OpalExporter:
         self.client = client
         return self
 
-    def submit(self, format):
+    def submit(self, format) -> core.OpalResponse:
         # export options
         options = {
             'format': format,
