@@ -129,22 +129,22 @@ def run():
     add_subcommand(subparsers, 'delete-table', 'Delete some tables.', DeleteTableService.add_arguments, DeleteTableService.do_command)
     add_subcommand(subparsers, 'user', 'Manage users.', UserService.add_arguments, UserService.do_command)
     add_subcommand(subparsers, 'group', 'Manage groups.', GroupService.add_arguments, GroupService.do_command)
-    add_subcommand(subparsers, 'perm-project', 'Apply permission on a project.', ProjectPermService.add_arguments,
+    add_subcommand(subparsers, 'perm-project', 'Get or apply permission on a project.', ProjectPermService.add_arguments,
                   ProjectPermService.do_command)
-    add_subcommand(subparsers, 'perm-datasource', 'Apply permission on a datasource.', DatasourcePermService.add_arguments,
+    add_subcommand(subparsers, 'perm-datasource', 'Get or apply permission on a datasource.', DatasourcePermService.add_arguments,
                   DatasourcePermService.do_command)
-    add_subcommand(subparsers, 'perm-table', 'Apply permission on a set of tables.', TablePermService.add_arguments,
+    add_subcommand(subparsers, 'perm-table', 'Get or apply permission on a set of tables.', TablePermService.add_arguments,
                   TablePermService.do_command)
-    add_subcommand(subparsers, 'perm-variable', 'Apply permission on a set of variables.', VariablePermService.add_arguments,
+    add_subcommand(subparsers, 'perm-variable', 'Get or apply permission on a set of variables.', VariablePermService.add_arguments,
                   VariablePermService.do_command)
-    add_subcommand(subparsers, 'perm-resources', 'Apply permission on resources as a whole.', ResourcesPermService.add_arguments,
+    add_subcommand(subparsers, 'perm-resources', 'Get or apply permission on resources as a whole.', ResourcesPermService.add_arguments,
                   ResourcesPermService.do_command)
-    add_subcommand(subparsers, 'perm-resource', 'Apply permission on a set of resources.', ResourcePermService.add_arguments,
+    add_subcommand(subparsers, 'perm-resource', 'Get or apply permission on a set of resources.', ResourcePermService.add_arguments,
                   ResourcePermService.do_command)
-    add_subcommand(subparsers, 'perm-r', 'Apply R permission.', RPermService.add_arguments, RPermService.do_command)
-    add_subcommand(subparsers, 'perm-datashield', 'Apply DataSHIELD permission.', DataSHIELDPermService.add_arguments,
+    add_subcommand(subparsers, 'perm-r', 'Get or apply R permission.', RPermService.add_arguments, RPermService.do_command)
+    add_subcommand(subparsers, 'perm-datashield', 'Get or apply DataSHIELD permission.', DataSHIELDPermService.add_arguments,
                   DataSHIELDPermService.do_command)
-    add_subcommand(subparsers, 'perm-system', 'Apply system permission.', SystemPermService.add_arguments, SystemPermService.do_command)
+    add_subcommand(subparsers, 'perm-system', 'Get or apply system permission.', SystemPermService.add_arguments, SystemPermService.do_command)
     add_subcommand(subparsers, 'plugin', 'Manage system plugins.', PluginService.add_arguments,
                   PluginService.do_command)
     add_subcommand(subparsers, 'encrypt', "Encrypt string using Opal's secret key.", EncryptService.add_arguments,

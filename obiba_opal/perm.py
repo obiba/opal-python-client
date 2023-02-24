@@ -20,11 +20,12 @@ class PermService:
         """
         Add permission arguments
         """
-        parser.add_argument('--add', '-a', action='store_true', help='Add a permission')
+        parser.add_argument('--add', '-a', action='store_true', required=False, help='Add a permission')
         parser.add_argument('--delete', '-d', action='store_true', required=False, help='Delete a permission')
         parser.add_argument('--permission', '-pe', help="Permission to apply: %s" % ', '.join(permissions))
-        parser.add_argument('--subject', '-s', required=True, help='Subject name to which the permission will be granted')
-        parser.add_argument('--type', '-ty', required=False, help='Subject type: user or group')
+        parser.add_argument('--subject', '-s', required=False, help='Subject name to which the permission will be granted/removed')
+        parser.add_argument('--type', '-ty', required=True, help='Subject type: user or group')
+        parser.add_argument('--json', '-j', action='store_true', help='Pretty JSON formatting of the response')
 
     def _map_permission(self, permission: str, permissions: dict):
         """
@@ -40,15 +41,18 @@ class PermService:
         """
         Validate action, permission and subject type
         """
-        if not args.add and not args.delete:
-            raise ValueError("You must specify a permission operation: [--add|-a] or [--delete|-de]")
-
         if args.add:
+            if not args.subject:
+                raise ValueError("The subject name is required")
             if not args.permission:
                 raise ValueError("A permission name is required: %s" % ', '.join(list(permissions.keys())))
             if self._map_permission(args.permission, permissions) is None:
                 raise ValueError("Valid permissions are: %s" % ', '.join(list(permissions.keys())))
 
+        if args.delete:
+            if not args.subject:
+                raise ValueError("The subject name is required")
+        
         if not args.type or args.type.upper() not in self.SUBJECT_TYPES:
             raise ValueError("Valid subject types are: %s" % ', '.join(self.SUBJECT_TYPES).lower())
 
@@ -113,8 +117,11 @@ class ProjectPermService(PermService):
             # send request
             if args.delete:
                 service.delete_perm(args.project, args.subject, args.type)
-            else:
+            elif args.add:
                 service.add_perm(args.project, args.subject, args.type, args.permission)
+            else:
+                res = service.get_perms(args.project, args.type)
+                core.Formatter.print_json(res, args.json)
         finally:
             client.close()
     
@@ -192,8 +199,11 @@ class DatasourcePermService(PermService):
             # send request
             if args.delete:
                 service.delete_perm(args.project, args.subject, args.type)
-            else:
+            elif args.add:
                 service.add_perm(args.project, args.subject, args.type, args.permission)
+            else:
+                res = service.get_perms(args.project, args.type)
+                core.Formatter.print_json(res, args.json)
         finally:
             client.close()
 
@@ -276,8 +286,11 @@ class TablePermService(PermService):
             # send request
             if args.delete:
                 service.delete_perms(args.project, args.tables, args.subject, args.type)
-            else:
+            elif args.add:
                 service.add_perms(args.project, args.tables, args.subject, args.type, args.permission)
+            else:
+                res = service.get_perms(args.project, args.table, args.type)
+                core.Formatter.print_json(res, args.json)
         finally:
             client.close()
 
@@ -379,7 +392,7 @@ class VariablePermService(PermService):
         cls._add_permission_arguments(parser, list(cls.PERMISSIONS.keys()))
         parser.add_argument('--project', '-pr', required=True, help='Project name to which the tables belong')
         parser.add_argument('--table', '-t', required=True, help='Table name to which the variables belong')
-        parser.add_argument('--variables', '-va', nargs='+', required=True,
+        parser.add_argument('--variables', '-va', nargs='+', required=False,
                             help='List of variable names on which the permission is to be set (default is all)')
 
     @classmethod        
@@ -397,8 +410,13 @@ class VariablePermService(PermService):
             # send request
             if args.delete:
                 service.delete_perms(args.project, args.table, args.variables, args.subject, args.type)
-            else:
+            elif args.add:
                 service.add_perms(args.project, args.table, args.variables, args.subject, args.type, args.permission)
+            else:
+                res = []
+                for variable in service._ensure_variables(args.project, args.table, args.variables):
+                    res = res + service.get_perms(args.project, args.table, variable, args.type)
+                core.Formatter.print_json(res, args.json)
         finally:
             client.close()
 
@@ -524,8 +542,13 @@ class ResourcePermService(PermService):
             # send request
             if args.delete:
                 service.delete_perms(args.project, args.resources, args.subject, args.type)
-            else:
+            elif args.add:
                 service.add_perms(args.project, args.resources, args.subject, args.type, args.permission)
+            else:
+                res = []
+                for resource in service._ensure_resources(args.project, args.resources):
+                    res = res + service.get_perms(args.project, resource, args.type)
+                core.Formatter.print_json(res, args.json)
         finally:
             client.close()
 
@@ -642,8 +665,11 @@ class ResourcesPermService(PermService):
             # send request
             if args.delete:
                 service.delete_perm(args.project, args.subject, args.type)
-            else:
+            elif args.add:
                 service.add_perm(args.project, args.subject, args.type, args.permission)
+            else:
+                res = service.get_perms(args.project, args.type)
+                core.Formatter.print_json(res, args.json)
         finally:
             client.close()
 
@@ -718,8 +744,11 @@ class RPermService(PermService):
             # send request
             if args.delete:
                 service.delete_perm(args.subject, args.type)
-            else:
+            elif args.add:
                 service.add_perm(args.subject, args.type, args.permission)
+            else:
+                res = service.get_perms(args.type)
+                core.Formatter.print_json(res, args.json)
         finally:
             client.close()
 
@@ -792,8 +821,11 @@ class DataSHIELDPermService(PermService):
             # send request
             if args.delete:
                 service.delete_perm(args.subject, args.type)
-            else:
+            elif args.add:
                 service.add_perm(args.subject, args.type, args.permission)
+            else:
+                res = service.get_perms(args.type)
+                core.Formatter.print_json(res, args.json)
         finally:
             client.close()
 
@@ -866,8 +898,11 @@ class SystemPermService(PermService):
             # send request
             if args.delete:
                 service.delete_perm(args.subject, args.type)
-            else:
+            elif args.add:
                 service.add_perm(args.subject, args.type, args.permission)
+            else:
+                res = service.get_perms(args.type)
+                core.Formatter.print_json(res, args.json)
         finally:
             client.close()
     
