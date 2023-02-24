@@ -71,19 +71,19 @@ class OpalExtensionFactory(io.OpalImporter.ExtensionFactoryInterface):
         csv_factory = {}
 
         if self.characterSet:
-            csv_factory.characterSet = self.characterSet
+            csv_factory['characterSet'] = self.characterSet
 
         if self.separator:
-            csv_factory.separator = self.separator
+            csv_factory['separator'] = self.separator
 
         if self.quote:
-            csv_factory.quote = self.quote
+            csv_factory['quote'] = self.quote
 
         if self.firstRow:
-            csv_factory.firstRow = self.firstRow
+            csv_factory['firstRow'] = self.firstRow
 
         if self.valueType:
-            csv_factory.defaultValueType = self.valueType
+            csv_factory['defaultValueType'] = self.valueType
 
         table = {
             'data': self.path,
