@@ -170,7 +170,7 @@ class BackupViewService:
             out.write(response.content)
             out.close()
 
-    def backup_views(self, project: str, views: list, output: str, force: bool):
+    def backup_views(self, project: str, views: list, output: str, force: bool) -> list:
         """
         Retrieve table DTOs of the project, look for the views, download the views in JSON into a file in provided or current directory
         
@@ -209,8 +209,9 @@ class BackupViewService:
                 os.makedirs(outdir)
 
             # backup each view
-            for view in views:
+            for view in views_:
                 self.backup_view(project, view, outdir, force)
+        return views_
     
     def _retrieve_datasource_views(self, project: str) -> list:
         request = self.client.new_request()
