@@ -84,7 +84,7 @@ def handle_variable(args, writer, datasource, table, variableObject):
                 if not args.taxonomies or attribute['namespace'] in args.taxonomies:
                     row = [datasource, table, variableObject['name'], attribute['namespace'], attribute['name'],
                            attribute['value']]
-                    writer.writerow([s.encode("utf-8") for s in row])
+                    writer.writerow(row)
 
 
 def csv_separator(args):
