@@ -137,10 +137,10 @@ class OpalClient:
     def new_request(self):
         if self.id is None:
             # iterate until file does not exists
-            self.id = random.choice(list(range(1, 999, 1)))
+            self.id = random.choice(list(range(1, 999999, 1)))
             self.cookie_file = "%s/opal-cookie-%s.dat" % (self.get_app_workdir(), self.id)
             while os.path.exists(self.cookie_file):
-                self.id = random.choice(list(range(1, 999, 1)))
+                self.id = random.choice(list(range(1, 999999, 1)))
                 self.cookie_file = "/tmp/opal-cookie-%s.dat" % self.id
         return OpalRequest(self)
 
@@ -349,11 +349,12 @@ class OpalRequest:
         return self
 
     def content_upload(self, filename):
+        path = os.path.expanduser(filename)
         if self._verbose:
             print('* File Content:')
-            print('[file=' + filename + ', size=' + str(os.path.getsize(filename)) + ']')
+            print('[file=' + filename + ', size=' + str(os.path.getsize(path)) + ']')
             # self.curl_option(pycurl.POST,1)
-        self.curl_option(pycurl.HTTPPOST, [('file1', (pycurl.FORM_FILE, filename))])
+        self.curl_option(pycurl.HTTPPOST, [('file1', (pycurl.FORM_FILE, path))])
         return self
 
     def send(self, buffer=None):

@@ -1,4 +1,4 @@
-from obiba_opal.core import UriBuilder, OpalClient, OpalRequest, OpalResponse, Formatter, MagmaNameResolver
+from obiba_opal.core import UriBuilder, OpalClient, OpalRequest, OpalResponse, Formatter, MagmaNameResolver, HTTPError
 from obiba_opal.project import ProjectService, BackupProjectCommand, RestoreProjectCommand
 from obiba_opal.table import CopyTableCommand, BackupViewService, RestoreViewService
 from obiba_opal.dictionary import DictionaryService, ExportAnnotationsService, ImportAnnotationsService

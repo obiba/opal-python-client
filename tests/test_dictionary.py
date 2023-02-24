@@ -22,7 +22,7 @@ class TestClass:
         client = self.client
         res = DictionaryService(client).get_datasources()
         assert type(res) == list
-        assert len(res) > 0
+        assert 'CNSIM' in [x['name'] for x in res]
 
     def test_table(self):
         client = self.client
@@ -35,7 +35,7 @@ class TestClass:
         client = self.client
         res = DictionaryService(client).get_tables('CNSIM')
         assert type(res) == list
-        assert len(res) == 3
+        assert 'CNSIM1' in [x['name'] for x in res]
 
     def test_variable(self):
         client = self.client

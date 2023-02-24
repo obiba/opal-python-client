@@ -23,6 +23,7 @@ class TestClass:
         assert 'id' in task
         status = TaskService(client).wait_task(task['id'])
         assert status in ['SUCCEEDED', 'CANCELED', 'FAILED']
+        fs.delete_file('/tmp/data.csv')
         dico = DictionaryService(client)
         table = dico.get_table('CNSIM', 'data')
         assert table is not None
