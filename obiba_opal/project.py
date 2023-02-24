@@ -104,7 +104,7 @@ class ProjectService:
         Add a project.
 
         :param name: The project name
-        :param database: The project database name. If not provided only views can be added.
+        :param database: The project database name. If not provided only views can be added. See get_databases() for the list of databases available for storage.
         :param title: The project title
         :param description: The project description
         :param tags: The list of project tags
@@ -131,7 +131,18 @@ class ProjectService:
         request = self._make_request()
         request.accept_json().content_type_json()
         request.post().resource(core.UriBuilder(['projects']).build()).content(json.dumps(project)).send()
-        
+
+    def get_databases(self, usage: str = 'storage') -> list:
+        """
+        Get the databases available.
+
+        :param usage: Database usage: 'storage' (default), 'import' or 'export'
+        """
+        request = self._make_request()
+        request.accept_json()
+        response = request.get().resource(core.UriBuilder(['system', 'databases']).query('usage', usage).build()).send()
+        return response.from_json()
+
     def _make_request(self, fail_safe: bool = False):
         request = self.client.new_request()
         if not fail_safe:

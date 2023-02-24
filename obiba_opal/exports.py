@@ -412,7 +412,7 @@ class ExportSQLCommand:
 
         :param project: The project name
         :param tables: The table names to export
-        :param database: The SQL database name
+        :param database: The SQL database name. See ProjectService.get_databases() for a list of databases with 'export' usage.
         :param identifiers: The name of the ID mapping
         :param incremental: Incremental export
         """

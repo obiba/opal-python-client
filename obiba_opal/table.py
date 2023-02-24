@@ -4,6 +4,7 @@ Table/view copy and management.
 
 import obiba_opal.core as core
 import obiba_opal.io as io
+from obiba_opal.dictionary import DictionaryService
 import os
 import zipfile
 
@@ -18,7 +19,7 @@ class CopyTableCommand:
         self.verbose = verbose
 
     @classmethod
-    def add_arguments(self, parser):
+    def add_arguments(cls, parser):
         """
         Add data command specific options
         """
@@ -33,7 +34,7 @@ class CopyTableCommand:
         parser.add_argument('--json', '-j', action='store_true', help='Pretty JSON formatting of the response')
 
     @classmethod
-    def do_command(self, args):
+    def do_command(cls, args):
         """
         Execute copy data command
         """
@@ -90,7 +91,7 @@ class DeleteTableService:
         self.verbose = verbose
 
     @classmethod
-    def add_arguments(self, parser):
+    def add_arguments(cls, parser):
         """
         Add command specific options
         """
@@ -99,55 +100,17 @@ class DeleteTableService:
                             help='List of table names which will be deleted (default is all)')
 
     @classmethod
-    def do_command(self, args):
+    def do_command(cls, args):
         """
         Execute delete command
         """
         # Build and send requests
         client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
         try:
-            DeleteTableService(client, args.verbose).delete_tables(args.project, args.tables)
+            DictionaryService(client, args.verbose).delete_tables(args.project, args.tables)
         finally:
             client.close()
 
-    def delete_tables(self, project: str, tables: list = None):
-        """
-        Execute delete table command
-
-        :param client: Opal connection object
-        :param project: The project name
-        :param tables: List of table names to be deleted (default is all)
-        :param verbose: Verbose requests
-        """
-        tables_ = tables
-        if not tables:
-            tables_ = self._retrieve_datasource_tables(project)
-        
-        for table in tables_:
-            request = self.client.new_request()
-            if self.verbose:
-                request.verbose()
-            # send request
-            try:
-                response = request.delete().resource(core.UriBuilder(['datasource', project, 'table', table]).build()).send()
-                # format response
-                if self.verbose and response.code != 200:
-                    print(response.content)
-            except Exception as e:
-                print(Exception, e)
-    
-    def _retrieve_datasource_tables(self, project: str) -> list:
-        request = self.client.new_request()
-        request.fail_on_error()
-        if self.verbose:
-            request.verbose()
-        response = request.get().resource(core.UriBuilder(['datasource', project, 'tables']).build()).send()
-
-        tables = []
-        for table in response.from_json():
-            tables.append(str(table['name']))
-
-        return tables
 
 class BackupViewService:
     """
@@ -159,7 +122,7 @@ class BackupViewService:
         self.verbose = verbose
 
     @classmethod
-    def add_arguments(self, parser):
+    def add_arguments(cls, parser):
         """
         Add command specific options
         """
@@ -171,7 +134,7 @@ class BackupViewService:
                             help='Skip confirmation when overwriting the backup file.')
 
     @classmethod
-    def do_command(self, args):
+    def do_command(cls, args):
         """
         Retrieve table DTOs of the project, look for the views, download the views in JSON into a file in provided or current directory
         """

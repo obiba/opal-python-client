@@ -1,4 +1,4 @@
-from obiba_opal import ImportCSVCommand, TaskService, FileService, DictionaryService, DeleteTableService
+from obiba_opal import ImportCSVCommand, TaskService, FileService, DictionaryService
 from tests.utils import make_client
 import random
 
@@ -26,6 +26,6 @@ class TestClass:
         dico = DictionaryService(client)
         table = dico.get_table('CNSIM', 'data')
         assert table is not None
-        DeleteTableService(client).delete_tables('CNSIM', ['data'])
+        dico.delete_tables('CNSIM', ['data'])
         ds = dico.get_datasource('CNSIM')
         assert 'data' not in ds['table']

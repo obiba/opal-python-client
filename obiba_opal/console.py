@@ -4,6 +4,7 @@
 import argparse
 import sys
 
+from obiba_opal.core import Formatter, HTTPError
 from obiba_opal.project import ProjectService, BackupProjectCommand, RestoreProjectCommand
 from obiba_opal.table import CopyTableCommand, DeleteTableService, BackupViewService, RestoreViewService
 from obiba_opal.dictionary import DictionaryService, ExportAnnotationsService, ImportAnnotationsService
@@ -171,11 +172,17 @@ def run():
     # Execute selected command
     args = parser.parse_args()
     if hasattr(args, 'func'):
-      try:
-        args.func(args)
-      except Exception as e:
-          print(e)
-          sys.exit(2)
+        try:
+          args.func(args)
+        except HTTPError as e:
+            Formatter.print_json(e.error, args.json if hasattr(args, 'json') else False)
+            sys.exit(2)
+        except Exception as e:
+            if hasattr(e, 'message'):
+                print(e.message)
+            else:
+                print(e)
+            sys.exit(2)
     else:
-      print('Opal command line tool.')
-      print('For more details: opal --help')
+        print('Opal command line tool.')
+        print('For more details: opal --help')

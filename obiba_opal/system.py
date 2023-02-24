@@ -358,7 +358,7 @@ class RESTService:
         parser.add_argument('--json', '-j', action='store_true', help='Pretty JSON formatting of the response')
 
     @classmethod
-    def do_command(args):
+    def do_command(cls, args):
         """
         Execute REST command
         """

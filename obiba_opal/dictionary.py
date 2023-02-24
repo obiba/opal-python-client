@@ -22,7 +22,7 @@ class DictionaryService:
         self.verbose = verbose
 
     @classmethod
-    def add_arguments(self, parser):
+    def add_arguments(cls, parser):
         """
         Add variable command specific options
         """
@@ -31,7 +31,7 @@ class DictionaryService:
         parser.add_argument('--json', '-j', action='store_true', help='Pretty JSON formatting of the response')
 
     @classmethod
-    def do_command(self, args):
+    def do_command(cls, args):
         """
         Execute variable command
         """
@@ -95,6 +95,26 @@ class DictionaryService:
         """
         return self._get_dictionary('%s.%s:%s' % (project, table, variable))
     
+    def delete_tables(self, project: str, tables: list = None):
+        """
+        Delete provided or all tables.
+
+        :param client: Opal connection object
+        :param project: The project name
+        :param tables: List of table names to be deleted (default is all)
+        :param verbose: Verbose requests
+        """
+        tables_ = tables
+        if not tables:
+            tables_ = self.get_tables(project)
+            tables_ = [x['name'] for x in tables_]
+        
+        for table in tables_:
+            request = self.client.new_request()
+            if self.verbose:
+                request.verbose()
+            request.fail_on_error().delete().resource(core.UriBuilder(['datasource', project, 'table', table]).build()).send()
+
     def _get_dictionary(self, name: str) -> any:
         """
         Get dictionary items by their full name, with wild-card support.
@@ -112,6 +132,7 @@ class DictionaryService:
         response = request.send()
         return response.from_json()
 
+
 class ExportAnnotationsService:
     """
     Export dictionary annotations for later import.
@@ -122,7 +143,7 @@ class ExportAnnotationsService:
         self.verbose = verbose
 
     @classmethod
-    def add_arguments(self, parser):
+    def add_arguments(cls, parser):
         """
         Add command specific options
         """
@@ -138,7 +159,7 @@ class ExportAnnotationsService:
                             help='The list of taxonomy names of interest (default is any that are found in the variable attributes)')
 
     @classmethod
-    def do_command(self, args):
+    def do_command(cls, args):
         """
         Execute command
         """
@@ -218,7 +239,7 @@ class ImportAnnotationsService:
         self.verbose = verbose
     
     @classmethod
-    def add_arguments(self, parser):
+    def add_arguments(cls, parser):
         """
         Add command specific options
         """
@@ -237,7 +258,7 @@ class ImportAnnotationsService:
                             help='The list of taxonomy names of interest (default is any that is found in the input file)')
 
     @classmethod
-    def do_command(self, args):
+    def do_command(cls, args):
         """
         Execute command
         """

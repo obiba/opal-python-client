@@ -815,7 +815,7 @@ class ImportSQLCommand:
         """
         Import tables from a SQL database.
         
-        :param database: The database name as declared in Opal
+        :param database: The database name as declared in Opal. See ProjectService.get_databases() for a list of databases with 'import' usage.
         :param destination: The destination project
         :param tables: The tables names to be imported (default is all)
         :param incremental: Incremental import (new and updated value sets)

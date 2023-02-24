@@ -14,6 +14,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from functools import reduce
+from http import HTTPStatus
 
 
 class OpalClient:
@@ -224,6 +225,7 @@ class OpalRequest:
         self.curl_options = {}
         self.headers = {'Accept': 'application/json'}
         self._verbose = False
+        self._fail_on_error = False
 
     def curl_option(self, opt, value):
         self.curl_options[opt] = value
@@ -240,7 +242,9 @@ class OpalRequest:
         return self.curl_option(pycurl.VERBOSE, True)
 
     def fail_on_error(self):
-        return self.curl_option(pycurl.FAILONERROR, True)
+        #return self.curl_option(pycurl.FAILONERROR, True)
+        self._fail_on_error = True
+        return self
 
     def header(self, key, value):
         if value:
@@ -366,6 +370,9 @@ class OpalRequest:
         curl.perform()
         response = OpalResponse(curl.getinfo(pycurl.HTTP_CODE), hbuf.headers, cbuf.content.decode('utf-8'))
         curl.close()
+
+        if self._fail_on_error and response.code >= 400:
+            raise HTTPError(response)
 
         return response
 
@@ -595,3 +602,21 @@ class UriBuilder:
 
     def build(self):
         return self.__str__()
+
+class HTTPError(Exception):
+    def __init__(self, response: OpalResponse, message: str = None):            
+        # Call the base class constructor with the parameters it needs
+        super().__init__(message if message else 'HTTP Error: %s' % response.code)
+        self.code = response.code
+        http_status = [x for x in list(HTTPStatus) if x.value == response.code][0]
+        self.message = message if message else '%s: %s' % (http_status.phrase, http_status.description)
+        self.error = response.from_json() if response.content else { 'code': response.code, 'status': self.message }
+        # case the reported error is not a dict
+        if type(self.error) != dict:
+            self.error = { 'code': response.code, 'status': self.error }
+
+    def is_client_error(self) -> bool:
+        return self.code >= 400 and self.code < 500
+    
+    def is_server_error(self) -> bool:
+        return self.code >= 500
