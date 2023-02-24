@@ -20,10 +20,11 @@ class PermService:
         """
         Add permission arguments
         """
+        parser.add_argument('--fetch', '-f', action='store_true', required=False, help='Fetch permissions')
         parser.add_argument('--add', '-a', action='store_true', required=False, help='Add a permission')
         parser.add_argument('--delete', '-d', action='store_true', required=False, help='Delete a permission')
         parser.add_argument('--permission', '-pe', help="Permission to apply: %s" % ', '.join(permissions))
-        parser.add_argument('--subject', '-s', required=False, help='Subject name to which the permission will be granted/removed')
+        parser.add_argument('--subject', '-s', required=False, help='Subject name to which the permission will be granted/removed (required on add/delete)')
         parser.add_argument('--type', '-ty', required=True, help='Subject type: user or group')
         parser.add_argument('--json', '-j', action='store_true', help='Pretty JSON formatting of the response')
 
@@ -269,7 +270,7 @@ class TablePermService(PermService):
         cls._add_permission_arguments(parser, list(cls.PERMISSIONS.keys()))
         parser.add_argument('--project', '-pr', required=True, help='Project name to which the tables belong')
         parser.add_argument('--tables', '-t', nargs='+', required=False,
-                            help='List of table names on which the permission is to be set (default is all)')
+                            help='List of table names on which the permission is to be get/set (default is all)')
 
     @classmethod        
     def do_command(cls, args):
@@ -289,7 +290,9 @@ class TablePermService(PermService):
             elif args.add:
                 service.add_perms(args.project, args.tables, args.subject, args.type, args.permission)
             else:
-                res = service.get_perms(args.project, args.table, args.type)
+                res = []
+                for table in service._ensure_tables(args.project, args.tables):
+                    res = res + service.get_perms(args.project, table, args.type)
                 core.Formatter.print_json(res, args.json)
         finally:
             client.close()
@@ -393,7 +396,7 @@ class VariablePermService(PermService):
         parser.add_argument('--project', '-pr', required=True, help='Project name to which the tables belong')
         parser.add_argument('--table', '-t', required=True, help='Table name to which the variables belong')
         parser.add_argument('--variables', '-va', nargs='+', required=False,
-                            help='List of variable names on which the permission is to be set (default is all)')
+                            help='List of variable names on which the permission is to be get/set (default is all)')
 
     @classmethod        
     def do_command(cls, args):
@@ -525,7 +528,7 @@ class ResourcePermService(PermService):
         cls._add_permission_arguments(parser, list(cls.PERMISSIONS.keys()))
         parser.add_argument('--project', '-pr', required=True, help='Project name to which the resources belong')
         parser.add_argument('--resources', '-r', nargs='+', required=False,
-                            help='List of resource names on which the permission is to be set (default is all)')
+                            help='List of resource names on which the permission is to be get/set (default is all)')
     
     @classmethod        
     def do_command(cls, args):
