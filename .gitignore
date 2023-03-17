@@ -27,4 +27,6 @@ coverage
 *.sln
 *.sw?
 
+# VSCode
+.history
 __pycache__
