@@ -28,6 +28,8 @@ sudo apt-get install python3-pycurl
 sudo yum install python3-pycurl
 ```
 
+### CLI
+
 To get the options of the command line:
 
 ```shell
@@ -43,7 +45,7 @@ opal <subcommand> --help
 The objective of having sub-command is to hide the complexity of applying some use cases to the Opal REST API. More
 sub-commands will be developed in the future.
 
-## Development
+## API
 
 Opal Python client can be easily extended by using the [exposed classes](https://github.com/obiba/opal-python-client/blob/master/obiba_opal/__init__.py). The classes `*Command` return an Opal task object, to be followed with the `TaskService`. The classes `*Service` perform immediate operations. 
 
