@@ -342,6 +342,52 @@ class RESTService:
     Perform raw web services requests.
     """
 
+    def __init__(self, client: core.OpalClient, accept: str = None, headers = None, verbose: bool = False):
+        self.client = client
+        self.verbose = verbose
+
+    def make_request(self, accept: str = None, headers = None):
+        request = self.client.new_request()
+        request.fail_on_error()
+
+        if accept:
+            request.accept(accept)
+        else:
+            request.accept_json()
+
+        if headers:
+            headers = ast.literal_eval(headers)
+            for key in list(headers.keys()):
+                request.header(key, headers[key])
+
+        if self.verbose:
+            request.verbose()
+        return request
+
+    def make_request_with_content_type(self, contentType, accept: str = None, headers = None):
+        request = self.make_request(accept, headers)
+        if contentType:
+          request.content_type(contentType)
+          print('Enter content:')
+          request.content(sys.stdin.read())
+
+        return request
+
+    def send_get_request(self, url: str, request: core.OpalRequest):
+        return request.get().resource(url).send()
+
+    def send_options_request(self, url: str, request: core.OpalRequest):
+        return request.options().resource(url).send()
+
+    def send_delete_request(self, url: str, request: core.OpalRequest):
+        return request.delete().resource(url).send()
+
+    def send_put_request(self, url: str, request: core.OpalRequest):
+        return request.put().resource(url).send()
+
+    def send_post_request(self, url: str, request: core.OpalRequest):
+        return request.post().resource(url).send()
+
     @classmethod
     def add_arguments(cls, parser):
         """
@@ -364,31 +410,15 @@ class RESTService:
         """
         # Build and send request
         client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
+        service = RESTService(client, args.accept, args)
+        method = args.method if args.method else 'GET'
+        serviceMethod = getattr(service, 'send_%s_request' % method.lower())
+
         try:
-            request = client.new_request()
-            request.fail_on_error()
-
-            if args.accept:
-                request.accept(args.accept)
+            if method in ['POST', 'PUT']:
+              response = serviceMethod(args.ws, service.make_request_with_content_type(args.content_type, args.accept, args.headers))
             else:
-                request.accept_json()
-
-            if args.content_type:
-                request.content_type(args.content_type)
-                print('Enter content:')
-                request.content(sys.stdin.read())
-
-            if args.headers:
-                headers = ast.literal_eval(args.headers)
-                for key in list(headers.keys()):
-                    request.header(key, headers[key])
-
-            if args.verbose:
-                request.verbose()
-
-            # send request
-            request.method(args.method).resource(args.ws)
-            response = request.send()
+              response = serviceMethod(args.ws, service.make_request(args.accept, args.headers))
 
             # format response
             res = response.content
