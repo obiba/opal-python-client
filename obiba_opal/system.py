@@ -364,12 +364,16 @@ class RESTService:
             request.verbose()
         return request
 
-    def make_request_with_content_type(self, contentType, accept: str = None, headers = None):
+    def make_request_with_content_type(self, contentType, accept: str = None, headers = None, content: str = None):
         request = self.make_request(accept, headers)
         if contentType:
           request.content_type(contentType)
-          print('Enter content:')
-          request.content(sys.stdin.read())
+
+          if content is not None:
+              request.content(content)
+          else:
+            print('Enter content:')
+            request.content(sys.stdin.read())
 
         return request
 
