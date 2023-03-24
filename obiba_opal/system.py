@@ -346,8 +346,9 @@ class RESTService:
         self.client = client
         self.verbose = verbose
 
-    def make_request(self, accept: str = None, headers = None):
+    def make_request(self, method: str, accept: str = None, headers = None):
         request = self.client.new_request()
+        request.method(method)
         request.fail_on_error()
 
         if accept:
@@ -364,8 +365,9 @@ class RESTService:
             request.verbose()
         return request
 
-    def make_request_with_content_type(self, contentType, accept: str = None, headers = None, content: str = None):
-        request = self.make_request(accept, headers)
+    def make_request_with_content_type(self, method: str, contentType: str, accept: str = None, headers = None, content: str = None):
+        request = self.make_request(method, accept, headers)
+
         if contentType:
           request.content_type(contentType)
 
@@ -377,20 +379,8 @@ class RESTService:
 
         return request
 
-    def send_get_request(self, url: str, request: core.OpalRequest):
-        return request.get().resource(url).send()
-
-    def send_options_request(self, url: str, request: core.OpalRequest):
-        return request.options().resource(url).send()
-
-    def send_delete_request(self, url: str, request: core.OpalRequest):
-        return request.delete().resource(url).send()
-
-    def send_put_request(self, url: str, request: core.OpalRequest):
-        return request.put().resource(url).send()
-
-    def send_post_request(self, url: str, request: core.OpalRequest):
-        return request.post().resource(url).send()
+    def send_request(self, url: str, request: core.OpalRequest):
+        return request.resource(url).send()
 
     @classmethod
     def add_arguments(cls, parser):
@@ -418,15 +408,15 @@ class RESTService:
         method = args.method if args.method else 'GET'
 
         try:
-            serviceMethod = getattr(service, 'send_%s_request' % method.lower())
-
             if method in ['POST', 'PUT']:
-              response = serviceMethod(args.ws, service.make_request_with_content_type(args.content_type, args.accept, args.headers))
+              request = service.make_request_with_content_type(args.method, args.content_type, args.accept, args.headers)
             else:
-              response = serviceMethod(args.ws, service.make_request(args.accept, args.headers))
+              request = service.make_request(args.method, args.accept, args.headers)
 
             # format response
+            response = service.send_request(args.ws, request)
             res = response.content
+
             if args.json:
                 res = response.pretty_json()
             elif args.method in ['OPTIONS']:
