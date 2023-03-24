@@ -414,11 +414,12 @@ class RESTService:
         """
         # Build and send request
         client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
-        service = RESTService(client, args.accept, args.verbose)
+        service = RESTService(client, args.verbose)
         method = args.method if args.method else 'GET'
-        serviceMethod = getattr(service, 'send_%s_request' % method.lower())
 
         try:
+            serviceMethod = getattr(service, 'send_%s_request' % method.lower())
+
             if method in ['POST', 'PUT']:
               response = serviceMethod(args.ws, service.make_request_with_content_type(args.content_type, args.accept, args.headers))
             else:
