@@ -342,7 +342,7 @@ class RESTService:
     Perform raw web services requests.
     """
 
-    def __init__(self, client: core.OpalClient, accept: str = None, headers = None, verbose: bool = False):
+    def __init__(self, client: core.OpalClient, verbose: bool = False):
         self.client = client
         self.verbose = verbose
 
@@ -414,7 +414,7 @@ class RESTService:
         """
         # Build and send request
         client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
-        service = RESTService(client, args.accept, args)
+        service = RESTService(client, args.accept, args.verbose)
         method = args.method if args.method else 'GET'
         serviceMethod = getattr(service, 'send_%s_request' % method.lower())
 
