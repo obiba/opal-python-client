@@ -342,6 +342,46 @@ class RESTService:
     Perform raw web services requests.
     """
 
+    def __init__(self, client: core.OpalClient, verbose: bool = False):
+        self.client = client
+        self.verbose = verbose
+
+    def make_request(self, method: str, accept: str = None, headers = None):
+        request = self.client.new_request()
+        request.method(method)
+        request.fail_on_error()
+
+        if accept:
+            request.accept(accept)
+        else:
+            request.accept_json()
+
+        if headers:
+            headers = ast.literal_eval(headers)
+            for key in list(headers.keys()):
+                request.header(key, headers[key])
+
+        if self.verbose:
+            request.verbose()
+        return request
+
+    def make_request_with_content_type(self, method: str, contentType: str, accept: str = None, headers = None, content: str = None):
+        request = self.make_request(method, accept, headers)
+
+        if contentType:
+          request.content_type(contentType)
+
+          if content is not None:
+              request.content(content)
+          else:
+            print('Enter content:')
+            request.content(sys.stdin.read())
+
+        return request
+
+    def send_request(self, url: str, request: core.OpalRequest):
+        return request.resource(url).send()
+
     @classmethod
     def add_arguments(cls, parser):
         """
@@ -364,34 +404,19 @@ class RESTService:
         """
         # Build and send request
         client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
+        service = RESTService(client, args.verbose)
+        method = args.method if args.method else 'GET'
+
         try:
-            request = client.new_request()
-            request.fail_on_error()
-
-            if args.accept:
-                request.accept(args.accept)
+            if method in ['POST', 'PUT']:
+              request = service.make_request_with_content_type(args.method, args.content_type, args.accept, args.headers)
             else:
-                request.accept_json()
-
-            if args.content_type:
-                request.content_type(args.content_type)
-                print('Enter content:')
-                request.content(sys.stdin.read())
-
-            if args.headers:
-                headers = ast.literal_eval(args.headers)
-                for key in list(headers.keys()):
-                    request.header(key, headers[key])
-
-            if args.verbose:
-                request.verbose()
-
-            # send request
-            request.method(args.method).resource(args.ws)
-            response = request.send()
+              request = service.make_request(args.method, args.accept, args.headers)
 
             # format response
+            response = service.send_request(args.ws, request)
             res = response.content
+
             if args.json:
                 res = response.pretty_json()
             elif args.method in ['OPTIONS']:
