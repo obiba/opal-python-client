@@ -28,6 +28,7 @@ class PermService:
         parser.add_argument('--type', '-ty', required=True, help='Subject type: user or group')
         parser.add_argument('--json', '-j', action='store_true', help='Pretty JSON formatting of the response')
 
+    @classmethod
     def _map_permission(self, permission: str, permissions: dict):
         """
         Map permission argument to permission query parameter
@@ -335,7 +336,7 @@ class TablePermService(PermService):
         request.delete().resource(
                 self._make_delete_ws(['project', project, 'permissions', 'table', table], subject, type)).send()
 
-    def add_perms(self, project: str, tables: list, subject: str, type: str):
+    def add_perms(self, project: str, tables: list, subject: str, type: str, permission: str):
         """
         Add project's tables level permissions.
 
@@ -347,7 +348,7 @@ class TablePermService(PermService):
         """
         tables_ = self._ensure_tables(project, tables)
         for table in tables_:
-            self.add_perm(project, table, subject, type)
+            self.add_perm(project, table, subject, type, permission)
 
     def add_perm(self, project: str, table: str, subject: str, type: str, permission: str):
         """
@@ -465,7 +466,7 @@ class VariablePermService(PermService):
         request.delete().resource(
                 self._make_delete_ws(['project', project, 'permissions', 'table', table, 'variable', variable], subject, type)).send()
 
-    def add_perms(self, project: str, table: str, variables: list, subject: str, type: str):
+    def add_perms(self, project: str, table: str, variables: list, subject: str, type: str, permission: str):
         """
         Add project's table variables level permissions.
 
@@ -478,7 +479,7 @@ class VariablePermService(PermService):
         """
         variables_ = self._ensure_variables(project, table, variables)
         for variable in variables_:
-            self.add_perm(project, table, variable, subject, type)
+            self.add_perm(project, table, variable, subject, type, permission)
 
     def add_perm(self, project: str, table: str, variable: str, subject: str, type: str, permission: str):
         """
@@ -593,7 +594,7 @@ class ResourcePermService(PermService):
         request.delete().resource(
                 self._make_delete_ws(['project', project, 'permissions', 'resource', resource], subject, type)).send()
 
-    def add_perms(self, project: str, resources: list, subject: str, type: str):
+    def add_perms(self, project: str, resources: list, subject: str, type: str, permission: str):
         """
         Add project's resources level permissions.
 
@@ -605,7 +606,7 @@ class ResourcePermService(PermService):
         """
         resources_ = self._ensure_resources(project, resources)
         for resource in resources_:
-            self.add_perm(project, resource, subject, type)
+            self.add_perm(project, resource, subject, type, permission)
 
     def add_perm(self, project: str, resource: str, subject: str, type: str, permission: str):
         """
