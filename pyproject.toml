@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "obiba-opal"
-version = "5.1.0"
+version = "5.1.1"
 description = "OBiBa/Opal python client."
 authors = ["Yannick Marcon <yannick.marcon@obiba.org>"]
 maintainers = ["Yannick Marcon <yannick.marcon@obiba.org>"]
