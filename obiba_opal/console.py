@@ -19,6 +19,8 @@ from obiba_opal.system import PluginService, SystemService, TaxonomyService, Tas
 from obiba_opal.sql import SQLService, SQLHistoryService
 from obiba_opal.security import EncryptService, DecryptService
 
+def prompt_password():
+    return input('Enter password:')
 
 def add_opal_arguments(parser):
     """
@@ -27,7 +29,7 @@ def add_opal_arguments(parser):
     parser.add_argument('--opal', '-o', required=False, default='http://localhost:8080',
                         help='Opal server base url (default: http://localhost:8080)')
     parser.add_argument('--user', '-u', required=False, help='Credentials auth: user name (requires a password)')
-    parser.add_argument('--password', '-p', required=False,
+    parser.add_argument('--password', '-p', required=False, nargs="?",
                         help='Credentials auth: user password (requires a user name)')
     parser.add_argument('--token', '-tk', required=False, help='Token auth: User access token')
     parser.add_argument('--ssl-cert', '-sc', required=False,
@@ -171,6 +173,10 @@ def run():
 
     # Execute selected command
     args = parser.parse_args()
+
+    if not args.password or len(args.password) == 0:
+        args.password = prompt_password()
+
     if hasattr(args, 'func'):
         try:
           args.func(args)
