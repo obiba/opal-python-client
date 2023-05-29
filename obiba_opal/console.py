@@ -3,6 +3,7 @@
 #
 import argparse
 import sys
+import getpass
 
 from obiba_opal.core import Formatter, HTTPError
 from obiba_opal.project import ProjectService, BackupProjectCommand, RestoreProjectCommand
@@ -20,7 +21,7 @@ from obiba_opal.sql import SQLService, SQLHistoryService
 from obiba_opal.security import EncryptService, DecryptService
 
 def prompt_password():
-    return input('Enter password:')
+    return getpass.getpass(prompt='Enter password: ')
 
 def add_opal_arguments(parser):
     """
