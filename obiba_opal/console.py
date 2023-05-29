@@ -175,9 +175,11 @@ def run():
     # Execute selected command
     args = parser.parse_args()
 
-    if not args.password or len(args.password) == 0:
+    # Prompt for a missing password only when user/password is required
+    if not (args.ssl_cert or args.ssl_key) and not args.token:
+      if not args.password or len(args.password) == 0:
         args.password = prompt_password()
-
+        
     if hasattr(args, 'func'):
         try:
           args.func(args)
