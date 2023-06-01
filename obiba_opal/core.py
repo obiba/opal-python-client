@@ -519,7 +519,7 @@ class OpalRequest:
         if self._verbose:
             logging.info('* File Content:')
             logging.info('[file=' + filename + ', size=' + str(os.path.getsize(filename)) + ']')
-        self.files = {'file': (filename, open(filename, 'rb'))}
+        self.files = {'file': (os.path.basename(filename), open(filename, 'rb'))}
         return self
 
     def __build_request(self):
