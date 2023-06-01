@@ -38,7 +38,7 @@ def add_opal_arguments(parser):
     parser.add_argument('--ssl-key', '-sk', required=False,
                         help='Two-way SSL auth: private key file (requires a certificate)')
     parser.add_argument('--verbose', '-v', action='store_true', help='Verbose output')
-
+    parser.add_argument('--no-ssl-verify', '-nv', action='store_true', help='Do not verify SSL certificates for HTTPS.')
 
 def add_subcommand(subparsers, name, help, add_args_func, default_func):
     """
@@ -174,6 +174,7 @@ def run():
 
     # Execute selected command
     args = parser.parse_args()
+
 
     if hasattr(args, 'func'):
         try:
