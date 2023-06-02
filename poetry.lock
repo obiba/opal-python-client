@@ -201,17 +201,6 @@ dev = ["pre-commit", "tox"]
 testing = ["pytest", "pytest-benchmark"]
 
 [[package]]
-name = "pycurl"
-version = "7.45.2"
-description = "PycURL -- A Python Interface To The cURL library"
-category = "main"
-optional = false
-python-versions = ">=3.5"
-files = [
-    {file = "pycurl-7.45.2.tar.gz", hash = "sha256:5730590be0271364a5bddd9e245c9cc0fb710c4cbacbdd95264a3122d23224ca"},
-]
-
-[[package]]
 name = "pytest"
 version = "7.3.1"
 description = "pytest: simple powerful testing with Python"
@@ -318,4 +307,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7"
-content-hash = "0afe3208fb56eb6c1912ea3eb3cb30266f005b53742750593eb269c349e9ce25"
+content-hash = "335052695b16a0fded331bbc44db184e5b849d3777a113263590aaf72addf6d0"

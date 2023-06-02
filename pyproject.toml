@@ -16,7 +16,6 @@ documentation = "https://opaldoc.obiba.org/en/latest/python-user-guide/"
 
 [tool.poetry.dependencies]
 python = "^3.7"
-pycurl = "^7.45.2"
 requests = "^2.31.0"
 
 [tool.poetry.group.test.dependencies]
