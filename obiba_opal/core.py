@@ -1,10 +1,7 @@
 """
-Based on PyCurl http://pycurl.sourceforge.net/
-See also http://www.angryobjects.com/2011/10/15/http-with-python-pycurl-by-example/
-Curl options http://curl.haxx.se/libcurl/c/curl_easy_setopt.html
+Based on Python Request library https://docs.python-requests.org/en/latest/index.html
 """
 
-import random
 import base64
 import getpass
 import json
@@ -34,6 +31,11 @@ class OpalClient:
 
     @classmethod
     def build(cls, loginInfo):
+        """
+        Creates a client instance
+
+        :param loginInfo - login related information
+        """
         if loginInfo.isSsl():
             return OpalClient.buildWithCertificate(loginInfo.data['server'], loginInfo.data['cert'],
                                                    loginInfo.data['key'], loginInfo.data['no_ssl_verify'])
@@ -45,6 +47,15 @@ class OpalClient:
 
     @classmethod
     def buildWithCertificate(cls, server, cert, key, no_ssl_verify: bool = False):
+        """
+        Creates a client instance authenticated by a certificate/key combination
+
+        :param server - Opal server address
+        :param cert - public certificate/key (must be named as 'publickey.pem')
+        :param key - private key (must be named as 'privatekey.pem')
+        :param no_ssl_verify - if True, the SSL certificate is not verified (not recommended)
+        """
+       
         client = cls(server)
         if client.base_url.startswith('https:'):
             client.session.verify = False if no_ssl_verify else True
@@ -54,6 +65,14 @@ class OpalClient:
 
     @classmethod
     def buildWithAuthentication(cls, server, user, password, no_ssl_verify: bool = False):
+        """
+        Creates a client instance authenticated by a user/password
+
+        :param server - Opal server address
+        :param user - username
+        :param password - user password
+        :param no_ssl_verify - if True, the SSL certificate is not verified (not recommended)
+        """
         client = cls(server)
         if client.base_url.startswith('https:'):
             client.session.verify = False if no_ssl_verify else True
@@ -71,6 +90,13 @@ class OpalClient:
 
     @classmethod
     def buildWithToken(cls, server, token, no_ssl_verify: bool = False):
+        """
+        Creates a client instance authenticated by a token configured by an Opal user
+
+        :param server - Opal server address
+        :param token - token key 
+        :param no_ssl_verify - if True, the SSL certificate is not verified (not recommended)
+        """
         client = cls(server)
         if client.base_url.startswith('https:'):
             client.session.verify = False if no_ssl_verify else True
@@ -87,16 +113,29 @@ class OpalClient:
         return e
 
     def credentials(self, user, password):
+        """
+        Creates the authorization header and attempts to input the required user/password
+
+        :param user - username
+        :param password - user password
+        """ 
         u = self.__ensure_entry('User name', user)
         p = self.__ensure_entry('Password', password, True)
         return self.header('Authorization', 'Basic ' + base64.b64encode('{}:{}'.format(u, p).encode('utf-8')).decode('utf-8'))
 
     def token(self, token):
+        """
+        Creates the authorization header and attempts to input the required token
+
+        :param token - token key
+        """ 
         tk = self.__ensure_entry('Token', token, True)
         return self.header('X-Opal-Auth', tk)
 
     def init_otp(self):
-        # check if an OTP is needed
+        """
+        Checks if an OTP is needed and if yes, prompts the user for the security code
+        """
         request = self.new_request()
         profile_url = '/system/subject-profile/_current'
         response = request.accept_json().get().resource(profile_url).send()
@@ -115,13 +154,6 @@ class OpalClient:
         :param value = True/False to validation or not. Value can also be a CA_BUNDLE file or directory (e.g. 'verify=/etc/ssl/certs/ca-certificates.crt')
         """
         self.session.verify = value
-        return self
-
-    def ssl_version(self, version):
-        return self.curl_option(pycurl.SSLVERSION, version)
-
-    def curl_option(self, opt, value):
-        self.curl_options[opt] = value
         return self
 
     def header(self, key, value):
@@ -151,6 +183,9 @@ class OpalClient:
             self.id = None
 
     class LoginInfo:
+        """
+        Class used to parse and hold the login info
+        """        
         data = None
 
         @classmethod
