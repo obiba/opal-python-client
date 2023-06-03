@@ -175,7 +175,6 @@ def run():
     # Execute selected command
     args = parser.parse_args()
 
-
     if hasattr(args, 'func'):
         try:
           # Prompt for a missing password only when user/password is required
