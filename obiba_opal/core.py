@@ -12,7 +12,7 @@ import urllib.parse
 import urllib.request
 from functools import reduce
 from http import HTTPStatus
-import logging
+from http.client import HTTPConnection
 
 class OpalClient:
     """
@@ -55,7 +55,7 @@ class OpalClient:
         :param key - private key (must be named as 'privatekey.pem')
         :param no_ssl_verify - if True, the SSL certificate is not verified (not recommended)
         """
-       
+
         client = cls(server)
         if client.base_url.startswith('https:'):
             client.session.verify = False if no_ssl_verify else True
@@ -94,7 +94,7 @@ class OpalClient:
         Creates a client instance authenticated by a token configured by an Opal user
 
         :param server - Opal server address
-        :param token - token key 
+        :param token - token key
         :param no_ssl_verify - if True, the SSL certificate is not verified (not recommended)
         """
         client = cls(server)
@@ -118,7 +118,7 @@ class OpalClient:
 
         :param user - username
         :param password - user password
-        """ 
+        """
         u = self.__ensure_entry('User name', user)
         p = self.__ensure_entry('Password', password, True)
         return self.header('Authorization', 'Basic ' + base64.b64encode('{}:{}'.format(u, p).encode('utf-8')).decode('utf-8'))
@@ -128,7 +128,7 @@ class OpalClient:
         Creates the authorization header and attempts to input the required token
 
         :param token - token key
-        """ 
+        """
         tk = self.__ensure_entry('Token', token, True)
         return self.header('X-Opal-Auth', tk)
 
@@ -185,7 +185,7 @@ class OpalClient:
     class LoginInfo:
         """
         Class used to parse and hold the login info
-        """        
+        """
         data = None
 
         @classmethod
@@ -254,10 +254,8 @@ class OpalRequest:
     def verbose(self):
         """
         Enables the verbose mode
-
-        Note: Requests library logging requires a log-level DEBUG
         """
-        logging.basicConfig(level=logging.DEBUG)
+        HTTPConnection.debuglevel = 1
         self._verbose = True
         return self
 
@@ -354,8 +352,8 @@ class OpalRequest:
         Note: Requests library takes care of mutlti-part setting in the header
         """
         if self._verbose:
-            logging.info('* File Content:')
-            logging.info('[file=' + filename + ', size=' + str(os.path.getsize(filename)) + ']')
+            print('* File Content:')
+            print('[file=' + filename + ', size=' + str(os.path.getsize(filename)) + ']')
         self.files = {'file': (os.path.basename(filename), open(filename, 'rb'))}
         return self
 
