@@ -403,7 +403,7 @@ class OpalResponse:
     Response from Opal: code, headers and content
     """
 
-    def __init__(self, response: Response):
+    def __init__(self, response: Response = Response()):
         self.response = response
 
     @property
@@ -465,7 +465,7 @@ class OpalResponse:
         return None
 
     def __str__(self):
-        return self.response.content
+        return self.response.content.decode('utf-8')
 
 class Formatter:
 

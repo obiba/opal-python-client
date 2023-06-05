@@ -171,6 +171,49 @@ class TaxonomyService:
     Taxonomies management.
     """
 
+    def __init__(self, client: core.OpalClient, verbose: bool = False):
+      self.client = client
+      self.verbose = verbose
+
+    def __make_request(self):
+        request = self.client.new_request()
+        request.fail_on_error()
+        request.accept_json()
+
+        if self.verbose:
+            request.verbose()
+
+        return request
+
+    def download(self, name: str):
+        resource = self.OpalTaxonomyResource(name)
+        request = self.__make_request().get().resource(resource.get_download_ws()).accept('text/plain')
+
+        return request.send()
+
+    def importFile(self, file: str, override: bool = False):
+        uri = core.UriBuilder(['system', 'conf', 'taxonomies', 'import', '_file']) \
+          .query('file', file) \
+          .query('override', str(override).lower()) \
+          .build()
+        return self.__make_request() \
+          .post() \
+          .resource(uri) \
+          .send()
+
+    def delete(self, name: str):
+        return self.__make_request().resource(self.OpalTaxonomyResource(name).get_ws()).delete().send()
+
+    def confirmAndDelete(self, name: str, rejectHandler):
+        confirmed = input('Delete the taxonomy {}? [y/N]: '.format(name))
+        if confirmed == 'y':
+            return self.delete(name)
+
+        return rejectHandler()
+
+    def summaries(self):
+        return self.__make_request().get().resource('/system/conf/taxonomies/summaries').send()
+
     @classmethod
     def add_arguments(cls, parser):
         """
@@ -187,44 +230,36 @@ class TaxonomyService:
         """
         Execute taxonomy command
         """
-        # Build and send request
+
         client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
         try:
-            request = client.new_request()
-            request.fail_on_error().accept_json()
-
-            if args.verbose:
-                request.verbose()
-
-
+            service = TaxonomyService(client, args.verbose)
             # send request
             if args.download:
-                taxo = cls.OpalTaxonomyResource(args.download)
-                response = request.get().resource(taxo.get_download_ws()).accept('text/plain').send()
+                response = service.download(args.download)
             elif args.import_file:
-                response = request.post().resource(core.UriBuilder(['system', 'conf', 'taxonomies', 'import', '_file']).query('file',args.import_file).build()).send()
+                response = service.importFile(args.import_file)
             elif args.delete:
                 taxo = cls.OpalTaxonomyResource(args.delete)
                 # confirm
                 if args.force:
-                    response = request.delete().resource(taxo.get_ws()).send()
+                    response = service.delete(args.delete)
                 else:
-                    confirmed = input('Delete the taxonomy "' + args.delete + '"? [y/N]: ')
-                    if confirmed == 'y':
-                        response = request.delete().resource(taxo.get_ws()).send()
-                    else:
+                    def rejectHandler():
                         print('Aborted.')
                         sys.exit(0)
+
+                    response = service.confirmAndDelete(args.delete, rejectHandler)
             else:
-                response = request.get().resource('/system/conf/taxonomies/summaries').send()
+                response = service.summaries()
 
             # format response
-            res = response.content
             if args.json and not args.download and not args.delete and not args.import_file:
-                res = response.pretty_json()
+                print(response.pretty_json())
+            else:
+              # output to stdout as string
+              print(response)
 
-            # output to stdout
-            print(res)
         finally:
             client.close()
 
