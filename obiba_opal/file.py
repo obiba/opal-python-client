@@ -78,9 +78,12 @@ class FileService:
 
         file = FileService.OpalFile(path)
 
+
         fp = os.fdopen(fd, 'wb')
-        request.get().resource(file.get_ws()).accept('*/*').header('X-File-Key', download_password).send(fp)
+        response = request.get().resource(file.get_ws()).accept('*/*').header('X-File-Key', download_password).send()
+        fp.write(response.content)
         fp.flush()
+
 
     def upload_file(self, upload: str, path: str):
         """
