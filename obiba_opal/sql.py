@@ -107,6 +107,6 @@ class SQLHistoryService:
             if args.json:
                 print(response.pretty_json())
             else:
-                print(response.content)
+                print(str(response))
         finally:
             client.close()

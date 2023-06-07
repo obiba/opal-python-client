@@ -21,7 +21,6 @@ class ExportPluginCommand:
         parser.add_argument('--tables', '-t', nargs='+', required=True, help='The list of tables to be exported')
         parser.add_argument('--name', '-n', required=True, help='Opal datasource plugin name')
         parser.add_argument('--config', '-c', required=True, help='A JSON file containing the export configuration')
-        parser.add_argument('--incremental', '-i', action='store_true', help='Incremental export')
         parser.add_argument('--identifiers', '-id', required=False, help='Name of the ID mapping')
         parser.add_argument('--json', '-j', action='store_true', help='Pretty JSON formatting of the response')
 
@@ -35,13 +34,13 @@ class ExportPluginCommand:
         config = json.loads(open(args.config).read())
         try:
             res = cls(client, args.verbose) \
-                .export(args.name, args.datasource, args.tables, config, args.identifiers, args.incremental)
+                .export_data(args.name, args.datasource, args.tables, config, args.identifiers)
             # format response
             core.Formatter.print_json(res, args.json)
         finally:
             client.close()
 
-    def export_data(self, name: str, project: str, tables: list, config: str, identifiers: str = None, incremental: bool = False) -> dict:
+    def export_data(self, name: str, project: str, tables: list, config: str, identifiers: str = None) -> dict:
         """
         Export tables using a plugin.
 
@@ -50,12 +49,10 @@ class ExportPluginCommand:
         :param tables: The table names to export
         :param config: The plugin configuration dictionary
         :param identifiers: The name of the ID mapping
-        :param incremental: Incremental export
         """
         configStr = json.dumps(config)
-        exporter = io.OpalExporter.build(client=self.client, datasource=project , tables=tables, 
+        exporter = io.OpalExporter.build(client=self.client, datasource=project , tables=tables,
                                          identifiers=identifiers, output=configStr,
-                                         incremental=incremental,
                                          verbose=self.verbose)
         response = exporter.submit(name)
         return response.from_json()
@@ -68,7 +65,7 @@ class ExportCSVCommand:
     def __init__(self, client: core.OpalClient, verbose: bool = False):
         self.client = client
         self.verbose = verbose
-    
+
     @classmethod
     def add_arguments(cls, parser):
         """
@@ -77,7 +74,6 @@ class ExportCSVCommand:
         parser.add_argument('--datasource', '-d', required=True, help='Project name')
         parser.add_argument('--tables', '-t', nargs='+', required=True, help='The list of tables to be exported')
         parser.add_argument('--output', '-out', required=True, help='Output directory name')
-        parser.add_argument('--incremental', '-i', action='store_true', help='Incremental export')
         parser.add_argument('--id-name', '-in', required=False, help='Name of the ID column name')
         parser.add_argument('--identifiers', '-id', required=False, help='Name of the ID mapping')
         parser.add_argument('--no-multilines', '-nl', action='store_true',
@@ -93,13 +89,13 @@ class ExportCSVCommand:
         client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
         try:
             res = cls(client, args.verbose) \
-                .export(args.datasource, args.tables, args.output, args.id_name, args.identifiers, args.incremental, not args.no_multilines)
+                .export_data(args.datasource, args.tables, args.output, args.id_name, args.identifiers, not args.no_multilines)
             # format response
             core.Formatter.print_json(res, args.json)
         finally:
             client.close()
 
-    def export_data(self, project: str, tables: list, output: str, id_name: str = None, identifiers: str = None, incremental: bool = False, multilines: bool = True) -> dict:
+    def export_data(self, project: str, tables: list, output: str, id_name: str = None, identifiers: str = None, multilines: bool = True) -> dict:
         """
         Export tables in CSV files.
 
@@ -108,12 +104,10 @@ class ExportCSVCommand:
         :param output: The output directory path
         :param id_name: The name of the ID column name
         :param identifiers: The name of the ID mapping
-        :param incremental: Incremental export
         :param multilines: Write value sequences as multiple lines
         """
         exporter = io.OpalExporter.build(client=self.client, datasource=project , tables=tables, entityIdNames = id_name,
                                          identifiers=identifiers, output=output,
-                                         incremental=incremental,
                                          multilines=multilines, verbose=self.verbose)
         response = exporter.submit('csv')
         return response.from_json()
@@ -150,13 +144,13 @@ class ExportRDSCommand:
         client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
         try:
             res = cls(client, args.verbose) \
-                .export(args.datasource, args.tables, args.output, args.id_name, args.identifiers, args.incremental, not args.no_multilines)
+                .export_data(args.datasource, args.tables, args.output, args.id_name, args.identifiers, not args.no_multilines)
             # format response
             core.Formatter.print_json(res, args.json)
         finally:
             client.close()
 
-    def export_data(self, project: str, tables: list, output: str, id_name: str = None, identifiers: str = None, incremental: bool = False, multilines: bool = True) -> dict:
+    def export_data(self, project: str, tables: list, output: str, id_name: str = None, identifiers: str = None, multilines: bool = True) -> dict:
         """
         Export tables in a RDS file.
 
@@ -165,15 +159,13 @@ class ExportRDSCommand:
         :param output: The output file path (.rds)
         :param id_name: The name of the ID column name
         :param identifiers: The name of the ID mapping
-        :param incremental: Incremental export
         :param multilines: Write value sequences as multiple lines
         """
         if not (output.endswith('.rds')):
             raise Exception('Output must be a RDS file (.rds).')
-        
+
         exporter = io.OpalExporter.build(client=self.client, datasource=project , tables=tables, entityIdNames = id_name,
                                          identifiers=identifiers, output=output,
-                                         incremental=incremental,
                                          multilines=multilines, verbose=self.verbose)
         response = exporter.submit('RDS')
         return response.from_json()
@@ -211,13 +203,13 @@ class ExportRSASCommand:
         client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
         try:
             res = cls(client, args.verbose) \
-                .export(args.datasource, args.tables, args.output, args.id_name, args.identifiers, args.incremental, not args.no_multilines)
+                .export_data(args.datasource, args.tables, args.output, args.id_name, args.identifiers, not args.no_multilines)
             # format response
             core.Formatter.print_json(res, args.json)
         finally:
             client.close()
 
-    def export_data(self, project: str, tables: list, output: str, id_name: str = None, identifiers: str = None, incremental: bool = False, multilines: bool = True) -> dict:
+    def export_data(self, project: str, tables: list, output: str, id_name: str = None, identifiers: str = None, multilines: bool = True) -> dict:
         """
         Export tables in a SAS file.
 
@@ -226,15 +218,13 @@ class ExportRSASCommand:
         :param output: The output file path (.sas7bdat or .xpt)
         :param id_name: The name of the ID column name
         :param identifiers: The name of the ID mapping
-        :param incremental: Incremental export
         :param multilines: Write value sequences as multiple lines
         """
         if not (output.endswith('.sas7bdat')) and not (output.endswith('.xpt')):
             raise Exception('Output must be a SAS file (.sas7bdat or .xpt).')
-    
+
         exporter = io.OpalExporter.build(client=self.client, datasource=project , tables=tables, entityIdNames = id_name,
                                          identifiers=identifiers, output=output,
-                                         incremental=incremental,
                                          multilines=multilines, verbose=self.verbose)
         response = None
         if output.endswith('.sas7bdat'):
@@ -276,13 +266,13 @@ class ExportRSPSSCommand:
         client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
         try:
             res = cls(client, args.verbose) \
-                .export(args.datasource, args.tables, args.output, args.id_name, args.identifiers, args.incremental, not args.no_multilines)
+                .export_data(args.datasource, args.tables, args.output, args.id_name, args.identifiers, not args.no_multilines)
             # format response
             core.Formatter.print_json(res, args.json)
         finally:
             client.close()
 
-    def export_data(self, project: str, tables: list, output: str, id_name: str = None, identifiers: str = None, incremental: bool = False, multilines: bool = True) -> dict:
+    def export_data(self, project: str, tables: list, output: str, id_name: str = None, identifiers: str = None, multilines: bool = True) -> dict:
         """
         Export tables in a SPSS file.
 
@@ -291,7 +281,6 @@ class ExportRSPSSCommand:
         :param output: The output file path (.sav or .zsav)
         :param id_name: The name of the ID column name
         :param identifiers: The name of the ID mapping
-        :param incremental: Incremental export
         :param multilines: Write value sequences as multiple lines
         """
         if not (output.endswith('.sav')) and not (output.endswith('.zsav')):
@@ -299,7 +288,6 @@ class ExportRSPSSCommand:
 
         exporter = io.OpalExporter.build(client=self.client, datasource=project , tables=tables, entityIdNames = id_name,
                                          identifiers=identifiers, output=output,
-                                         incremental=incremental,
                                          multilines=multilines, verbose=self.verbose)
         response = None
         if output.endswith('.sav'):
@@ -341,13 +329,13 @@ class ExportRSTATACommand:
         client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
         try:
             res = cls(client, args.verbose) \
-                .export(args.datasource, args.tables, args.output, args.id_name, args.identifiers, args.incremental, not args.no_multilines)
+                .export_data(args.datasource, args.tables, args.output, args.id_name, args.identifiers, not args.no_multilines)
             # format response
             core.Formatter.print_json(res, args.json)
         finally:
             client.close()
 
-    def export_data(self, project: str, tables: list, output: str, id_name: str = None, identifiers: str = None, incremental: bool = False, multilines: bool = True) -> dict:
+    def export_data(self, project: str, tables: list, output: str, id_name: str = None, identifiers: str = None, multilines: bool = True) -> dict:
         """
         Export tables in a STATA file.
 
@@ -356,7 +344,6 @@ class ExportRSTATACommand:
         :param output: The output file path (.dta)
         :param id_name: The name of the ID column name
         :param identifiers: The name of the ID mapping
-        :param incremental: Incremental export
         :param multilines: Write value sequences as multiple lines
         """
         if not (output.endswith('.dta')):
@@ -364,7 +351,6 @@ class ExportRSTATACommand:
 
         exporter = io.OpalExporter.build(client=self.client, datasource=project , tables=tables, entityIdNames = id_name,
                                          identifiers=identifiers, output=output,
-                                         incremental=incremental,
                                          multilines=multilines, verbose=self.verbose)
         response = exporter.submit('RSTATA')
         return response.from_json()
@@ -387,7 +373,6 @@ class ExportSQLCommand:
         parser.add_argument('--datasource', '-d', required=True, help='Project name')
         parser.add_argument('--tables', '-t', nargs='+', required=True, help='The list of tables to be exported')
         parser.add_argument('--database', '-db', required=True, help='Name of the SQL database')
-        parser.add_argument('--incremental', '-i', action='store_true', help='Incremental export')
         parser.add_argument('--identifiers', '-id', required=False, help='Name of the ID mapping')
         parser.add_argument('--json', '-j', action='store_true', help='Pretty JSON formatting of the response')
 
@@ -400,13 +385,13 @@ class ExportSQLCommand:
         client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
         try:
             res = cls(client, args.verbose) \
-                .export(args.datasource, args.tables, args.database, args.identifiers, args.incremental)
+                .export_data(args.datasource, args.tables, args.database, args.identifiers)
             # format response
             core.Formatter.print_json(res, args.json)
         finally:
             client.close()
-    
-    def export_data(self, project: str, tables: list, database: str, identifiers: str = None, incremental: bool = False):
+
+    def export_data(self, project: str, tables: list, database: str, identifiers: str = None):
         """
         Export tables in a SQL database.
 
@@ -414,11 +399,10 @@ class ExportSQLCommand:
         :param tables: The table names to export
         :param database: The SQL database name. See ProjectService.get_databases() for a list of databases with 'export' usage.
         :param identifiers: The name of the ID mapping
-        :param incremental: Incremental export
         """
         exporter = io.OpalExporter.build(client=self.client, datasource=project , tables=tables,
                                                     identifiers=identifiers, output=database,
-                                                    incremental=incremental, verbose=self.verbose)
+                                                    verbose=self.verbose)
         response = exporter.submit('jdbc')
         return response.from_json()
 
@@ -439,7 +423,6 @@ class ExportXMLCommand:
         parser.add_argument('--datasource', '-d', required=True, help='Project name')
         parser.add_argument('--tables', '-t', nargs='+', required=True, help='The list of tables to be exported')
         parser.add_argument('--output', '-out', required=True, help='Output zip file name that will be exported')
-        parser.add_argument('--incremental', '-i', action='store_true', help='Incremental export')
         parser.add_argument('--identifiers', '-id', required=False, help='Name of the ID mapping')
         parser.add_argument('--json', '-j', action='store_true', help='Pretty JSON formatting of the response')
 
@@ -452,13 +435,13 @@ class ExportXMLCommand:
         client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
         try:
             res = cls(client, args.verbose) \
-                .export(args.datasource, args.tables, args.output, args.identifiers, args.incremental)
+                .export_data(args.datasource, args.tables, args.output, args.identifiers)
             # format response
             core.Formatter.print_json(res, args.json)
         finally:
             client.close()
 
-    def export_data(self, project: str, tables: list, output: str, identifiers: str = None, incremental: bool = False) -> dict:
+    def export_data(self, project: str, tables: list, output: str, identifiers: str = None) -> dict:
         """
         Export tables in an Opal archive file.
 
@@ -467,7 +450,6 @@ class ExportXMLCommand:
         :param output: The output file path (.zip)
         :param id_name: The name of the ID column name
         :param identifiers: The name of the ID mapping
-        :param incremental: Incremental export
         :param multilines: Write value sequences as multiple lines
         """
         if not (output.endswith('.zip')):
@@ -475,11 +457,11 @@ class ExportXMLCommand:
 
         exporter = io.OpalExporter.build(client=self.client, datasource=project , tables=tables,
                                          identifiers=identifiers, output=output,
-                                         incremental=incremental,
+                                         incremental=False,
                                          verbose=self.verbose)
         response = exporter.submit('xml')
         return response.from_json()
-        
+
 
 class ExportVCFCommand:
     """
@@ -513,7 +495,7 @@ class ExportVCFCommand:
         client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
         try:
             res = ExportVCFCommand(client, args.verbose) \
-                .export(args.project, args.vcf, args.destination, not args.no_case_controls, args.filter_table)
+                .export_data(args.project, args.vcf, args.destination, not args.no_case_controls, args.filter_table)
         finally:
             client.close()
 
