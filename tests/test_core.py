@@ -9,8 +9,8 @@ class TestClass(unittest.TestCase):
     @classmethod
     def setup_class(cls):
         # Make sure to place your own certificate files
-        setattr(cls, 'SSL_CERTIFICATE', '/home/ramin/projects/obiba/opal-python-client/tests/resources/certificates/publickey.pem')
-        setattr(cls, 'SSL_KEY', '/home/ramin/projects/obiba/opal-python-client/tests/resources/certificates/privatekey.pem')
+        setattr(cls, 'SSL_CERTIFICATE', './resources/certificates/publickey.pem')
+        setattr(cls, 'SSL_KEY', './resources/certificates/privatekey.pem')
 
     def test_sendRestBadServer(self):
         # FIXME for some reason, the cookie_file is not removed (despite the os.remove() is called and os.path.exists() says it was removed)
