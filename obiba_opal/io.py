@@ -289,6 +289,7 @@ class OpalCopier:
             'nonIncremental': not self.incremental,
             'noVariables': False,
             'noValues': False,
+            'destinationTableName': None,
             'copyNullValues': self.nulls,
             'tables': []
         }
@@ -300,7 +301,7 @@ class OpalCopier:
             options['tables'] = list(map(table_fullname, tables2copy))
         # name option will be ignored if more than one table
         if self.name:
-            options.destinationTableName = self.name
+            options['destinationTableName'] = self.name
 
         if self.verbose:
             print("** Copy options:")

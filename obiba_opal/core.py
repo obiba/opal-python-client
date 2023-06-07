@@ -290,7 +290,8 @@ class OpalRequest:
         return self.accept('text/csv')
 
     def content_type(self, value):
-        return self.headers.update({'Content-Type': value})
+        self.headers.update({'Content-Type': value})
+        return self
 
     def content_type_json(self):
         return self.content_type('application/json')
@@ -386,7 +387,7 @@ class OpalRequest:
 
         return request
 
-    def send(self):
+    def send(self, fp = None):
         """
         Sends the request via client session object
         """
@@ -395,6 +396,9 @@ class OpalRequest:
 
         if self._fail_on_error and response.code >= 400:
             raise HTTPError(response)
+
+        if fp is not None:
+            fp.write(response.content)
 
         return response
 

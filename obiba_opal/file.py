@@ -80,8 +80,7 @@ class FileService:
 
 
         fp = os.fdopen(fd, 'wb')
-        response = request.get().resource(file.get_ws()).accept('*/*').header('X-File-Key', download_password).send()
-        fp.write(response.content)
+        request.get().resource(file.get_ws()).accept('*/*').header('X-File-Key', download_password).send(fp)
         fp.flush()
 
 

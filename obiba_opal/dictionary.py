@@ -39,7 +39,7 @@ class DictionaryService:
         client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
         try:
             res = DictionaryService(client, args.verbose)._get_dictionary(args.name)
-        
+
             # format response
             core.Formatter.print_json(res, args.json)
         finally:
@@ -58,11 +58,11 @@ class DictionaryService:
         :param project: The project name associated to the datasource
         """
         return self._get_dictionary(project)
-    
+
     def get_tables(self, project: str) -> list:
         """
         Get the tables of a datasource.
-        
+
         :param project: The project name associated to the datasource
         """
         return self._get_dictionary('%s.*' % project)
@@ -94,7 +94,7 @@ class DictionaryService:
         :param variable: The variable name
         """
         return self._get_dictionary('%s.%s:%s' % (project, table, variable))
-    
+
     def delete_tables(self, project: str, tables: list = None):
         """
         Delete provided or all tables.
@@ -108,7 +108,7 @@ class DictionaryService:
         if not tables:
             tables_ = self.get_tables(project)
             tables_ = [x['name'] for x in tables_]
-        
+
         for table in tables_:
             request = self.client.new_request()
             if self.verbose:
@@ -237,7 +237,7 @@ class ImportAnnotationsService:
     def __init__(self, client: core.OpalClient, verbose: bool = False):
         self.client = client
         self.verbose = verbose
-    
+
     @classmethod
     def add_arguments(cls, parser):
         """
@@ -299,8 +299,8 @@ class ImportAnnotationsService:
         form = '&'.join([urllib.parse.urlencode({'variable': x}) for x in variables])
         if self.verbose:
             request.verbose()
-        
-        request.put().resource(builder.build()).content(form).send()
+
+        request.put().resource(builder.build()).content_type_form_urlencoded().content(form).send()
 
     def _append_row(self, dictionary, row, tables=None, taxonomies=None):
         if row[0] not in dictionary:

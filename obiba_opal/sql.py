@@ -49,7 +49,7 @@ class SQLService:
                 if args.json:
                     print(response.pretty_json())
                 else:
-                    print(response.content)
+                    print(str(response))
             else:
                 request.accept_text_csv().content_type_form_urlencoded()
                 body = 'query=' + urllib.parse.quote(args.query)
@@ -57,7 +57,7 @@ class SQLService:
                     body = body + '&id=' + urllib.parse.quote(args.id_name)
                 response = request.post().resource(uri).content(body).send()
                 # output to stdout
-                print(response.content)
+                print(str(response))
         finally:
             client.close()
 

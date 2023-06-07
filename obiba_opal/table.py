@@ -67,7 +67,7 @@ class CopyTableCommand:
                                     verbose=self.verbose)
         response = copier.submit()
         return response.from_json()
-    
+
     def _retrieve_datasource_tables(self, project: str) -> list:
         request = self.client.new_request()
         if self.verbose:
@@ -145,7 +145,7 @@ class BackupViewService:
             BackupViewService(client, args.verbose).backup_views(args.project, args.views, args.output, args.force)
         finally:
             client.close()
-    
+
     def backup_view(self, project: str, view, outdir, force: bool):
         outfile = view + '.json'
         print('Backup of', view, 'in', outfile, '...')
@@ -167,13 +167,13 @@ class BackupViewService:
 
         if dowrite:
             out = open(outpath, 'w+')
-            out.write(response.content)
+            out.write(str(response))
             out.close()
 
     def backup_views(self, project: str, views: list, output: str, force: bool) -> list:
         """
         Retrieve table DTOs of the project, look for the views, download the views in JSON into a file in provided or current directory
-        
+
         :param client: Opal connection object
         :param project: The project name
         :param views: List of view names to be backed up (default is all)
@@ -212,7 +212,7 @@ class BackupViewService:
             for view in views_:
                 self.backup_view(project, view, outdir, force)
         return views_
-    
+
     def _retrieve_datasource_views(self, project: str) -> list:
         request = self.client.new_request()
         request.fail_on_error()

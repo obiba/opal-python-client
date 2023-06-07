@@ -76,7 +76,7 @@ class DataService:
         :param fd: Get raw value into the provided file descriptor (see os.fdopen()), useful for downloading a binary value
         """
         return self._get_data('%s.%s:%s' % (project, table, variable), id, pos, fd)
-    
+
     def _get_data(self, name: str, id: str = None, pos: str = None, fd = None) -> any:
         """
         Execute data command
@@ -89,7 +89,7 @@ class DataService:
         request = self.client.new_request()
         if self.verbose:
             request.verbose()
-        
+
         resolver = core.MagmaNameResolver(name)
         raw = resolver.is_variable() and id and fd is not None
         ws = self._make_ws(resolver, id, pos, raw)
@@ -106,7 +106,7 @@ class DataService:
     def _make_ws(self, resolver: core.MagmaNameResolver, id: str = None, pos: str = None, raw: bool = False):
         """
         Build the web service resource path
-        """        
+        """
         ws = resolver.get_table_ws()
         if id:
             ws = '%s/valueSet/%s' % (ws, id)
@@ -153,7 +153,7 @@ class EntityService:
                 res = EntityService(client, args.verbose).get_entity_tables(args.id, args.type)
             else:
                 res = EntityService(client, args.verbose).get_entity(args.id, args.type)
-        
+
             # format response
             core.Formatter.print_json(res, args.json)
         finally:
