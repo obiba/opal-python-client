@@ -1,21 +1,18 @@
 """
-Based on PyCurl http://pycurl.sourceforge.net/
-See also http://www.angryobjects.com/2011/10/15/http-with-python-pycurl-by-example/
-Curl options http://curl.haxx.se/libcurl/c/curl_easy_setopt.html
+Based on Python Request library https://docs.python-requests.org/en/latest/index.html
 """
 
-import random
 import base64
 import getpass
 import json
 import os
-import pycurl
+from requests import Session, Request, Response
 import urllib.error
 import urllib.parse
 import urllib.request
 from functools import reduce
 from http import HTTPStatus
-
+from http.client import HTTPConnection
 
 class OpalClient:
     """
@@ -23,40 +20,64 @@ class OpalClient:
     """
 
     def __init__(self, server=None):
-        self.curl_options = {}
+        self.session = Session()
         self.headers = {}
         self.base_url = self.__ensure_entry('Opal address', server)
         self.id = None
         self.rid = None
 
-    @classmethod
-    def build(cls, loginInfo):
-        if loginInfo.isSsl():
-            return OpalClient.buildWithCertificate(loginInfo.data['server'], loginInfo.data['cert'],
-                                                   loginInfo.data['key'])
-        elif loginInfo.isToken():
-            return OpalClient.buildWithToken(loginInfo.data['server'], loginInfo.data['token'])
-        else:
-            return OpalClient.buildWithAuthentication(loginInfo.data['server'], loginInfo.data['user'],
-                                                      loginInfo.data['password'])
+    def __del__(self):
+        self.close()
 
     @classmethod
-    def buildWithCertificate(cls, server, cert, key):
+    def build(cls, loginInfo):
+        """
+        Creates a client instance
+
+        :param loginInfo - login related information
+        """
+        if loginInfo.isSsl():
+            return OpalClient.buildWithCertificate(loginInfo.data['server'], loginInfo.data['cert'],
+                                                   loginInfo.data['key'], loginInfo.data['no_ssl_verify'])
+        elif loginInfo.isToken():
+            return OpalClient.buildWithToken(loginInfo.data['server'], loginInfo.data['token'], loginInfo.data['no_ssl_verify'])
+        else:
+            return OpalClient.buildWithAuthentication(loginInfo.data['server'], loginInfo.data['user'],
+                                                      loginInfo.data['password'], loginInfo.data['no_ssl_verify'])
+
+    @classmethod
+    def buildWithCertificate(cls, server, cert, key, no_ssl_verify: bool = False):
+        """
+        Creates a client instance authenticated by a certificate/key combination
+
+        :param server - Opal server address
+        :param cert - public certificate/key (must be named as 'publickey.pem')
+        :param key - private key (must be named as 'privatekey.pem')
+        :param no_ssl_verify - if True, the SSL certificate is not verified (not recommended)
+        """
+
         client = cls(server)
         if client.base_url.startswith('https:'):
-            client.verify_peer(0)
-            client.verify_host(0)
-        client.keys(cert, key)
+            client.session.verify = False if no_ssl_verify else True
+        client.session.cert = (cert, key)
+
         return client
 
     @classmethod
-    def buildWithAuthentication(cls, server, user, password):
+    def buildWithAuthentication(cls, server, user, password, no_ssl_verify: bool = False):
+        """
+        Creates a client instance authenticated by a user/password
+
+        :param server - Opal server address
+        :param user - username
+        :param password - user password
+        :param no_ssl_verify - if True, the SSL certificate is not verified (not recommended)
+        """
         client = cls(server)
         if client.base_url.startswith('https:'):
-            client.verify_peer(0)
-            client.verify_host(0)
+            client.session.verify = False if no_ssl_verify else True
         client.credentials(user, password)
-    
+
         # need to know whether a OTP is needed
         try:
             client.init_otp()
@@ -64,15 +85,21 @@ class OpalClient:
             # do the close as the exception is raised in the builder
             client.close()
             raise e
-        
+
         return client
 
     @classmethod
-    def buildWithToken(cls, server, token):
+    def buildWithToken(cls, server, token, no_ssl_verify: bool = False):
+        """
+        Creates a client instance authenticated by a token configured by an Opal user
+
+        :param server - Opal server address
+        :param token - token key
+        :param no_ssl_verify - if True, the SSL certificate is not verified (not recommended)
+        """
         client = cls(server)
         if client.base_url.startswith('https:'):
-            client.verify_peer(0)
-            client.verify_host(0)
+            client.session.verify = False if no_ssl_verify else True
         client.token(token)
         return client
 
@@ -86,16 +113,29 @@ class OpalClient:
         return e
 
     def credentials(self, user, password):
+        """
+        Creates the authorization header and attempts to input the required user/password
+
+        :param user - username
+        :param password - user password
+        """
         u = self.__ensure_entry('User name', user)
         p = self.__ensure_entry('Password', password, True)
-        return self.header('Authorization', 'Basic ' + base64.b64encode((u + ':' + p).encode('utf-8')).decode('utf-8'))
+        return self.header('Authorization', 'Basic ' + base64.b64encode('{}:{}'.format(u, p).encode('utf-8')).decode('utf-8'))
 
     def token(self, token):
+        """
+        Creates the authorization header and attempts to input the required token
+
+        :param token - token key
+        """
         tk = self.__ensure_entry('Token', token, True)
         return self.header('X-Opal-Auth', tk)
 
     def init_otp(self):
-        # check if an OTP is needed
+        """
+        Checks if an OTP is needed and if yes, prompts the user for the security code
+        """
         request = self.new_request()
         profile_url = '/system/subject-profile/_current'
         response = request.accept_json().get().resource(profile_url).send()
@@ -107,76 +147,45 @@ class OpalClient:
                 request = self.new_request()
                 request.header(otp_header, val).accept_json().get().resource(profile_url).send()
 
-    def keys(self, cert_file, key_file, key_pwd=None, ca_certs=None):
-        self.curl_option(pycurl.SSLCERT, cert_file)
-        self.curl_option(pycurl.SSLKEY, key_file)
-        if key_pwd:
-            self.curl_option(pycurl.KEYPASSWD, key_pwd)
-        if ca_certs:
-            self.curl_option(pycurl.CAINFO, ca_certs)
-        self.headers.pop('Authorization', None)
-        return self
+    def verify(self, value):
+        """
+        Ignore or validate certificate
 
-    def verify_peer(self, verify):
-        return self.curl_option(pycurl.SSL_VERIFYPEER, verify)
-
-    def verify_host(self, verify):
-        return self.curl_option(pycurl.SSL_VERIFYHOST, verify)
-
-    def ssl_version(self, version):
-        return self.curl_option(pycurl.SSLVERSION, version)
-
-    def curl_option(self, opt, value):
-        self.curl_options[opt] = value
+        :param value = True/False to validation or not. Value can also be a CA_BUNDLE file or directory (e.g. 'verify=/etc/ssl/certs/ca-certificates.crt')
+        """
+        self.session.verify = value
         return self
 
     def header(self, key, value):
-        self.headers[key] = value
+        """
+        Adds a header to session headers used by the request
+
+        :param key - header key
+        :param value - header value
+        """
+        header = {}
+        header[key] = value
+
+        self.session.headers.update(header)
         return self
 
     def new_request(self):
-        if self.id is None:
-            # iterate until file does not exists
-            self.id = random.choice(list(range(1, 999999, 1)))
-            self.cookie_file = "%s/opal-cookie-%s.dat" % (self.get_app_workdir(), self.id)
-            while os.path.exists(self.cookie_file):
-                self.id = random.choice(list(range(1, 999999, 1)))
-                self.cookie_file = "/tmp/opal-cookie-%s.dat" % self.id
         return OpalRequest(self)
-
-    def get_app_home(self):
-        app_home = os.environ['OBIBA_HOME'] if 'OBIBA_HOME' in os.environ else None
-        if not app_home:
-            app_home = '/tmp/.obiba'
-            try:
-                app_home = os.path.expanduser('~/.obiba')
-            except Exception as e:
-                pass
-        
-        os.makedirs(app_home, exist_ok=True)
-        return app_home
-
-    def get_app_workdir(self):
-        app_home = self.get_app_home()
-        workdir = '%s/work' % app_home
-        os.makedirs(workdir, exist_ok=True)
-        return workdir
 
     def close(self):
         if self.id is not None:
             # request to close session
             try:
                 self.new_request().resource('/auth/session/_current').delete().send()
+                self.session.close()
             except Exception as e:
                 pass
             self.id = None
-        if self.cookie_file:
-            try:
-                os.remove(self.cookie_file)
-            except OSError:
-                pass
-        
+
     class LoginInfo:
+        """
+        Class used to parse and hold the login info
+        """
         data = None
 
         @classmethod
@@ -188,6 +197,8 @@ class OpalClient:
                 data['server'] = argv['opal']
             else:
                 raise ValueError('Opal server information is missing.')
+
+            data['no_ssl_verify'] = argv.get('no_ssl_verify')
 
             if argv.get('user') and argv.get('password'):
                 data['user'] = argv['user']
@@ -222,37 +233,52 @@ class OpalRequest:
 
     def __init__(self, opal_client):
         self.client = opal_client
-        self.curl_options = {}
+        self.options = {}
         self.headers = {'Accept': 'application/json'}
         self._verbose = False
+        self.params = {}
         self._fail_on_error = False
-
-    def curl_option(self, opt, value):
-        self.curl_options[opt] = value
-        return self
+        self.files = None
+        self.data = None
 
     def timeout(self, value):
-        return self.curl_option(pycurl.TIMEOUT, value)
+        """
+        Sets the connection and read timeout
+        Note: value can be a tupple to have different timeouts for connection and reading (connTimout, readTimeout)
 
-    def connection_timeout(self, value):
-        return self.curl_option(pycurl.CONNECTTIMEOUT, value)
+        :param value - connection/read timout
+        """
+        self.options['timeout'] = value
+        return self
 
     def verbose(self):
+        """
+        Enables the verbose mode
+        """
+        HTTPConnection.debuglevel = 1
         self._verbose = True
-        return self.curl_option(pycurl.VERBOSE, True)
+        return self
 
     def fail_on_error(self):
-        #return self.curl_option(pycurl.FAILONERROR, True)
         self._fail_on_error = True
         return self
 
     def header(self, key, value):
+        """
+        Adds a header to session headers used by the request
+
+        :param key - header key
+        :param value - header value
+        """
         if value:
-            self.headers[key] = value
+            header = {}
+            header[key] = value
+            self.headers.update(header)
         return self
 
     def accept(self, value):
-        return self.header('Accept', value)
+        self.headers.update({'Accept': value})
+        return self
 
     def accept_json(self):
         return self.accept('application/json')
@@ -264,7 +290,8 @@ class OpalRequest:
         return self.accept('text/csv')
 
     def content_type(self, value):
-        return self.header('Content-Type', value)
+        self.headers.update({'Content-Type': value})
+        return self
 
     def content_type_json(self):
         return self.content_type('application/json')
@@ -302,141 +329,108 @@ class OpalRequest:
     def options(self):
         return self.method('OPTIONS')
 
-    def __build_request(self):
-        curl = pycurl.Curl()
-        # curl options
-        for o in self.client.curl_options:
-            curl.setopt(o, self.client.curl_options[o])
-        for o in self.curl_options:
-            curl.setopt(o, self.curl_options[o])
-            # headers
-        hlist = []
-        for h in self.client.headers:
-            hlist.append(h + ": " + self.client.headers[h])
-        for h in self.headers:
-            hlist.append(h + ": " + self.headers[h])
-        curl.setopt(pycurl.HTTPHEADER, hlist)
-        if self.method:
-            curl.setopt(pycurl.CUSTOMREQUEST, self.method)
-        if self.resource:
-            curl.setopt(pycurl.URL, self.client.base_url + '/ws' + self.resource)
-        else:
-            raise ValueError('Resource is missing')
-        return curl
-
     def resource(self, ws):
         self.resource = ws
         return self
 
     def content(self, content):
+        """
+        Stores the request body
+
+        :param content - request body
+        """
         if self._verbose:
             print('* Content:')
             print(content)
-        encodedContent = content.encode('utf-8')
-        self.curl_option(pycurl.POST, 1)
-        self.curl_option(pycurl.POSTFIELDSIZE, len(encodedContent))
-        self.curl_option(pycurl.POSTFIELDS, encodedContent)
-        return self
 
-    def content_file(self, filename):
-        if self._verbose:
-            print('* File Content:')
-            print('[file=' + filename + ', size=' + str(os.path.getsize(filename)) + ']')
-        self.curl_option(pycurl.POST, 1)
-        self.curl_option(pycurl.POSTFIELDSIZE, os.path.getsize(filename))
-        reader = open(filename, 'rb')
-        self.curl_option(pycurl.READFUNCTION, reader.read)
+        self.data = content
         return self
 
     def content_upload(self, filename):
-        path = os.path.expanduser(filename)
+        """
+        Sets the file associate with the upload
+
+        Note: Requests library takes care of mutlti-part setting in the header
+        """
         if self._verbose:
             print('* File Content:')
-            print('[file=' + filename + ', size=' + str(os.path.getsize(path)) + ']')
-            # self.curl_option(pycurl.POST,1)
-        self.curl_option(pycurl.HTTPPOST, [('file1', (pycurl.FORM_FILE, path))])
+            print('[file=' + filename + ', size=' + str(os.path.getsize(filename)) + ']')
+        self.files = {'file': (os.path.basename(filename), open(filename, 'rb'))}
         return self
 
-    def send(self, buffer=None):
-        curl = self.__build_request()
-        hbuf = HeaderStorage()
-        cbuf = Storage()
-        if buffer:
-            curl.setopt(curl.WRITEFUNCTION, buffer.write)
+    def __build_request(self):
+        request = Request()
+        request.method = self.method if self.method else 'GET'
+
+        for option in self.options:
+            setattr(request, option, self.options[option])
+
+        # Combine the client and the request headers
+        request.headers = {}
+        request.headers.update(self.client.session.headers)
+        request.headers.update(self.headers)
+
+        if self.resource:
+            path = self.resource
+            request.url = self.client.base_url + '/ws' + path
+
+            if self.params:
+                request.params = self.params
         else:
-            curl.setopt(curl.WRITEFUNCTION, cbuf.store)
-        curl.setopt(curl.HEADERFUNCTION, hbuf.store)
-        curl.setopt(curl.COOKIEJAR, self.client.cookie_file)
-        curl.setopt(curl.COOKIEFILE, self.client.cookie_file)
-        curl.perform()
-        response = OpalResponse(curl.getinfo(pycurl.HTTP_CODE), hbuf.headers, cbuf.content.decode('utf-8'))
-        curl.close()
+            raise ValueError('Resource is missing')
+
+        if self.files is not None:
+            request.files = self.files
+
+        if self.data is not None:
+            request.data = self.data
+
+        return request
+
+    def send(self, fp = None):
+        """
+        Sends the request via client session object
+        """
+        request = self.__build_request()
+        response = OpalResponse(self.client.session.send(request.prepare()))
 
         if self._fail_on_error and response.code >= 400:
             raise HTTPError(response)
 
+        if fp is not None:
+            fp.write(response.content)
+
         return response
-
-class Storage:
-    """
-    Content storage.
-    """
-
-    def __init__(self):
-        self.content = bytearray()
-        self.line = 0
-
-    def store(self, buf):
-        self.line = self.line + 1
-        self.content = self.content + buf
-
-    def __str__(self):
-        return self.contents.decode('utf-8')
-
-
-class HeaderStorage(Storage):
-    """
-    Store response headers in a dictionary: key is the header name,
-    value is header value or the list of header values.
-    """
-
-    def __init__(self):
-        Storage.__init__(self)
-        self.headers = {}
-
-    def store(self, buf):
-        Storage.store(self, buf)
-        header = buf.decode('utf-8').partition(':')
-        if header[1]:
-            value = header[2].rstrip().strip()
-            if header[0] in self.headers:
-                current_value = self.headers[header[0]]
-                if isinstance(current_value, str):
-                    self.headers[header[0]] = list(current_value)
-                self.headers[header[0]].append(value)
-            else:
-                self.headers[header[0]] = value
-
 
 class OpalResponse:
     """
     Response from Opal: code, headers and content
     """
 
-    def __init__(self, code, headers, content):
-        self.code = code
-        self.headers = headers
-        self.content = content
+    def __init__(self, response: Response = Response()):
+        self.response = response
+
+    @property
+    def code(self):
+        return self.response.status_code
+
+    @property
+    def headers(self):
+        return self.response.headers
+
+    @property
+    def content(self):
+        return self.response.content
 
     def from_json(self):
-        if self.content is None:
+        if self.response is None or self.response.content is None:
             return None
         else:
             try:
-                return json.loads(self.content)
+                return self.response.json()
             except Exception as e:
                 if type(self.content) == str:
-                    return self.content
+                    return self.response.content
                 else:
                     # FIXME silently fail
                     return None
@@ -446,21 +440,21 @@ class OpalResponse:
 
     def get_header(self, header: str) -> str:
         value = None
-        if header in self.headers:
-            value = self.headers[header]
-        elif header.lower() in self.headers:
-            value = self.headers[header.lower()]
+        if header in self.response.headers:
+            value = self.response.headers[header]
+        elif header.lower() in self.response.headers:
+            value = self.response.headers[header.lower()]
         return value
 
     def get_location(self):
         return self.get_header('Location')
 
     def extract_cookie_value(self, name: str):
-        if 'set-cookie' in self.headers:
-            if type(self.headers['set-cookie']) == str:
-                return self._extract_cookie_single_value(name, self.headers['set-cookie'])
+        if 'set-cookie' in self.response.headers:
+            if type(self.response.headers['set-cookie']) == str:
+                return self._extract_cookie_single_value(name, self.response.headers['set-cookie'])
             else:
-                for header in self.headers['set-cookie']:
+                for header in self.response.headers['set-cookie']:
                     rval = self._extract_cookie_single_value(name, header)
                     if rval is not None:
                         return rval
@@ -475,7 +469,7 @@ class OpalResponse:
         return None
 
     def __str__(self):
-        return self.content
+        return self.response.content.decode('utf-8')
 
 class Formatter:
 
@@ -605,19 +599,19 @@ class UriBuilder:
         return self.__str__()
 
 class HTTPError(Exception):
-    def __init__(self, response: OpalResponse, message: str = None):            
+    def __init__(self, response: OpalResponse, message: str = None):
         # Call the base class constructor with the parameters it needs
         super().__init__(message if message else 'HTTP Error: %s' % response.code)
         self.code = response.code
         http_status = [x for x in list(HTTPStatus) if x.value == response.code][0]
         self.message = message if message else '%s: %s' % (http_status.phrase, http_status.description)
-        self.error = response.from_json() if response.content else { 'code': response.code, 'status': self.message }
+        self.error = response.from_json() if response.content else {'code': response.code, 'status': self.message}
         # case the reported error is not a dict
         if type(self.error) != dict:
-            self.error = { 'code': response.code, 'status': self.error }
+            self.error = {'code': response.code, 'status': self.error}
 
     def is_client_error(self) -> bool:
         return self.code >= 400 and self.code < 500
-    
+
     def is_server_error(self) -> bool:
         return self.code >= 500

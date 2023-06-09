@@ -78,9 +78,11 @@ class FileService:
 
         file = FileService.OpalFile(path)
 
+
         fp = os.fdopen(fd, 'wb')
         request.get().resource(file.get_ws()).accept('*/*').header('X-File-Key', download_password).send(fp)
         fp.flush()
+
 
     def upload_file(self, upload: str, path: str):
         """
@@ -97,9 +99,9 @@ class FileService:
 
         file = FileService.OpalFile(path)
 
-        request.content_upload(upload).accept('text/html').content_type('multipart/form-data')
+        request.content_upload(upload).accept('text/html')
         request.post().resource(file.get_ws()).send()
-    
+
     def delete_file(self, path: str):
         """
         Delete a file in Opal.
@@ -115,7 +117,7 @@ class FileService:
         file = FileService.OpalFile(path)
 
         request.delete().resource(file.get_ws()).send()
-    
+
     def file_info(self, path) -> dict:
         """
         Get information about a file in Opal.
@@ -132,7 +134,7 @@ class FileService:
 
         response = request.get().resource(file.get_meta_ws()).send()
         return response.from_json()
-    
+
     class OpalFile:
         """
         File on Opal file system

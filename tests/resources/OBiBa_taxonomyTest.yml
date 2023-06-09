@@ -1,0 +1,44 @@
+"name": "OBiBa_taxonomyTest"
+"title":
+  "fr": "Essai"
+  "en": "Test"
+"description":
+  "fr": "Ceci est un taxomonmie d'essai"
+  "en": "This is a test txonomy"
+"author": "OBiBa`s Opal Python Client"
+"vocabularies":
+  - "name": "status"
+    "title":
+      "fr": "Statut d'essai"
+      "en": "Test Status"
+    "description":
+      "fr": "Statut d'essai"
+      "en": "Test Status"
+    "terms":
+      - "name": "complete"
+        "title":
+          "fr": "Complet"
+          "en": "Complete"
+        "description":
+          "fr": "Le statut d'essai est complet."
+          "en": "Test status is complete."
+        "attributes": {}
+        "keywords": {}
+      - "name": "undetermined"
+        "title":
+          "fr": "Indéterminé"
+          "en": "Undetermined"
+        "description":
+          "fr": "Le statut d'essai est indéterminé (en attente d'information)."
+          "en": "Test status is undetermined (information pending)."
+        "attributes": {}
+        "keywords": {}
+      - "name": "impossible"
+        "title":
+          "fr": "Impossible"
+          "en": "Impossible"
+        "description":
+          "fr": "Le statut d'essai est impossible."
+          "en": "Test status is impossible."
+        "attributes": {}
+        "keywords": {}
