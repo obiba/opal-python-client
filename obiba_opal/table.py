@@ -307,7 +307,7 @@ class RestoreViewService:
 
             request =  self._make_request()
             with open(infile, 'r') as inf:
-                request.content(inf.read().encode('utf-8'))
+                request.content(inf.read())
             request.content_type_json()
 
             if view in obsviews:

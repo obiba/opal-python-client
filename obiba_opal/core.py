@@ -343,7 +343,7 @@ class OpalRequest:
             print('* Content:')
             print(content)
 
-        self.data = content
+        self.data = content.encode('utf-8')
         return self
 
     def content_upload(self, filename):
