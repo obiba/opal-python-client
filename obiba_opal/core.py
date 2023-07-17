@@ -10,6 +10,7 @@ from requests import Session, Request, Response
 import urllib.error
 import urllib.parse
 import urllib.request
+import urllib3
 from functools import reduce
 from http import HTTPStatus
 from http.client import HTTPConnection
@@ -75,7 +76,10 @@ class OpalClient:
         """
         client = cls(server)
         if client.base_url.startswith('https:'):
-            client.session.verify = False if no_ssl_verify else True
+            client.session.verify = not no_ssl_verify
+            if no_ssl_verify:
+                urllib3.disable_warnings()
+
         client.credentials(user, password)
 
         # need to know whether a OTP is needed
