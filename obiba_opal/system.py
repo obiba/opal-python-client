@@ -51,7 +51,7 @@ class SystemService:
             response = request.send()
 
             # format response
-            res = response.content
+            res = response.content.decode('utf-8')
 
             if args.json:
                 res = response.pretty_json()
@@ -156,7 +156,7 @@ class PluginService:
                 response = request.delete().resource('/plugin/' + args.stop + '/service').send()
 
             # format response
-            res = response.content
+            res = response.content.decode('utf-8')
             if args.json:
                 res = response.pretty_json()
 
@@ -450,7 +450,7 @@ class RESTService:
 
             # format response
             response = service.send_request(args.ws, request)
-            res = response.content
+            res = response.content.decode('utf-8')
 
             if args.json:
                 res = response.pretty_json()
