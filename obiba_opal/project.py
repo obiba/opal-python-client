@@ -11,7 +11,7 @@ class ProjectService:
     """
     Project management.
     """
-    
+
     def __init__(self, client: core.OpalClient, verbose: bool = False):
         self.client = client
         self.verbose = verbose
@@ -87,7 +87,7 @@ class ProjectService:
         request = self._make_request(fail_safe)
         response = request.get().resource(core.UriBuilder(['project', name]).build()).send()
         return response.from_json() if response.code == 200 else None
-    
+
     def delete_project(self, name: str):
         """
         Delete the project by its name.
@@ -98,7 +98,7 @@ class ProjectService:
             raise ValueError('The project name is required.')
         request = self._make_request()
         request.delete().resource(core.UriBuilder(['project', name]).build()).send()
-    
+
     def add_project(self, name: str, database: str = None, title: str = None, description: str = None, tags: list = None, export_folder: str = None):
         """
         Add a project.
@@ -112,7 +112,7 @@ class ProjectService:
         """
         if not name:
             raise ValueError('The project name is required.')
-        
+
         # create project
         project = {'name': name}
         if database:
@@ -127,7 +127,7 @@ class ProjectService:
             project['tags'] = tags
         if export_folder:
             project['exportFolder'] = export_folder
-        
+
         request = self._make_request()
         request.accept_json().content_type_json()
         request.post().resource(core.UriBuilder(['projects']).build()).content(json.dumps(project)).send()
@@ -278,7 +278,7 @@ class RestoreProjectCommand:
             request.verbose()
         response = request.get().resource(job_resource).send()
         # format response
-        res = response.content
+        res = response.content.decode('utf-8')
         if args.json:
             res = response.pretty_json()
 
