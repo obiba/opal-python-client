@@ -29,6 +29,7 @@ class DictionaryService:
         parser.add_argument('name',
                             help='Fully qualified name of a datasource/project or a table or a variable, for instance: opal-data or opal-data.questionnaire or opal-data.questionnaire:Q1. Wild cards can also be used, for instance: "*", "opal-data.*", etc.')
         parser.add_argument('--json', '-j', action='store_true', help='Pretty JSON formatting of the response')
+        parser.add_argument('--excel', '-xls', required=False, help='Full path of the target data dictionary Excel file.')
 
     @classmethod
     def do_command(cls, args):
@@ -38,10 +39,17 @@ class DictionaryService:
         # Build and send request
         client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
         try:
-            res = DictionaryService(client, args.verbose)._get_dictionary(args.name)
+            service = DictionaryService(client, args.verbose)
 
-            # format response
-            core.Formatter.print_json(res, args.json)
+            if args.excel:
+                res = service._get_dictionary_as_excel(args.name)
+                with open(args.excel, mode="wb") as excelFile:
+                    excelFile.write(res)
+            else:               
+                res = service._get_dictionary()
+
+                # format response
+                core.Formatter.print_json(res, args.json)
         finally:
             client.close()
 
@@ -131,6 +139,30 @@ class DictionaryService:
         request.get().resource(core.MagmaNameResolver(name).get_ws())
         response = request.send()
         return response.from_json()
+
+    def _get_dictionary_as_excel(self, name: str) -> any:
+        """
+        Get dictionary items by their full name, with wild-card support.
+
+        :param name: Fully qualified name of a datasource/project or a table or a variable, for instance: opal-data or opal-data.questionnaire or opal-data.questionnaire:Q1. Wild cards can also be used, for instance: "*", "opal-data.*", etc.
+        """
+        request = self.client.new_request()
+        request.fail_on_error().accept("application/vnd.ms-excel")
+
+        if self.verbose:
+            request.verbose()
+
+        # send request
+
+        resolver = core.MagmaNameResolver(name)
+
+        if not resolver.is_variables():
+            raise Exception("Excel data dictionaries must be for all variables, use '<datasource>.<table>:*' format for resource.")
+
+        request.get().resource(f"{resolver.get_ws()}/excel")
+        response = request.send()
+
+        return response.content
 
 
 class ExportAnnotationsService:
