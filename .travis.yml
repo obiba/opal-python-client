@@ -1,11 +1,10 @@
 language: python
-python:
-- '3.7'
-- '3.9'
 matrix:
   include:
   - python: 3.7
     dist: xenial
+  - python: 3.9
+    dist: bionic
 addons:
   apt:
     packages:
