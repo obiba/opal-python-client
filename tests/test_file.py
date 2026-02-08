@@ -3,24 +3,38 @@ from tests.utils import make_client
 from obiba_opal.file import FileService
 from obiba_opal.core import HTTPError
 import os
+import shutil
+from uuid import uuid4
 
 class TestClass(unittest.TestCase):
 
   TEST_FILE = '/tmp/data.csv'
   TEST_ZIPPED_FILE = '/tmp/data.zip'
+  TEST_FILENAME = 'data.csv'
+  LOCAL_UPLOAD_FILE = '/tmp/data.csv'
 
   @classmethod
   def setup_class(cls):
     cls.service = FileService(make_client())
+    suffix = uuid4().hex
+    cls.TEST_FILENAME = f'data_{suffix}.csv'
+    cls.TEST_FILE = f'/tmp/{cls.TEST_FILENAME}'
+    cls.TEST_ZIPPED_FILE = f'/tmp/data_{suffix}.zip'
+    cls.LOCAL_UPLOAD_FILE = f'/tmp/{cls.TEST_FILENAME}'
 
   def test_1_fileUpload(self):
     try:
-      self.service.upload_file('./tests/resources/data.csv', '/tmp')
-      response = self.service.file_info(self.TEST_FILE)
-      if response['name'] == 'data.csv':
-        assert True
-      else:
-        assert False
+      shutil.copyfile('./tests/resources/data.csv', self.LOCAL_UPLOAD_FILE)
+      try:
+        self.service.upload_file(self.LOCAL_UPLOAD_FILE, '/tmp')
+        response = self.service.file_info(self.TEST_FILE)
+        if response['name'] == self.TEST_FILENAME:
+          assert True
+        else:
+          assert False
+      finally:
+        if os.path.exists(self.LOCAL_UPLOAD_FILE):
+          os.remove(self.LOCAL_UPLOAD_FILE)
     except Exception as e:
       assert False
 
@@ -53,7 +67,7 @@ class TestClass(unittest.TestCase):
 
   def test_4_deleteUpload(self):
     try:
-      self.service.delete_file('/tmp/data.csv')
+      self.service.delete_file(self.TEST_FILE)
       self.service.file_info(self.TEST_FILE)
     except HTTPError as e:
       assert e.code == 404

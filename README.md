@@ -17,16 +17,35 @@ Install with:
 pip install obiba-opal
 ```
 
-Note: `obiba-opal` depends on `pycurl` which itself depends on system libraries (mostly OpenSSL related). In case `pycurl` installation
-fails with **pip**, a quick fix is to install it via a system package:
+## Development
 
+This project uses [uv](https://docs.astral.sh/uv/) for dependency management and packaging.
+
+### Setup Development Environment
+
+1. Install uv:
+
+See [uv installation](https://docs.astral.sh/uv/getting-started/installation/).
+
+2. Install dependencies:
 ```shell
-# on Debian systems
-sudo apt-get install python3-pycurl
-
-# on RPM systems
-sudo yum install python3-pycurl
+uv sync
 ```
+
+3. Run tests:
+```shell
+uv run pytest
+```
+
+4. Build the package:
+```shell
+uv build
+```
+
+### Requirements
+
+- Python 3.10 or higher
+- uv (for development)
 
 ### CLI
 
