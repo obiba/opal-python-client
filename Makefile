@@ -1,11 +1,11 @@
 install:
-	poetry install
+	uv sync --all-extras
 
 test:
-	poetry run pytest
+	uv run --all-extras pytest
 
 build:
-	poetry build
+	uv build
 
 clean:
 	rm -rf dist

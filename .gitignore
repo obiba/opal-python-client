@@ -32,3 +32,4 @@ coverage
 __pycache__
 
 debug.py
+.serena/
