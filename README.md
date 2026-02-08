@@ -24,16 +24,8 @@ This project uses [uv](https://docs.astral.sh/uv/) for dependency management and
 ### Setup Development Environment
 
 1. Install uv:
-```shell
-# On macOS and Linux
-curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# On Windows
-powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
-
-# Or with pip
-pip install uv
-```
+See [uv installation](https://docs.astral.sh/uv/getting-started/installation/).
 
 2. Install dependencies:
 ```shell

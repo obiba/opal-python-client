@@ -268,7 +268,10 @@ class OpalRequest:
         self.params = {}
         self._fail_on_error = False
         self.files = None
+        self._upload_file = None
         self.data = None
+        self._method = "GET"
+        self._resource = None
 
     def timeout(self, value):
         """
@@ -336,9 +339,9 @@ class OpalRequest:
 
     def method(self, method):
         if not method:
-            self.method = "GET"
+            self._method = "GET"
         elif method in ["GET", "DELETE", "PUT", "POST", "OPTIONS"]:
-            self.method = method
+            self._method = method
         else:
             raise ValueError("Not a valid method: " + method)
         return self
@@ -359,7 +362,7 @@ class OpalRequest:
         return self.method("OPTIONS")
 
     def resource(self, ws):
-        self.resource = ws
+        self._resource = ws
         return self
 
     def content(self, content):
@@ -386,12 +389,12 @@ class OpalRequest:
             print(
                 "[file=" + filename + ", size=" + str(os.path.getsize(filename)) + "]"
             )
-        self.files = {"file": (os.path.basename(filename), open(filename, "rb"))}
+        self._upload_file = filename
         return self
 
     def __build_request(self):
         request = Request()
-        request.method = self.method if self.method else "GET"
+        request.method = self._method if self._method else "GET"
 
         for option in self.options:
             setattr(request, option, self.options[option])
@@ -401,14 +404,18 @@ class OpalRequest:
         request.headers.update(self.client.session.headers)
         request.headers.update(self.headers)
 
-        if self.resource:
-            path = self.resource
+        if self._resource:
+            path = self._resource
             request.url = self.client.base_url + "/ws" + path
 
             if self.params:
                 request.params = self.params
         else:
             raise ValueError("Resource is missing")
+
+        if self._upload_file is not None:
+            # Open file here, will be closed in send() method
+            self.files = {"file": (os.path.basename(self._upload_file), open(self._upload_file, "rb"))}
 
         if self.files is not None:
             request.files = self.files
@@ -423,15 +430,22 @@ class OpalRequest:
         Sends the request via client session object
         """
         request = self.__build_request()
-        response = OpalResponse(self.client.session.send(request.prepare()))
+        try:
+            response = OpalResponse(self.client.session.send(request.prepare()))
 
-        if self._fail_on_error and response.code >= 400:
-            raise HTTPError(response)
+            if self._fail_on_error and response.code >= 400:
+                raise HTTPError(response)
 
-        if fp is not None:
-            fp.write(response.content)
+            if fp is not None:
+                fp.write(response.content)
 
-        return response
+            return response
+        finally:
+            # Close file handle if it was opened for upload
+            if self.files is not None and "file" in self.files:
+                file_tuple = self.files["file"]
+                if len(file_tuple) > 1 and hasattr(file_tuple[1], "close"):
+                    file_tuple[1].close()
 
 
 class OpalResponse:
@@ -470,7 +484,7 @@ class OpalResponse:
     def pretty_json(self):
         return json.dumps(self.from_json(), sort_keys=True, indent=2)
 
-    def get_header(self, header: str) -> str:
+    def get_header(self, header: str) -> str | None:
         value = None
         if header in self.response.headers:
             value = self.response.headers[header]
@@ -481,7 +495,7 @@ class OpalResponse:
     def get_location(self):
         return self.get_header("Location")
 
-    def extract_cookie_value(self, name: str):
+    def extract_cookie_value(self, name: str) -> str | None:
         if "set-cookie" in self.response.headers:
             if type(self.response.headers["set-cookie"]) == str:
                 return self._extract_cookie_single_value(
@@ -494,7 +508,7 @@ class OpalResponse:
                         return rval
         return None
 
-    def _extract_cookie_single_value(self, name: str, header: str):
+    def _extract_cookie_single_value(self, name: str, header: str) -> str | None:
         cookie_parts = header.split(";")
         if len(cookie_parts) > 0:
             cookie_parts = cookie_parts[0].split("=")
@@ -527,15 +541,15 @@ class MagmaNameResolver:
 
     def __init__(self, name):
         self.name = name
-        self.datasource, sep, remain = name.partition(".")
-        self.table, sep, self.variable = remain.partition(":")
+        self.datasource, _, remain = name.partition(".")
+        self.table, _, self.variable = remain.partition(":")
         if len(self.table) == 0:
             self.table = None
         if len(self.variable) == 0:
             self.variable = None
 
     def is_datasources(self):
-        return self.datasource == None or self.datasource == "*"
+        return self.datasource is None or self.datasource == "*"
 
     def is_datasource(self):
         if self.table:
@@ -602,30 +616,26 @@ class UriBuilder:
     """
 
     def __init__(self, path=[], params={}):
-        self.path = path
-        self.params = params
+        self._path = path
+        self._params = params
 
     def path(self, path):
-        self.path = path
+        self._path = path
         return self
 
     def segment(self, seg):
-        self.path.append(seg)
+        self._path.append(seg)
         return self
 
     def params(self, params):
-        self.params = params
+        self._params = params
         return self
 
     def query(self, key, value):
         val = "%s" % value
         if type(value) == bool:
             val = val.lower()
-        self.params.update(
-            [
-                (key, val),
-            ]
-        )
+        self._params.update([(key, val), ])
         return self
 
     def __str__(self):
@@ -635,15 +645,15 @@ class UriBuilder:
         def concat_params(k):
             return "%s=%s" % (
                 urllib.parse.quote(k),
-                urllib.parse.quote(str(self.params[k])),
+                urllib.parse.quote(str(self._params[k])),
             )
 
         def concat_query(q, p):
             return "%s&%s" % (q, p)
 
-        p = urllib.parse.quote("/" + reduce(concat_segment, self.path))
-        if len(self.params):
-            q = reduce(concat_query, list(map(concat_params, list(self.params.keys()))))
+        p = urllib.parse.quote("/" + reduce(concat_segment, self._path))
+        if len(self._params):
+            q = reduce(concat_query, list(map(concat_params, list(self._params.keys()))))
             return "%s?%s" % (p, q)
         else:
             return p
