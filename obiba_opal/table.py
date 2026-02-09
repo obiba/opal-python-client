@@ -40,7 +40,8 @@ class CopyTableCommand:
             "--name",
             "-na",
             required=False,
-            help="New table name (required if source and destination are the same, ignored if more than one table is to be copied)",
+            help="New table name (required if source and destination are the "
+            "same, ignored if more than one table is to be copied)",
         )
         parser.add_argument(
             "--incremental", "-i", action="store_true", help="Incremental copy"
@@ -91,7 +92,8 @@ class CopyTableCommand:
         :param project: The project name
         :param tables: List of table names to be copied (default is all)
         :param destination: Destination project name
-        :param name: New table name (required if source and destination are the same, ignored if more than one table is to be copied)
+        :param name: New table name (required if source and destination are
+                    the same, ignored if more than one table is to be copied)
         :param incremental: Incremental copy
         :param nulls: Copy the null values
         """
@@ -175,7 +177,8 @@ class DeleteTableService:
 
 class BackupViewService:
     """
-    Backup views of a project: download view's JSON representation and save it in a file, one for each view, for later restore.
+    Backup views of a project: download view's JSON representation and save
+    it in a file, one for each view, for later restore.
     """
 
     def __init__(self, client: core.OpalClient, verbose: bool = False):
@@ -213,7 +216,8 @@ class BackupViewService:
     @classmethod
     def do_command(cls, args):
         """
-        Retrieve table DTOs of the project, look for the views, download the views in JSON into a file in provided or current directory
+        Retrieve table DTOs of the project, look for the views, download the
+        views in JSON into a file in provided or current directory
         """
 
         # Build and send request
@@ -254,7 +258,8 @@ class BackupViewService:
 
     def backup_views(self, project: str, views: list, output: str, force: bool) -> list:
         """
-        Retrieve table DTOs of the project, look for the views, download the views in JSON into a file in provided or current directory
+        Retrieve table DTOs of the project, look for the views, download the
+        views in JSON into a file in provided or current directory
 
         :param client: Opal connection object
         :param project: The project name
@@ -334,13 +339,15 @@ class RestoreViewService:
             "-vw",
             nargs="+",
             required=False,
-            help="List of view names to be restored (default is all the JSON files that are found in the backup directory/zip archive)",
+            help="List of view names to be restored (default is all the JSON "
+            "files that are found in the backup directory/zip archive)",
         )
         parser.add_argument(
             "--input",
             "-in",
             required=False,
-            help="Input directory name or input zip file containing JSON views (default is current directory)",
+            help="Input directory name or input zip file containing JSON views "
+            "(default is current directory)",
         )
         parser.add_argument(
             "--force",
@@ -352,7 +359,8 @@ class RestoreViewService:
     @classmethod
     def do_command(cls, args):
         """
-        Retrieve table DTOs of the project, look for the views, download the views in JSON into a file in provided or current directory
+        Retrieve table DTOs of the project, look for the views, download the
+        views in JSON into a file in provided or current directory
         """
 
         # Build and send request
