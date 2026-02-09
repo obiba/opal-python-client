@@ -21,13 +21,37 @@ class FileService:
         """
         Add file command specific options
         """
-        parser.add_argument('path', help='File path in Opal file system.')
-        parser.add_argument('--download', '-dl', action='store_true', help='Download file, or folder (as a zip file).')
-        parser.add_argument('--download-password', '-dlp', help='Password to encrypt the file content.')
-        parser.add_argument('--upload', '-up', required=False, help='Upload a local file to a folder in Opal file system.')
-        parser.add_argument('--delete', '-dt', action='store_true', help='Delete a file on Opal file system.')
-        parser.add_argument('--force', '-f', action='store_true', help='Skip confirmation.')
-        parser.add_argument('--json', '-j', action='store_true', help='Pretty JSON formatting of the response')
+        parser.add_argument("path", help="File path in Opal file system.")
+        parser.add_argument(
+            "--download",
+            "-dl",
+            action="store_true",
+            help="Download file, or folder (as a zip file).",
+        )
+        parser.add_argument(
+            "--download-password", "-dlp", help="Password to encrypt the file content."
+        )
+        parser.add_argument(
+            "--upload",
+            "-up",
+            required=False,
+            help="Upload a local file to a folder in Opal file system.",
+        )
+        parser.add_argument(
+            "--delete",
+            "-dt",
+            action="store_true",
+            help="Delete a file on Opal file system.",
+        )
+        parser.add_argument(
+            "--force", "-f", action="store_true", help="Skip confirmation."
+        )
+        parser.add_argument(
+            "--json",
+            "-j",
+            action="store_true",
+            help="Pretty JSON formatting of the response",
+        )
 
     @classmethod
     def do_command(self, args):
@@ -41,7 +65,9 @@ class FileService:
 
             # send request
             if args.download or args.download_password:
-                service.download_file(args.path, sys.stdout.fileno(), args.download_password)
+                service.download_file(
+                    args.path, sys.stdout.fileno(), args.download_password
+                )
             else:
                 if args.upload:
                     service.upload_file(args.upload, args.path)
@@ -50,11 +76,13 @@ class FileService:
                     if args.force:
                         service.delete_file(args.path)
                     else:
-                        confirmed = input('Delete the file "' + args.path + '"? [y/N]: ')
-                        if confirmed == 'y':
+                        confirmed = input(
+                            'Delete the file "' + args.path + '"? [y/N]: '
+                        )
+                        if confirmed == "y":
                             service.delete_file(args.path)
                         else:
-                            print('Aborted.')
+                            print("Aborted.")
                             sys.exit(0)
                 else:
                     res = service.file_info(args.path)
@@ -68,7 +96,8 @@ class FileService:
 
         :param path: The file path in Opal
         :param fd: The destination file descriptor (see os.fdopen())
-        :param download_password: The password to use to encrypt the downloaded zip archive
+        :param download_password: The password to use to encrypt the
+                                 downloaded zip archive
         """
         request = self.client.new_request()
         request.fail_on_error()
@@ -78,11 +107,11 @@ class FileService:
 
         file = FileService.OpalFile(path)
 
-
-        fp = os.fdopen(fd, 'wb')
-        request.get().resource(file.get_ws()).accept('*/*').header('X-File-Key', download_password).send(fp)
+        fp = os.fdopen(fd, "wb")
+        request.get().resource(file.get_ws()).accept("*/*").header(
+            "X-File-Key", download_password
+        ).send(fp)
         fp.flush()
-
 
     def upload_file(self, upload: str, path: str):
         """
@@ -99,7 +128,7 @@ class FileService:
 
         file = FileService.OpalFile(path)
 
-        request.content_upload(upload).accept('text/html')
+        request.content_upload(upload).accept("text/html")
         request.post().resource(file.get_ws()).send()
 
     def delete_file(self, path: str):
@@ -144,7 +173,7 @@ class FileService:
             self.path = path
 
         def get_meta_ws(self):
-            return '/files/_meta%s' % self.path
+            return f"/files/_meta{self.path}"
 
         def get_ws(self):
-            return '/files%s' % self.path
+            return f"/files{self.path}"
