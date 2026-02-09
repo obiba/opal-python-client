@@ -26,9 +26,7 @@ class SystemService:
             help="Pretty JSON formatting of the response",
         )
 
-        parser.add_argument(
-            "--version", action="store_true", required=False, help="Opal version number"
-        )
+        parser.add_argument("--version", action="store_true", required=False, help="Opal version number")
         parser.add_argument(
             "--env",
             action="store_true",
@@ -107,9 +105,7 @@ class PluginService:
         Add plugin command specific options
         """
 
-        parser.add_argument(
-            "--list", "-ls", action="store_true", help="List the installed plugins."
-        )
+        parser.add_argument("--list", "-ls", action="store_true", help="List the installed plugins.")
         parser.add_argument(
             "--updates",
             "-lu",
@@ -135,19 +131,15 @@ class PluginService:
             "--remove",
             "-rm",
             required=False,
-            help="Remove a plugin by providing its name. Requires system "
-            "restart to be effective.",
+            help="Remove a plugin by providing its name. Requires system restart to be effective.",
         )
         parser.add_argument(
             "--reinstate",
             "-ri",
             required=False,
-            help="Reinstate a plugin that was previously removed by providing "
-            "its name.",
+            help="Reinstate a plugin that was previously removed by providing its name.",
         )
-        parser.add_argument(
-            "--fetch", "-f", required=False, help="Get the named plugin description."
-        )
+        parser.add_argument("--fetch", "-f", required=False, help="Get the named plugin description.")
         parser.add_argument(
             "--configure",
             "-c",
@@ -202,58 +194,35 @@ class PluginService:
                 response = request.get().resource("/plugins/_available").send()
             elif args.install:
                 if args.install.startswith("/"):
-                    response = (
-                        request.post().resource("/plugins?file=" + args.install).send()
-                    )
+                    response = request.post().resource("/plugins?file=" + args.install).send()
                 else:
                     nameVersion = args.install.split(":")
                     if len(nameVersion) == 1:
-                        response = (
-                            request.post()
-                            .resource("/plugins?name=" + nameVersion[0])
-                            .send()
-                        )
+                        response = request.post().resource("/plugins?name=" + nameVersion[0]).send()
                     else:
                         response = (
-                            request.post()
-                            .resource(
-                                "/plugins?name="
-                                + nameVersion[0]
-                                + "&version="
-                                + nameVersion[1]
-                            )
+                            request
+                            .post()
+                            .resource("/plugins?name=" + nameVersion[0] + "&version=" + nameVersion[1])
                             .send()
                         )
             elif args.fetch:
                 response = request.get().resource("/plugin/" + args.fetch).send()
             elif args.configure:
                 request.content_type_text_plain()
-                print(
-                    "Enter plugin site properties (one property per line, "
-                    "Ctrl-D to end input):"
-                )
+                print("Enter plugin site properties (one property per line, Ctrl-D to end input):")
                 request.content(sys.stdin.read())
-                response = (
-                    request.put().resource("/plugin/" + args.configure + "/cfg").send()
-                )
+                response = request.put().resource("/plugin/" + args.configure + "/cfg").send()
             elif args.remove:
                 response = request.delete().resource("/plugin/" + args.remove).send()
             elif args.reinstate:
                 response = request.put().resource("/plugin/" + args.reinstate).send()
             elif args.status:
-                response = (
-                    request.get().resource("/plugin/" + args.status + "/service").send()
-                )
+                response = request.get().resource("/plugin/" + args.status + "/service").send()
             elif args.start:
-                response = (
-                    request.put().resource("/plugin/" + args.start + "/service").send()
-                )
+                response = request.put().resource("/plugin/" + args.start + "/service").send()
             elif args.stop:
-                response = (
-                    request.delete()
-                    .resource("/plugin/" + args.stop + "/service")
-                    .send()
-                )
+                response = request.delete().resource("/plugin/" + args.stop + "/service").send()
 
             # format response
             res = response.content.decode("utf-8")
@@ -287,18 +256,14 @@ class TaxonomyService:
 
     def download(self, name: str):
         resource = self.OpalTaxonomyResource(name)
-        request = (
-            self.__make_request()
-            .get()
-            .resource(resource.get_download_ws())
-            .accept("text/plain")
-        )
+        request = self.__make_request().get().resource(resource.get_download_ws()).accept("text/plain")
 
         return request.send()
 
     def importFile(self, file: str, override: bool = False):
         uri = (
-            core.UriBuilder(["system", "conf", "taxonomies", "import", "_file"])
+            core
+            .UriBuilder(["system", "conf", "taxonomies", "import", "_file"])
             .query("file", file)
             .query("override", str(override).lower())
             .build()
@@ -306,12 +271,7 @@ class TaxonomyService:
         return self.__make_request().post().resource(uri).send()
 
     def delete(self, name: str):
-        return (
-            self.__make_request()
-            .resource(self.OpalTaxonomyResource(name).get_ws())
-            .delete()
-            .send()
-        )
+        return self.__make_request().resource(self.OpalTaxonomyResource(name).get_ws()).delete().send()
 
     def confirmAndDelete(self, name: str, rejectHandler):
         confirmed = input(f"Delete the taxonomy {name}? [y/N]: ")
@@ -321,12 +281,7 @@ class TaxonomyService:
         return rejectHandler()
 
     def summaries(self):
-        return (
-            self.__make_request()
-            .get()
-            .resource("/system/conf/taxonomies/summaries")
-            .send()
-        )
+        return self.__make_request().get().resource("/system/conf/taxonomies/summaries").send()
 
     @classmethod
     def add_arguments(cls, parser):
@@ -345,12 +300,8 @@ class TaxonomyService:
             required=False,
             help="Import a taxonomy from the provided Opal file path (YAML format).",
         )
-        parser.add_argument(
-            "--delete", "-dt", required=False, help="Delete a taxonomy by name."
-        )
-        parser.add_argument(
-            "--force", "-f", action="store_true", help="Skip confirmation."
-        )
+        parser.add_argument("--delete", "-dt", required=False, help="Delete a taxonomy by name.")
+        parser.add_argument("--force", "-f", action="store_true", help="Skip confirmation.")
         parser.add_argument(
             "--json",
             "-j",
@@ -388,12 +339,7 @@ class TaxonomyService:
                 response = service.summaries()
 
             # format response
-            if (
-                args.json
-                and not args.download
-                and not args.delete
-                and not args.import_file
-            ):
+            if args.json and not args.download and not args.delete and not args.import_file:
                 print(response.pretty_json())
             else:
                 # output to stdout as string
@@ -444,21 +390,15 @@ class TaskService:
             action="store_true",
             help="Show JSON representation of the task",
         )
-        parser.add_argument(
-            "--status", "-st", action="store_true", help="Get the status of the task"
-        )
+        parser.add_argument("--status", "-st", action="store_true", help="Get the status of the task")
         parser.add_argument(
             "--wait",
             "-w",
             action="store_true",
             help="Wait for the task to complete (successfully or not)",
         )
-        parser.add_argument(
-            "--cancel", "-c", action="store_true", help="Cancel the task"
-        )
-        parser.add_argument(
-            "--delete", "-d", action="store_true", help="Delete the task"
-        )
+        parser.add_argument("--cancel", "-c", action="store_true", help="Cancel the task")
+        parser.add_argument("--delete", "-d", action="store_true", help="Delete the task")
         parser.add_argument(
             "--json",
             "-j",
@@ -482,9 +422,7 @@ class TaskService:
                     id = str(json.loads(id)["id"])
                 args.id = id
 
-            if args.show or not (
-                args.show or args.wait or args.status or args.cancel or args.delete
-            ):
+            if args.show or not (args.show or args.wait or args.status or args.cancel or args.delete):
                 res = service.get_task(args.id)
                 core.Formatter.print_json(res, args.json)
             if args.wait:
@@ -520,12 +458,7 @@ class TaskService:
             if "progress" in task:
                 progress = task["progress"]
                 if "message" in progress:
-                    sys.stdout.write(
-                        "\r\033[K"
-                        + str(progress["percent"])
-                        + "% "
-                        + progress["message"]
-                    )
+                    sys.stdout.write("\r\033[K" + str(progress["percent"]) + "% " + progress["message"])
                 else:
                     sys.stdout.write("\r\033[K" + str(progress["percent"]) + "%")
             else:
@@ -603,8 +536,7 @@ class RESTService:
         """
         parser.add_argument(
             "ws",
-            help="Web service path, for instance: /datasource/xxx/table/yyy/"
-            "variable/vvv",
+            help="Web service path, for instance: /datasource/xxx/table/yyy/variable/vvv",
         )
         parser.add_argument(
             "--method",
@@ -628,8 +560,7 @@ class RESTService:
             "--headers",
             "-hs",
             required=False,
-            help='Custom headers in the form of: { "Key2": "Value2", '
-            '"Key2": "Value2" }',
+            help='Custom headers in the form of: { "Key2": "Value2", "Key2": "Value2" }',
         )
         parser.add_argument(
             "--json",

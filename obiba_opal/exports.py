@@ -25,18 +25,14 @@ class ExportPluginCommand:
             required=True,
             help="The list of tables to be exported",
         )
-        parser.add_argument(
-            "--name", "-n", required=True, help="Opal datasource plugin name"
-        )
+        parser.add_argument("--name", "-n", required=True, help="Opal datasource plugin name")
         parser.add_argument(
             "--config",
             "-c",
             required=True,
             help="A JSON file containing the export configuration",
         )
-        parser.add_argument(
-            "--identifiers", "-id", required=False, help="Name of the ID mapping"
-        )
+        parser.add_argument("--identifiers", "-id", required=False, help="Name of the ID mapping")
         parser.add_argument(
             "--json",
             "-j",
@@ -114,15 +110,9 @@ class ExportCSVCommand:
             required=True,
             help="The list of tables to be exported",
         )
-        parser.add_argument(
-            "--output", "-out", required=True, help="Output directory name"
-        )
-        parser.add_argument(
-            "--id-name", "-in", required=False, help="Name of the ID column name"
-        )
-        parser.add_argument(
-            "--identifiers", "-id", required=False, help="Name of the ID mapping"
-        )
+        parser.add_argument("--output", "-out", required=True, help="Output directory name")
+        parser.add_argument("--id-name", "-in", required=False, help="Name of the ID column name")
+        parser.add_argument("--identifiers", "-id", required=False, help="Name of the ID mapping")
         parser.add_argument(
             "--no-multilines",
             "-nl",
@@ -212,15 +202,9 @@ class ExportRDSCommand:
             required=True,
             help="The list of tables to be exported",
         )
-        parser.add_argument(
-            "--output", "-out", required=True, help="Output file name (.rds)"
-        )
-        parser.add_argument(
-            "--id-name", "-in", required=False, help="Name of the ID column name"
-        )
-        parser.add_argument(
-            "--identifiers", "-id", required=False, help="Name of the ID mapping"
-        )
+        parser.add_argument("--output", "-out", required=True, help="Output file name (.rds)")
+        parser.add_argument("--id-name", "-in", required=False, help="Name of the ID column name")
+        parser.add_argument("--identifiers", "-id", required=False, help="Name of the ID mapping")
         parser.add_argument(
             "--no-multilines",
             "-nl",
@@ -319,12 +303,8 @@ class ExportRSASCommand:
             required=True,
             help="Output file name (.sas7bdat or .xpt (Transport format))",
         )
-        parser.add_argument(
-            "--id-name", "-in", required=False, help="Name of the ID column name"
-        )
-        parser.add_argument(
-            "--identifiers", "-id", required=False, help="Name of the ID mapping"
-        )
+        parser.add_argument("--id-name", "-in", required=False, help="Name of the ID column name")
+        parser.add_argument("--identifiers", "-id", required=False, help="Name of the ID mapping")
         parser.add_argument(
             "--no-multilines",
             "-nl",
@@ -427,12 +407,8 @@ class ExportRSPSSCommand:
             required=True,
             help="Output file name (.sav or .zsav (compressed format))",
         )
-        parser.add_argument(
-            "--id-name", "-in", required=False, help="Name of the ID column name"
-        )
-        parser.add_argument(
-            "--identifiers", "-id", required=False, help="Name of the ID mapping"
-        )
+        parser.add_argument("--id-name", "-in", required=False, help="Name of the ID column name")
+        parser.add_argument("--identifiers", "-id", required=False, help="Name of the ID mapping")
         parser.add_argument(
             "--no-multilines",
             "-nl",
@@ -529,15 +505,9 @@ class ExportRSTATACommand:
             required=True,
             help="The list of tables to be exported",
         )
-        parser.add_argument(
-            "--output", "-out", required=True, help="Output file name (.dta)"
-        )
-        parser.add_argument(
-            "--id-name", "-in", required=False, help="Name of the ID column name"
-        )
-        parser.add_argument(
-            "--identifiers", "-id", required=False, help="Name of the ID mapping"
-        )
+        parser.add_argument("--output", "-out", required=True, help="Output file name (.dta)")
+        parser.add_argument("--id-name", "-in", required=False, help="Name of the ID column name")
+        parser.add_argument("--identifiers", "-id", required=False, help="Name of the ID mapping")
         parser.add_argument(
             "--no-multilines",
             "-nl",
@@ -630,12 +600,8 @@ class ExportSQLCommand:
             required=True,
             help="The list of tables to be exported",
         )
-        parser.add_argument(
-            "--database", "-db", required=True, help="Name of the SQL database"
-        )
-        parser.add_argument(
-            "--identifiers", "-id", required=False, help="Name of the ID mapping"
-        )
+        parser.add_argument("--database", "-db", required=True, help="Name of the SQL database")
+        parser.add_argument("--identifiers", "-id", required=False, help="Name of the ID mapping")
         parser.add_argument(
             "--json",
             "-j",
@@ -651,17 +617,13 @@ class ExportSQLCommand:
         # Build and send request
         client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
         try:
-            res = cls(client, args.verbose).export_data(
-                args.datasource, args.tables, args.database, args.identifiers
-            )
+            res = cls(client, args.verbose).export_data(args.datasource, args.tables, args.database, args.identifiers)
             # format response
             core.Formatter.print_json(res, args.json)
         finally:
             client.close()
 
-    def export_data(
-        self, project: str, tables: list, database: str, identifiers: str = None
-    ):
+    def export_data(self, project: str, tables: list, database: str, identifiers: str = None):
         """
         Export tables in a SQL database.
 
@@ -711,9 +673,7 @@ class ExportXMLCommand:
             required=True,
             help="Output zip file name that will be exported",
         )
-        parser.add_argument(
-            "--identifiers", "-id", required=False, help="Name of the ID mapping"
-        )
+        parser.add_argument("--identifiers", "-id", required=False, help="Name of the ID mapping")
         parser.add_argument(
             "--json",
             "-j",
@@ -729,17 +689,13 @@ class ExportXMLCommand:
         # Check output filename extension
         client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
         try:
-            res = cls(client, args.verbose).export_data(
-                args.datasource, args.tables, args.output, args.identifiers
-            )
+            res = cls(client, args.verbose).export_data(args.datasource, args.tables, args.output, args.identifiers)
             # format response
             core.Formatter.print_json(res, args.json)
         finally:
             client.close()
 
-    def export_data(
-        self, project: str, tables: list, output: str, identifiers: str = None
-    ) -> dict:
+    def export_data(self, project: str, tables: list, output: str, identifiers: str = None) -> dict:
         """
         Export tables in an Opal archive file.
 
@@ -786,9 +742,7 @@ class ExportVCFCommand:
             required=True,
             help="Project name from which genotypes data will be exported",
         )
-        parser.add_argument(
-            "--vcf", "-vcf", nargs="+", required=True, help="List of VCF/BCF file names"
-        )
+        parser.add_argument("--vcf", "-vcf", nargs="+", required=True, help="List of VCF/BCF file names")
         parser.add_argument(
             "--destination",
             "-d",
@@ -807,8 +761,7 @@ class ExportVCFCommand:
             "--no-case-controls",
             "-nocc",
             action="store_true",
-            help="Do not include case control samples (only relevant if there "
-            "is a sample-participant mapping defined)",
+            help="Do not include case control samples (only relevant if there is a sample-participant mapping defined)",
         )
 
     @classmethod

@@ -7,9 +7,7 @@ import getpass
 import json
 import os
 from requests import Session, Request, Response
-import urllib.error
 import urllib.parse
-import urllib.request
 import urllib3
 from functools import reduce
 from http import HTTPStatus
@@ -79,9 +77,7 @@ class OpalClient:
         return client
 
     @classmethod
-    def buildWithAuthentication(
-        cls, server, user, password, no_ssl_verify: bool = False
-    ):
+    def buildWithAuthentication(cls, server, user, password, no_ssl_verify: bool = False):
         """
         Creates a client instance authenticated by a user/password
 
@@ -170,9 +166,7 @@ class OpalClient:
                     val = input("Enter 6-digits code: ")
                     # validate code and get the opalsid cookie for further requests
                     request = self.new_request()
-                    request.header(otp_header, val).accept_json().get().resource(
-                        profile_url
-                    ).send()
+                    request.header(otp_header, val).accept_json().get().resource(profile_url).send()
 
     def verify(self, value):
         """
@@ -239,8 +233,7 @@ class OpalClient:
                 data["key"] = argv["ssl_key"]
             else:
                 raise ValueError(
-                    "Invalid login information. Requires user-password or token "
-                    "or certificate-key information"
+                    "Invalid login information. Requires user-password or token or certificate-key information"
                 )
 
             cls.data = data
@@ -385,9 +378,7 @@ class OpalRequest:
         """
         if self._verbose:
             print("* File Content:")
-            print(
-                "[file=" + filename + ", size=" + str(os.path.getsize(filename)) + "]"
-            )
+            print("[file=" + filename + ", size=" + str(os.path.getsize(filename)) + "]")
         self._upload_file = filename
         return self
 
@@ -508,9 +499,7 @@ class OpalResponse:
     def extract_cookie_value(self, name: str) -> str | None:
         if "set-cookie" in self.response.headers:
             if isinstance(self.response.headers["set-cookie"], str):
-                return self._extract_cookie_single_value(
-                    name, self.response.headers["set-cookie"]
-                )
+                return self._extract_cookie_single_value(name, self.response.headers["set-cookie"])
             else:
                 for header in self.response.headers["set-cookie"]:
                     rval = self._extract_cookie_single_value(name, header)
@@ -589,9 +578,13 @@ class MagmaNameResolver:
         elif self.is_table():
             return self.get_table_ws()
         elif self.is_variables():
-            return UriBuilder(
-                ["datasource", self.datasource, "table", self.table, "variables"]
-            ).build()
+            return UriBuilder([
+                "datasource",
+                self.datasource,
+                "table",
+                self.table,
+                "variables",
+            ]).build()
         else:
             return self.get_variable_ws()
 
@@ -599,16 +592,14 @@ class MagmaNameResolver:
         return UriBuilder(["datasource", self.datasource, "table", self.table]).build()
 
     def get_variable_ws(self):
-        return UriBuilder(
-            [
-                "datasource",
-                self.datasource,
-                "table",
-                self.table,
-                "variable",
-                self.variable,
-            ]
-        ).build()
+        return UriBuilder([
+            "datasource",
+            self.datasource,
+            "table",
+            self.table,
+            "variable",
+            self.variable,
+        ]).build()
 
 
 class UriBuilder:
@@ -636,11 +627,9 @@ class UriBuilder:
         val = f"{value}"
         if isinstance(value, bool):
             val = val.lower()
-        self._params.update(
-            [
-                (key, val),
-            ]
-        )
+        self._params.update([
+            (key, val),
+        ])
         return self
 
     def __str__(self):
@@ -648,19 +637,14 @@ class UriBuilder:
             return f"{p}/{s}"
 
         def concat_params(k):
-            return "{}={}".format(
-                urllib.parse.quote(k),
-                urllib.parse.quote(str(self._params[k])),
-            )
+            return f"{urllib.parse.quote(k)}={urllib.parse.quote(str(self._params[k]))}"
 
         def concat_query(q, p):
             return f"{q}&{p}"
 
         p = urllib.parse.quote("/" + reduce(concat_segment, self._path))
         if len(self._params):
-            q = reduce(
-                concat_query, list(map(concat_params, list(self._params.keys())))
-            )
+            q = reduce(concat_query, list(map(concat_params, list(self._params.keys()))))
             return f"{p}?{q}"
         else:
             return p
@@ -675,14 +659,8 @@ class HTTPError(Exception):
         super().__init__(message if message else f"HTTP Error: {response.code}")
         self.code = response.code
         http_status = [x for x in list(HTTPStatus) if x.value == response.code][0]
-        self.message = (
-            message if message else f"{http_status.phrase}: {http_status.description}"
-        )
-        self.error = (
-            response.from_json()
-            if response.content
-            else {"code": response.code, "status": self.message}
-        )
+        self.message = message if message else f"{http_status.phrase}: {http_status.description}"
+        self.error = response.from_json() if response.content else {"code": response.code, "status": self.message}
         # case the reported error is not a dict
         if not isinstance(self.error, dict):
             self.error = {"code": response.code, "status": self.error}

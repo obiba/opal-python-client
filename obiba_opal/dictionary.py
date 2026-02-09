@@ -7,9 +7,7 @@ import argparse
 import csv
 import sys
 import pprint
-import urllib.error
 import urllib.parse
-import urllib.request
 
 
 class DictionaryService:
@@ -183,8 +181,7 @@ class DictionaryService:
 
         if not resolver.is_variables():
             raise Exception(
-                "Excel data dictionaries must be for all variables, use "
-                "'<datasource>.<table>:*' format for resource."
+                "Excel data dictionaries must be for all variables, use '<datasource>.<table>:*' format for resource."
             )
 
         request.get().resource(f"{resolver.get_ws()}/excel")
@@ -221,23 +218,19 @@ class ExportAnnotationsService:
             type=argparse.FileType("w"),
             default=sys.stdout,
         )
-        parser.add_argument(
-            "--locale", "-l", required=False, help="Exported locale (default is none)"
-        )
+        parser.add_argument("--locale", "-l", required=False, help="Exported locale (default is none)")
         parser.add_argument(
             "--separator",
             "-s",
             required=False,
-            help="Separator char for CSV/TSV format (default is the "
-            "tabulation character)",
+            help="Separator char for CSV/TSV format (default is the tabulation character)",
         )
         parser.add_argument(
             "--taxonomies",
             "-tx",
             nargs="+",
             required=False,
-            help="The list of taxonomy names of interest (default is any that "
-            "are found in the variable attributes)",
+            help="The list of taxonomy names of interest (default is any that are found in the variable attributes)",
         )
 
     @classmethod
@@ -287,9 +280,7 @@ class ExportAnnotationsService:
         taxonomies: list = None,
         locale: str = None,
     ):
-        self._export_annotations(
-            f"{project}.{table}:{variable}", output, sep, taxonomies, locale
-        )
+        self._export_annotations(f"{project}.{table}:{variable}", output, sep, taxonomies, locale)
 
     def _export_annotations(
         self,
@@ -303,9 +294,7 @@ class ExportAnnotationsService:
         writer.writerow(["project", "table", "variable", "namespace", "name", "value"])
         self._handle_item(writer, name, taxonomies, locale)
 
-    def _handle_item(
-        self, writer, name: str, taxonomies: list = None, locale: str = None
-    ):
+    def _handle_item(self, writer, name: str, taxonomies: list = None, locale: str = None):
         # print 'Handling ' + name
         request = self.client.new_request()
         request.fail_on_error().accept_json()
@@ -337,13 +326,9 @@ class ExportAnnotationsService:
                     locale,
                 )
         if resolver.is_variable():
-            self._handle_variable(
-                writer, resolver.datasource, resolver.table, res, taxonomies, locale
-            )
+            self._handle_variable(writer, resolver.datasource, resolver.table, res, taxonomies, locale)
 
-    def _handle_datasource(
-        self, writer, datasourceObject, taxonomies: list = None, locale: str = None
-    ):
+    def _handle_datasource(self, writer, datasourceObject, taxonomies: list = None, locale: str = None):
         for table in datasourceObject["table"]:
             self._handle_item(
                 writer,
@@ -352,9 +337,7 @@ class ExportAnnotationsService:
                 locale,
             )
 
-    def _handle_table(
-        self, writer, tableObject, taxonomies: list = None, locale: str = None
-    ):
+    def _handle_table(self, writer, tableObject, taxonomies: list = None, locale: str = None):
         self._handle_item(
             writer,
             tableObject["datasourceName"] + "." + tableObject["name"] + ":*",
@@ -374,9 +357,7 @@ class ExportAnnotationsService:
         if "attributes" in variableObject:
             for attribute in variableObject["attributes"]:
                 do_search = (
-                    "namespace" in attribute
-                    and "locale" in attribute
-                    and locale in attribute["locale"]
+                    "namespace" in attribute and "locale" in attribute and locale in attribute["locale"]
                     if locale
                     else "namespace" in attribute and "locale" not in attribute
                 )
@@ -410,8 +391,7 @@ class ImportAnnotationsService:
         parser.add_argument(
             "--input",
             "-in",
-            help="CSV/TSV input file, typically the output of the "
-            '"export-annot" command (default is stdin)',
+            help='CSV/TSV input file, typically the output of the "export-annot" command (default is stdin)',
             type=argparse.FileType("r"),
             default=sys.stdin,
         )
@@ -425,15 +405,13 @@ class ImportAnnotationsService:
             "--separator",
             "-s",
             required=False,
-            help="Separator char for CSV/TSV format (default is the "
-            "tabulation character)",
+            help="Separator char for CSV/TSV format (default is the tabulation character)",
         )
         parser.add_argument(
             "--destination",
             "-d",
             required=False,
-            help="Destination datasource name (default is the one(s) "
-            "specified in the input file)",
+            help="Destination datasource name (default is the one(s) specified in the input file)",
         )
         parser.add_argument(
             "--tables",
@@ -448,8 +426,7 @@ class ImportAnnotationsService:
             "-tx",
             nargs="+",
             required=False,
-            help="The list of taxonomy names of interest (default is any that "
-            "is found in the input file)",
+            help="The list of taxonomy names of interest (default is any that is found in the input file)",
         )
 
     @classmethod
@@ -494,16 +471,10 @@ class ImportAnnotationsService:
                         for name in value_map[datasource][table][namespace]:
                             for value in value_map[datasource][table][namespace][name]:
                                 ds = destination if destination else datasource
-                                variables = value_map[datasource][table][namespace][
-                                    name
-                                ][value]
-                                self._annotate(
-                                    ds, table, namespace, name, value, variables, locale
-                                )
+                                variables = value_map[datasource][table][namespace][name][value]
+                                self._annotate(ds, table, namespace, name, value, variables, locale)
 
-    def _annotate(
-        self, datasource, table, namespace, name, value, variables, locale: str = None
-    ):
+    def _annotate(self, datasource, table, namespace, name, value, variables, locale: str = None):
         request = self.client.new_request()
         request.fail_on_error().accept_json()
         params = {"namespace": namespace, "name": name, "value": value}
@@ -519,9 +490,7 @@ class ImportAnnotationsService:
         if self.verbose:
             request.verbose()
 
-        request.put().resource(builder.build()).content_type_form_urlencoded().content(
-            form
-        ).send()
+        request.put().resource(builder.build()).content_type_form_urlencoded().content(form).send()
 
     def _append_row(self, dictionary, row, tables=None, taxonomies=None):
         if row[0] not in dictionary:

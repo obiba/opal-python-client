@@ -22,9 +22,7 @@ class ImportPluginCommand:
         """
         Add import command specific options
         """
-        parser.add_argument(
-            "--name", "-n", required=True, help="Opal datasource plugin name"
-        )
+        parser.add_argument("--name", "-n", required=True, help="Opal datasource plugin name")
         parser.add_argument(
             "--config",
             "-c",
@@ -146,18 +144,10 @@ class ImportCSVCommand:
             required=True,
             help="CSV file to import from the Opal filesystem.",
         )
-        parser.add_argument(
-            "--characterSet", "-c", required=False, help="Character set."
-        )
-        parser.add_argument(
-            "--separator", "-s", required=False, help="Field separator."
-        )
-        parser.add_argument(
-            "--quote", "-q", required=False, help="Quotation mark character."
-        )
-        parser.add_argument(
-            "--firstRow", "-f", type=int, required=False, help="From row."
-        )
+        parser.add_argument("--characterSet", "-c", required=False, help="Character set.")
+        parser.add_argument("--separator", "-s", required=False, help="Field separator.")
+        parser.add_argument("--quote", "-q", required=False, help="Quotation mark character.")
+        parser.add_argument("--firstRow", "-f", type=int, required=False, help="From row.")
         parser.add_argument(
             "--valueType",
             "-vt",
@@ -165,9 +155,7 @@ class ImportCSVCommand:
             help="Default value type (text, integer, decimal, boolean etc.). "
             'When not specified, "text" is the default.',
         )
-        parser.add_argument(
-            "--type", "-ty", required=True, help="Entity type (e.g. Participant)"
-        )
+        parser.add_argument("--type", "-ty", required=True, help="Entity type (e.g. Participant)")
 
         # non specific import arguments
         io.add_import_arguments(parser)
@@ -342,22 +330,19 @@ class ImportLimeSurveyCommand:
             "--url",
             "-ur",
             required=False,
-            help="LimeSurvey SQL database JDBC url (if not provided, plugin "
-            "defaults will be used).",
+            help="LimeSurvey SQL database JDBC url (if not provided, plugin defaults will be used).",
         )
         parser.add_argument(
             "--uname",
             "-un",
             required=False,
-            help="LimeSurvey SQL database user name (if not provided, plugin "
-            "defaults will be used).",
+            help="LimeSurvey SQL database user name (if not provided, plugin defaults will be used).",
         )
         parser.add_argument(
             "--pword",
             "-pwd",
             required=False,
-            help="LimeSurvey SQL database user password (if not provided, "
-            "plugin defaults will be used).",
+            help="LimeSurvey SQL database user password (if not provided, plugin defaults will be used).",
         )
         parser.add_argument(
             "--prefix",
@@ -420,18 +405,26 @@ class ImportLimeSurveyCommand:
         """
         Import tables from a LimeSurvey database.
 
-        :param url: LimeSurvey SQL database JDBC url (if not provided, plugin defaults will be used)
-        :param uname: LimeSurvey SQL database user name (if not provided, plugin defaults will be used)
-        :param pword: LimeSurvey SQL database user password (if not provided, plugin defaults will be used)
+        :param url: LimeSurvey SQL database JDBC url (if not provided, plugin
+            defaults will be used)
+        :param uname: LimeSurvey SQL database user name (if not provided, plugin
+            defaults will be used)
+        :param pword: LimeSurvey SQL database user password (if not provided,
+            plugin defaults will be used)
         :param prefix: Table prefix (if not provided, plugin defaults will be used)
-        :param properties: SQL properties (if not provided, plugin defaults will be used)
+        :param properties: SQL properties (if not provided, plugin defaults will
+            be used)
         :param destination: The destination project
         :param tables: The tables names to be imported (default is all)
         :param incremental: Incremental import (new and updated value sets)
         :param limit: Import limit (maximum number of value sets)
         :param identifiers: The name of the ID mapping
-        :param policy: The ID mapping policy: "required" (each identifiers must be mapped prior importation, default), "ignore" (ignore unknown identifiers), "generate" (generate a system identifier for each unknown identifier)
-        :param merge: Merge imported data dictionary with the destination one (default is false, i.e. data dictionary is overridden)
+        :param policy: The ID mapping policy: "required" (each identifiers must
+            be mapped prior importation, default), "ignore" (ignore unknown
+            identifiers), "generate" (generate a system identifier for each
+            unknown identifier)
+        :param merge: Merge imported data dictionary with the destination one
+            (default is false, i.e. data dictionary is overridden)
         """
         importer = io.OpalImporter.build(
             self.client,
@@ -444,9 +437,7 @@ class ImportLimeSurveyCommand:
             merge=merge,
             verbose=self.verbose,
         )
-        extension_factory = self.OpalExtensionFactory(
-            url, uname, pword, prefix, properties
-        )
+        extension_factory = self.OpalExtensionFactory(url, uname, pword, prefix, properties)
         response = importer.submit(extension_factory)
         return response.from_json()
 
@@ -496,9 +487,7 @@ class ImportOpalCommand:
         """
         Add data command specific options
         """
-        parser.add_argument(
-            "--ropal", "-ro", required=True, help="Remote Opal server base url"
-        )
+        parser.add_argument("--ropal", "-ro", required=True, help="Remote Opal server base url")
         parser.add_argument(
             "--ruser",
             "-ru",
@@ -517,9 +506,7 @@ class ImportOpalCommand:
             required=False,
             help="Remote personal access token (exclusive from user credentials)",
         )
-        parser.add_argument(
-            "--rdatasource", "-rd", required=True, help="Remote datasource name"
-        )
+        parser.add_argument("--rdatasource", "-rd", required=True, help="Remote datasource name")
         # non specific import arguments
         io.add_import_arguments(parser)
 
@@ -529,9 +516,7 @@ class ImportOpalCommand:
         Execute import data command
         """
         if (args.rtoken and args.ruser) or (not args.rtoken and not args.ruser):
-            raise ValueError(
-                "Either specify token OR user credentials (user name and password)"
-            )
+            raise ValueError("Either specify token OR user credentials (user name and password)")
         # Build and send request
         client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
         try:
@@ -576,14 +561,19 @@ class ImportOpalCommand:
         :param rdatasource: Remote project's datasource name
         :param ruser: Remote user name (exclusive from using token)
         :param rpassword: Remote user password (exclusive from using token)
-        :param rtoken: Remote personal access token (exclusive from user credentials)
+        :param rtoken: Remote personal access token (exclusive from user
+            credentials)
         :param destination: The destination project
         :param tables: The tables names to be imported (default is all)
         :param incremental: Incremental import (new and updated value sets)
         :param limit: Import limit (maximum number of value sets)
         :param identifiers: The name of the ID mapping
-        :param policy: The ID mapping policy: "required" (each identifiers must be mapped prior importation, default), "ignore" (ignore unknown identifiers), "generate" (generate a system identifier for each unknown identifier)
-        :param merge: Merge imported data dictionary with the destination one (default is false, i.e. data dictionary is overridden)
+        :param policy: The ID mapping policy: "required" (each identifiers must
+            be mapped prior importation, default), "ignore" (ignore unknown
+            identifiers), "generate" (generate a system identifier for each
+            unknown identifier)
+        :param merge: Merge imported data dictionary with the destination one
+            (default is false, i.e. data dictionary is overridden)
         """
         importer = io.OpalImporter.build(
             self.client,
@@ -597,9 +587,7 @@ class ImportOpalCommand:
             verbose=self.verbose,
         )
         # remote opal client factory
-        extension_factory = self.OpalExtensionFactory(
-            ropal, rdatasource, ruser, rpassword, rtoken
-        )
+        extension_factory = self.OpalExtensionFactory(ropal, rdatasource, ruser, rpassword, rtoken)
         response = importer.submit(extension_factory)
         return response.from_json()
 
@@ -645,14 +633,13 @@ class ImportRDSCommand:
             required=True,
             help="RDS file to import from the Opal filesystem.",
         )
-        parser.add_argument(
-            "--type", "-ty", required=False, help="Entity type (e.g. Participant)"
-        )
+        parser.add_argument("--type", "-ty", required=False, help="Entity type (e.g. Participant)")
         parser.add_argument(
             "--idVariable",
             "-iv",
             required=False,
-            help="R tibble column that provides the entity ID. If not specified, first column values are considered to be the entity identifiers.",
+            help="R tibble column that provides the entity ID. If not specified, first column values "
+            "are considered to be the entity identifiers.",
         )
 
         # non specific import arguments
@@ -705,14 +692,18 @@ class ImportRDSCommand:
 
         :param path: File to import in Opal file system
         :param entityType: Entity type (e.g. Participant)
-        :param idVariable: R tibble column that provides the entity ID. If not specified, first column values are considered to be the entity identifiers
+        :param idVariable: R tibble column that provides the entity ID. If not specified, first
+            column values are considered to be the entity identifiers
         :param destination: The destination project
         :param tables: The tables names to be imported (default is all)
         :param incremental: Incremental import (new and updated value sets)
         :param limit: Import limit (maximum number of value sets)
         :param identifiers: The name of the ID mapping
-        :param policy: The ID mapping policy: "required" (each identifiers must be mapped prior importation, default), "ignore" (ignore unknown identifiers), "generate" (generate a system identifier for each unknown identifier)
-        :param merge: Merge imported data dictionary with the destination one (default is false, i.e. data dictionary is overridden)
+        :param policy: The ID mapping policy: "required" (each identifiers must be mapped prior
+            importation, default), "ignore" (ignore unknown identifiers), "generate" (generate a
+            system identifier for each unknown identifier)
+        :param merge: Merge imported data dictionary with the destination one (default is false,
+            i.e. data dictionary is overridden)
         """
         importer = io.OpalImporter.build(
             self.client,
@@ -772,17 +763,14 @@ class ImportRSASCommand:
             required=True,
             help="SAS/SAS Transport file to import from the Opal filesystem.",
         )
-        parser.add_argument(
-            "--locale", "-l", required=False, help="SAS file locale (e.g. fr, en...)."
-        )
-        parser.add_argument(
-            "--type", "-ty", required=False, help="Entity type (e.g. Participant)"
-        )
+        parser.add_argument("--locale", "-l", required=False, help="SAS file locale (e.g. fr, en...).")
+        parser.add_argument("--type", "-ty", required=False, help="Entity type (e.g. Participant)")
         parser.add_argument(
             "--idVariable",
             "-iv",
             required=False,
-            help="SAS variable that provides the entity ID. If not specified, first variable values are considered to be the entity identifiers.",
+            help="SAS variable that provides the entity ID. If not specified, first variable values are considered to "
+            "be the entity identifiers.",
         )
 
         # non specific import arguments
@@ -838,14 +826,18 @@ class ImportRSASCommand:
         :param path: File to import in Opal file system
         :param locale: SAS file locale (e.g. fr, en...)
         :param entityType: Entity type (e.g. Participant)
-        :param idVariable: R tibble column that provides the entity ID. If not specified, first column values are considered to be the entity identifiers
+        :param idVariable: R tibble column that provides the entity ID. If not specified, first column
+            values are considered to be the entity identifiers
         :param destination: The destination project
         :param tables: The tables names to be imported (default is all)
         :param incremental: Incremental import (new and updated value sets)
         :param limit: Import limit (maximum number of value sets)
         :param identifiers: The name of the ID mapping
-        :param policy: The ID mapping policy: "required" (each identifiers must be mapped prior importation, default), "ignore" (ignore unknown identifiers), "generate" (generate a system identifier for each unknown identifier)
-        :param merge: Merge imported data dictionary with the destination one (default is false, i.e. data dictionary is overridden)
+        :param policy: The ID mapping policy: "required" (each identifiers must be mapped prior
+            importation, default), "ignore" (ignore unknown identifiers), "generate" (generate a system
+            identifier for each unknown identifier)
+        :param merge: Merge imported data dictionary with the destination one (default is false, i.e. data
+            dictionary is overridden)
         """
         importer = io.OpalImporter.build(
             self.client,
@@ -858,9 +850,7 @@ class ImportRSASCommand:
             merge,
             self.verbose,
         )
-        extension_factory = self.OpalExtensionFactory(
-            path, locale, entityType, idVariable
-        )
+        extension_factory = self.OpalExtensionFactory(path, locale, entityType, idVariable)
 
         response = importer.submit(extension_factory)
         return response.from_json()
@@ -911,17 +901,14 @@ class ImportRSPSSCommand:
             required=True,
             help="SPSS file, optionally compressed, to import from the Opal filesystem.",
         )
-        parser.add_argument(
-            "--locale", "-l", required=False, help="SPSS file locale (e.g. fr, en...)."
-        )
-        parser.add_argument(
-            "--type", "-ty", required=False, help="Entity type (e.g. Participant)"
-        )
+        parser.add_argument("--locale", "-l", required=False, help="SPSS file locale (e.g. fr, en...).")
+        parser.add_argument("--type", "-ty", required=False, help="Entity type (e.g. Participant)")
         parser.add_argument(
             "--idVariable",
             "-iv",
             required=False,
-            help="SPSS variable that provides the entity ID. If not specified, first variable values are considered to be the entity identifiers.",
+            help="SPSS variable that provides the entity ID. If not specified, first variable values "
+            "are considered to be the entity identifiers.",
         )
 
         # non specific import arguments
@@ -977,14 +964,18 @@ class ImportRSPSSCommand:
         :param path: File to import in Opal file system
         :param locale: SPSS file locale (e.g. fr, en...)
         :param entityType: Entity type (e.g. Participant)
-        :param idVariable: R tibble column that provides the entity ID. If not specified, first column values are considered to be the entity identifiers
+        :param idVariable: R tibble column that provides the entity ID. If not specified, first column
+            values are considered to be the entity identifiers
         :param destination: The destination project
         :param tables: The tables names to be imported (default is all)
         :param incremental: Incremental import (new and updated value sets)
         :param limit: Import limit (maximum number of value sets)
         :param identifiers: The name of the ID mapping
-        :param policy: The ID mapping policy: "required" (each identifiers must be mapped prior importation, default), "ignore" (ignore unknown identifiers), "generate" (generate a system identifier for each unknown identifier)
-        :param merge: Merge imported data dictionary with the destination one (default is false, i.e. data dictionary is overridden)
+        :param policy: The ID mapping policy: "required" (each identifiers must be mapped prior
+            importation, default), "ignore" (ignore unknown identifiers), "generate" (generate a
+            system identifier for each unknown identifier)
+        :param merge: Merge imported data dictionary with the destination one (default is false, i.e. data
+            dictionary is overridden)
         """
         importer = io.OpalImporter.build(
             self.client,
@@ -997,9 +988,7 @@ class ImportRSPSSCommand:
             merge,
             self.verbose,
         )
-        extension_factory = self.OpalExtensionFactory(
-            path, locale, entityType, idVariable
-        )
+        extension_factory = self.OpalExtensionFactory(path, locale, entityType, idVariable)
 
         response = importer.submit(extension_factory)
         return response.from_json()
@@ -1050,17 +1039,14 @@ class ImportRSTATACommand:
             required=True,
             help="Stata file to import from the Opal filesystem.",
         )
-        parser.add_argument(
-            "--locale", "-l", required=False, help="Stata file locale (e.g. fr, en...)."
-        )
-        parser.add_argument(
-            "--type", "-ty", required=False, help="Entity type (e.g. Participant)"
-        )
+        parser.add_argument("--locale", "-l", required=False, help="Stata file locale (e.g. fr, en...).")
+        parser.add_argument("--type", "-ty", required=False, help="Entity type (e.g. Participant)")
         parser.add_argument(
             "--idVariable",
             "-iv",
             required=False,
-            help="Stata variable that provides the entity ID. If not specified, first variable values are considered to be the entity identifiers.",
+            help="Stata variable that provides the entity ID. If not specified, first variable "
+            "values are considered to be the entity identifiers.",
         )
 
         # non specific import arguments
@@ -1116,14 +1102,18 @@ class ImportRSTATACommand:
         :param path: File to import in Opal file system
         :param locale: STATA file locale (e.g. fr, en...)
         :param entityType: Entity type (e.g. Participant)
-        :param idVariable: R tibble column that provides the entity ID. If not specified, first column values are considered to be the entity identifiers
+        :param idVariable: R tibble column that provides the entity ID. If not specified, first
+            column values are considered to be the entity identifiers
         :param destination: The destination project
         :param tables: The tables names to be imported (default is all)
         :param incremental: Incremental import (new and updated value sets)
         :param limit: Import limit (maximum number of value sets)
         :param identifiers: The name of the ID mapping
-        :param policy: The ID mapping policy: "required" (each identifiers must be mapped prior importation, default), "ignore" (ignore unknown identifiers), "generate" (generate a system identifier for each unknown identifier)
-        :param merge: Merge imported data dictionary with the destination one (default is false, i.e. data dictionary is overridden)
+        :param policy: The ID mapping policy: "required" (each identifiers must be mapped prior
+            importation, default), "ignore" (ignore unknown identifiers), "generate" (generate a
+            system identifier for each unknown identifier)
+        :param merge: Merge imported data dictionary with the destination one (default is false, i.e.
+            data dictionary is overridden)
         """
         importer = io.OpalImporter.build(
             self.client,
@@ -1136,9 +1126,7 @@ class ImportRSTATACommand:
             merge,
             self.verbose,
         )
-        extension_factory = self.OpalExtensionFactory(
-            path, locale, entityType, idVariable
-        )
+        extension_factory = self.OpalExtensionFactory(path, locale, entityType, idVariable)
 
         response = importer.submit(extension_factory)
         return response.from_json()
@@ -1183,9 +1171,7 @@ class ImportSQLCommand:
         """
         Add data command specific options
         """
-        parser.add_argument(
-            "--database", "-db", required=True, help="Name of the SQL database."
-        )
+        parser.add_argument("--database", "-db", required=True, help="Name of the SQL database.")
         # non specific import arguments
         io.add_import_arguments(parser)
 
@@ -1226,14 +1212,18 @@ class ImportSQLCommand:
         """
         Import tables from a SQL database.
 
-        :param database: The database name as declared in Opal. See ProjectService.get_databases() for a list of databases with 'import' usage.
+        :param database: The database name as declared in Opal. See ProjectService.get_databases()
+            for a list of databases with 'import' usage.
         :param destination: The destination project
         :param tables: The tables names to be imported (default is all)
         :param incremental: Incremental import (new and updated value sets)
         :param limit: Import limit (maximum number of value sets)
         :param identifiers: The name of the ID mapping
-        :param policy: The ID mapping policy: "required" (each identifiers must be mapped prior importation, default), "ignore" (ignore unknown identifiers), "generate" (generate a system identifier for each unknown identifier)
-        :param merge: Merge imported data dictionary with the destination one (default is false, i.e. data dictionary is overridden)
+        :param policy: The ID mapping policy: "required" (each identifiers must be mapped prior
+            importation, default), "ignore" (ignore unknown identifiers), "generate" (generate a
+            system identifier for each unknown identifier)
+        :param merge: Merge imported data dictionary with the destination one (default is false, i.e.
+            data dictionary is overridden)
         """
         importer = io.OpalImporter.build(
             self.client,
@@ -1259,9 +1249,7 @@ class ImportSQLCommand:
             """
             Add specific datasource factory extension
             """
-            factory["Magma.JdbcDatasourceFactoryDto.params"] = {
-                "database": self.database
-            }
+            factory["Magma.JdbcDatasourceFactoryDto.params"] = {"database": self.database}
 
 
 class ImportXMLCommand:
@@ -1330,8 +1318,11 @@ class ImportXMLCommand:
         :param incremental: Incremental import (new and updated value sets)
         :param limit: Import limit (maximum number of value sets)
         :param identifiers: The name of the ID mapping
-        :param policy: The ID mapping policy: "required" (each identifiers must be mapped prior importation, default), "ignore" (ignore unknown identifiers), "generate" (generate a system identifier for each unknown identifier)
-        :param merge: Merge imported data dictionary with the destination one (default is false, i.e. data dictionary is overridden)
+        :param policy: The ID mapping policy: "required" (each identifiers must be mapped prior
+            importation, default), "ignore" (ignore unknown identifiers), "generate" (generate a
+            system identifier for each unknown identifier)
+        :param merge: Merge imported data dictionary with the destination one (default is false, i.e.
+            data dictionary is overridden)
         """
         importer = io.OpalImporter.build(
             self.client,
@@ -1399,9 +1390,12 @@ class ImportVCFCommand:
 
             options = {"project": args.project, "files": args.vcf}
             # send request
-            uri = core.UriBuilder(
-                ["project", args.project, "commands", "_import_vcf"]
-            ).build()
+            uri = core.UriBuilder([
+                "project",
+                args.project,
+                "commands",
+                "_import_vcf",
+            ]).build()
             request.resource(uri).post().content(json.dumps(options)).send()
         finally:
             client.close()
@@ -1425,9 +1419,7 @@ class ImportIDService:
         """
         Add import_ids command specific options
         """
-        parser.add_argument(
-            "--type", "-t", required=True, help="Entity type (e.g. Participant)."
-        )
+        parser.add_argument("--type", "-t", required=True, help="Entity type (e.g. Participant).")
 
     @classmethod
     def do_command(cls, args):
@@ -1458,11 +1450,7 @@ class ImportIDService:
         request.content("\n".join(ids))
 
         # send request
-        uri = (
-            core.UriBuilder(["identifiers", "mappings", "entities", "_import"])
-            .query("type", type)
-            .build()
-        )
+        uri = core.UriBuilder(["identifiers", "mappings", "entities", "_import"]).query("type", type).build()
         request.post().resource(uri).send()
 
 
@@ -1484,13 +1472,9 @@ class ImportIDMapService:
         """
         Add import_idsmap command specific options
         """
-        parser.add_argument(
-            "--type", "-t", required=True, help="Entity type (e.g. Participant)."
-        )
+        parser.add_argument("--type", "-t", required=True, help="Entity type (e.g. Participant).")
         parser.add_argument("--map", "-m", required=True, help="Mapping name.")
-        parser.add_argument(
-            "--separator", "-s", required=False, help="Field separator (default is ,)."
-        )
+        parser.add_argument("--separator", "-s", required=False, help="Field separator (default is ,).")
 
     @classmethod
     def do_command(cls, args):
@@ -1500,13 +1484,9 @@ class ImportIDMapService:
         # Build and send request
         client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
         try:
-            print(
-                "Enter identifiers (one identifiers mapping per line, Ctrl-D to end input):"
-            )
+            print("Enter identifiers (one identifiers mapping per line, Ctrl-D to end input):")
             ids = sys.stdin.read()
-            cls(client, args.verbose).import_ids(
-                ids.split("\n"), args.type, args.map, args.separator
-            )
+            cls(client, args.verbose).import_ids(ids.split("\n"), args.type, args.map, args.separator)
         finally:
             client.close()
 
@@ -1529,9 +1509,7 @@ class ImportIDMapService:
         request.content("\n".join(ids))
 
         # send request
-        builder = core.UriBuilder(["identifiers", "mapping", map, "_import"]).query(
-            "type", type
-        )
+        builder = core.UriBuilder(["identifiers", "mapping", map, "_import"]).query("type", type)
         if separator:
             builder.query("separator", separator)
         uri = builder.build()

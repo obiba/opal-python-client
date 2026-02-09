@@ -38,9 +38,7 @@ class TestClass:
 
     def test_backup_command(self):
         client = self.client
-        res = BackupProjectCommand(client).backup_project(
-            "CNSIM", "/tmp/test", force=True
-        )
+        res = BackupProjectCommand(client).backup_project("CNSIM", "/tmp/test", force=True)
         assert res["command"] == "backup"
         assert res["name"] == "backup"
         assert res["project"] == "CNSIM"

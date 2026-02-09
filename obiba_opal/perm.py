@@ -28,9 +28,7 @@ class PermService:
             required=False,
             help="Fetch permissions",
         )
-        parser.add_argument(
-            "--add", "-a", action="store_true", required=False, help="Add a permission"
-        )
+        parser.add_argument("--add", "-a", action="store_true", required=False, help="Add a permission")
         parser.add_argument(
             "--delete",
             "-d",
@@ -49,9 +47,7 @@ class PermService:
             required=False,
             help="Subject name to which the permission will be granted/removed (required on add/delete)",
         )
-        parser.add_argument(
-            "--type", "-ty", required=True, help="Subject type: user or group"
-        )
+        parser.add_argument("--type", "-ty", required=True, help="Subject type: user or group")
         parser.add_argument(
             "--json",
             "-j",
@@ -78,28 +74,21 @@ class PermService:
             if not args.subject:
                 raise ValueError("The subject name is required")
             if not args.permission:
-                raise ValueError(
-                    f"A permission name is required: {', '.join(list(permissions.keys()))}"
-                )
+                raise ValueError(f"A permission name is required: {', '.join(list(permissions.keys()))}")
             if self._map_permission(args.permission, permissions) is None:
-                raise ValueError(
-                    f"Valid permissions are: {', '.join(list(permissions.keys()))}"
-                )
+                raise ValueError(f"Valid permissions are: {', '.join(list(permissions.keys()))}")
 
         if args.delete:
             if not args.subject:
                 raise ValueError("The subject name is required")
 
         if not args.type or args.type.upper() not in self.SUBJECT_TYPES:
-            raise ValueError(
-                f"Valid subject types are: {', '.join(self.SUBJECT_TYPES).lower()}"
-            )
+            raise ValueError(f"Valid subject types are: {', '.join(self.SUBJECT_TYPES).lower()}")
 
-    def _make_add_ws(
-        self, path: list, subject: str, type: str, permission: str, permissions: dict
-    ):
+    def _make_add_ws(self, path: list, subject: str, type: str, permission: str, permissions: dict):
         return (
-            core.UriBuilder(path)
+            core
+            .UriBuilder(path)
             .query("type", type.upper())
             .query("permission", self._map_permission(permission, permissions))
             .query("principal", subject)
@@ -107,12 +96,7 @@ class PermService:
         )
 
     def _make_delete_ws(self, path: list, subject: str, type: str = "user"):
-        return (
-            core.UriBuilder(path)
-            .query("type", type.upper())
-            .query("principal", subject)
-            .build()
-        )
+        return core.UriBuilder(path).query("type", type.upper()).query("principal", subject).build()
 
     def _make_get_ws(self, path: list, type: str = "user"):
         return core.UriBuilder(path).query("type", type.upper()).build()
@@ -175,11 +159,7 @@ class ProjectPermService(PermService):
         """
         request = self._make_request()
         response = (
-            request.get()
-            .resource(
-                self._make_get_ws(["project", project, "permissions", "project"], type)
-            )
-            .send()
+            request.get().resource(self._make_get_ws(["project", project, "permissions", "project"], type)).send()
         )
         return response.from_json()
 
@@ -193,9 +173,7 @@ class ProjectPermService(PermService):
         """
         request = self._make_request()
         request.delete().resource(
-            self._make_delete_ws(
-                ["project", project, "permissions", "project"], subject, type
-            )
+            self._make_delete_ws(["project", project, "permissions", "project"], subject, type)
         ).send()
 
     def add_perm(self, project: str, subject: str, type: str, permission: str):
@@ -277,13 +255,7 @@ class DatasourcePermService(PermService):
         """
         request = self._make_request()
         response = (
-            request.get()
-            .resource(
-                self._make_get_ws(
-                    ["project", project, "permissions", "datasource"], type
-                )
-            )
-            .send()
+            request.get().resource(self._make_get_ws(["project", project, "permissions", "datasource"], type)).send()
         )
         return response.from_json()
 
@@ -297,9 +269,7 @@ class DatasourcePermService(PermService):
         """
         request = self._make_request()
         request.delete().resource(
-            self._make_delete_ws(
-                ["project", project, "permissions", "datasource"], subject, type
-            )
+            self._make_delete_ws(["project", project, "permissions", "datasource"], subject, type)
         ).send()
 
     def add_perm(self, project: str, subject: str, type: str, permission: str):
@@ -375,9 +345,7 @@ class TablePermService(PermService):
             if args.delete:
                 service.delete_perms(args.project, args.tables, args.subject, args.type)
             elif args.add:
-                service.add_perms(
-                    args.project, args.tables, args.subject, args.type, args.permission
-                )
+                service.add_perms(args.project, args.tables, args.subject, args.type, args.permission)
             else:
                 res = []
                 for table in service._ensure_tables(args.project, args.tables):
@@ -395,13 +363,7 @@ class TablePermService(PermService):
         """
         request = self._make_request()
         response = (
-            request.get()
-            .resource(
-                self._make_get_ws(
-                    ["project", project, "permissions", "table", table], type
-                )
-            )
-            .send()
+            request.get().resource(self._make_get_ws(["project", project, "permissions", "table", table], type)).send()
         )
         return response.from_json()
 
@@ -429,14 +391,10 @@ class TablePermService(PermService):
         """
         request = self._make_request()
         request.delete().resource(
-            self._make_delete_ws(
-                ["project", project, "permissions", "table", table], subject, type
-            )
+            self._make_delete_ws(["project", project, "permissions", "table", table], subject, type)
         ).send()
 
-    def add_perms(
-        self, project: str, tables: list, subject: str, type: str, permission: str
-    ):
+    def add_perms(self, project: str, tables: list, subject: str, type: str, permission: str):
         """
         Add project's tables level permissions.
 
@@ -450,9 +408,7 @@ class TablePermService(PermService):
         for table in tables_:
             self.add_perm(project, table, subject, type, permission)
 
-    def add_perm(
-        self, project: str, table: str, subject: str, type: str, permission: str
-    ):
+    def add_perm(self, project: str, table: str, subject: str, type: str, permission: str):
         """
         Add project's table level permissions.
 
@@ -479,12 +435,7 @@ class TablePermService(PermService):
         """
         if not tables:
             request = self._make_request()
-            res = (
-                request.get()
-                .resource(core.UriBuilder(["datasource", project, "tables"]).build())
-                .send()
-                .from_json()
-            )
+            res = request.get().resource(core.UriBuilder(["datasource", project, "tables"]).build()).send().from_json()
             return [x["name"] for x in res]
         else:
             return tables
@@ -540,9 +491,7 @@ class VariablePermService(PermService):
 
             # send request
             if args.delete:
-                service.delete_perms(
-                    args.project, args.table, args.variables, args.subject, args.type
-                )
+                service.delete_perms(args.project, args.table, args.variables, args.subject, args.type)
             elif args.add:
                 service.add_perms(
                     args.project,
@@ -554,12 +503,8 @@ class VariablePermService(PermService):
                 )
             else:
                 res = []
-                for variable in service._ensure_variables(
-                    args.project, args.table, args.variables
-                ):
-                    res = res + service.get_perms(
-                        args.project, args.table, variable, args.type
-                    )
+                for variable in service._ensure_variables(args.project, args.table, args.variables):
+                    res = res + service.get_perms(args.project, args.table, variable, args.type)
                 core.Formatter.print_json(res, args.json)
         finally:
             client.close()
@@ -575,7 +520,8 @@ class VariablePermService(PermService):
         """
         request = self._make_request()
         response = (
-            request.get()
+            request
+            .get()
             .resource(
                 self._make_get_ws(
                     [
@@ -594,9 +540,7 @@ class VariablePermService(PermService):
         )
         return response.from_json()
 
-    def delete_perms(
-        self, project: str, table: str, variables: list, subject: str, type: str
-    ):
+    def delete_perms(self, project: str, table: str, variables: list, subject: str, type: str):
         """
         Delete project's table variables level permissions.
 
@@ -610,9 +554,7 @@ class VariablePermService(PermService):
         for variable in variables_:
             self.delete_perm(project, table, variable, subject, type)
 
-    def delete_perm(
-        self, project: str, table: str, variable: str, subject: str, type: str
-    ):
+    def delete_perm(self, project: str, table: str, variable: str, subject: str, type: str):
         """
         Delete project's table variable level permissions.
 
@@ -707,11 +649,16 @@ class VariablePermService(PermService):
         if not variables:
             request = self._make_request()
             res = (
-                request.get()
+                request
+                .get()
                 .resource(
-                    core.UriBuilder(
-                        ["datasource", project, "table", table, "variables"]
-                    ).build()
+                    core.UriBuilder([
+                        "datasource",
+                        project,
+                        "table",
+                        table,
+                        "variables",
+                    ]).build()
                 )
                 .send()
                 .from_json()
@@ -765,9 +712,7 @@ class ResourcePermService(PermService):
 
             # send request
             if args.delete:
-                service.delete_perms(
-                    args.project, args.resources, args.subject, args.type
-                )
+                service.delete_perms(args.project, args.resources, args.subject, args.type)
             elif args.add:
                 service.add_perms(
                     args.project,
@@ -793,12 +738,9 @@ class ResourcePermService(PermService):
         """
         request = self._make_request()
         response = (
-            request.get()
-            .resource(
-                self._make_get_ws(
-                    ["project", project, "permissions", "resource", resource], type
-                )
-            )
+            request
+            .get()
+            .resource(self._make_get_ws(["project", project, "permissions", "resource", resource], type))
             .send()
         )
         return response.from_json()
@@ -827,14 +769,10 @@ class ResourcePermService(PermService):
         """
         request = self._make_request()
         request.delete().resource(
-            self._make_delete_ws(
-                ["project", project, "permissions", "resource", resource], subject, type
-            )
+            self._make_delete_ws(["project", project, "permissions", "resource", resource], subject, type)
         ).send()
 
-    def add_perms(
-        self, project: str, resources: list, subject: str, type: str, permission: str
-    ):
+    def add_perms(self, project: str, resources: list, subject: str, type: str, permission: str):
         """
         Add project's resources level permissions.
 
@@ -848,9 +786,7 @@ class ResourcePermService(PermService):
         for resource in resources_:
             self.add_perm(project, resource, subject, type, permission)
 
-    def add_perm(
-        self, project: str, resource: str, subject: str, type: str, permission: str
-    ):
+    def add_perm(self, project: str, resource: str, subject: str, type: str, permission: str):
         """
         Add project's resource level permissions.
 
@@ -877,12 +813,7 @@ class ResourcePermService(PermService):
         """
         if not resources:
             request = self._make_request()
-            res = (
-                request.get()
-                .resource(core.UriBuilder(["project", project, "resources"]).build())
-                .send()
-                .from_json()
-            )
+            res = request.get().resource(core.UriBuilder(["project", project, "resources"]).build()).send().from_json()
             return [x["name"] for x in res]
         else:
             return resources
@@ -942,13 +873,7 @@ class ResourcesPermService(PermService):
         """
         request = self._make_request()
         response = (
-            request.get()
-            .resource(
-                self._make_get_ws(
-                    ["project", project, "permissions", "resources"], type
-                )
-            )
-            .send()
+            request.get().resource(self._make_get_ws(["project", project, "permissions", "resources"], type)).send()
         )
         return response.from_json()
 
@@ -962,9 +887,7 @@ class ResourcesPermService(PermService):
         """
         request = self._make_request()
         request.delete().resource(
-            self._make_delete_ws(
-                ["project", project, "permissions", "resources"], subject, type
-            )
+            self._make_delete_ws(["project", project, "permissions", "resources"], subject, type)
         ).send()
 
     def add_perm(self, project: str, subject: str, type: str, permission: str):
@@ -1034,11 +957,7 @@ class RPermService(PermService):
         :param type: The subject type ('user' or 'group')
         """
         request = self._make_request()
-        response = (
-            request.get()
-            .resource(self._make_get_ws(["system", "permissions", "r"], type))
-            .send()
-        )
+        response = request.get().resource(self._make_get_ws(["system", "permissions", "r"], type)).send()
         return response.from_json()
 
     def delete_perm(self, subject: str, type: str):
@@ -1049,9 +968,7 @@ class RPermService(PermService):
         :param type: The subject type ('user' or 'group')
         """
         request = self._make_request()
-        request.delete().resource(
-            self._make_delete_ws(["system", "permissions", "r"], subject, type)
-        ).send()
+        request.delete().resource(self._make_delete_ws(["system", "permissions", "r"], subject, type)).send()
 
     def add_perm(self, subject: str, type: str, permission: str):
         """
@@ -1119,11 +1036,7 @@ class DataSHIELDPermService(PermService):
         :param type: The subject type ('user' or 'group')
         """
         request = self._make_request()
-        response = (
-            request.get()
-            .resource(self._make_get_ws(["system", "permissions", "datashield"], type))
-            .send()
-        )
+        response = request.get().resource(self._make_get_ws(["system", "permissions", "datashield"], type)).send()
         return response.from_json()
 
     def delete_perm(self, subject: str, type: str):
@@ -1134,9 +1047,7 @@ class DataSHIELDPermService(PermService):
         :param type: The subject type ('user' or 'group')
         """
         request = self._make_request()
-        request.delete().resource(
-            self._make_delete_ws(["system", "permissions", "datashield"], subject, type)
-        ).send()
+        request.delete().resource(self._make_delete_ws(["system", "permissions", "datashield"], subject, type)).send()
 
     def add_perm(self, subject: str, type: str, permission: str):
         """
@@ -1204,13 +1115,7 @@ class SystemPermService(PermService):
         :param type: The subject type ('user' or 'group')
         """
         request = self._make_request()
-        response = (
-            request.get()
-            .resource(
-                self._make_get_ws(["system", "permissions", "administration"], type)
-            )
-            .send()
-        )
+        response = request.get().resource(self._make_get_ws(["system", "permissions", "administration"], type)).send()
         return response.from_json()
 
     def delete_perm(self, subject: str, type: str):
@@ -1222,9 +1127,7 @@ class SystemPermService(PermService):
         """
         request = self._make_request()
         request.delete().resource(
-            self._make_delete_ws(
-                ["system", "permissions", "administration"], subject, type
-            )
+            self._make_delete_ws(["system", "permissions", "administration"], subject, type)
         ).send()
 
     def add_perm(self, subject: str, type: str, permission: str):

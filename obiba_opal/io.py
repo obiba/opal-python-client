@@ -11,9 +11,7 @@ def add_import_arguments(parser):
     """
     Add Default Import arguments
     """
-    parser.add_argument(
-        "--destination", "-d", required=True, help="Destination datasource name"
-    )
+    parser.add_argument("--destination", "-d", required=True, help="Destination datasource name")
     parser.add_argument(
         "--tables",
         "-t",
@@ -34,20 +32,20 @@ def add_import_arguments(parser):
         type=int,
         help="Import limit (maximum number of value sets)",
     )
-    parser.add_argument(
-        "--identifiers", "-id", required=False, help="Name of the ID mapping"
-    )
+    parser.add_argument("--identifiers", "-id", required=False, help="Name of the ID mapping")
     parser.add_argument(
         "--policy",
         "-po",
         required=False,
-        help='ID mapping policy: "required" (each identifiers must be mapped prior importation, default), "ignore" (ignore unknown identifiers), "generate" (generate a system identifier for each unknown identifier)',
+        help='ID mapping policy: "required" (each identifiers must be mapped prior importation, default), "ignore" '
+        '(ignore unknown identifiers), "generate" (generate a system identifier for each unknown identifier)',
     )
     parser.add_argument(
         "--merge",
         "-mg",
         action="store_true",
-        help="Merge imported data dictionary with the destination one (default is false, i.e. data dictionary is overridden).",
+        help="Merge imported data dictionary with the destination one (default is false, i.e. data dictionary is "
+        "overridden).",
     )
     parser.add_argument(
         "--json",
@@ -64,9 +62,7 @@ class OpalImporter:
 
     class ExtensionFactoryInterface:
         def add(self, factory):
-            raise Exception(
-                "ExtensionFactoryInterface.add() method must be implemented by a concrete class."
-            )
+            raise Exception("ExtensionFactoryInterface.add() method must be implemented by a concrete class.")
 
     @classmethod
     def build(
@@ -142,9 +138,12 @@ class OpalImporter:
             print(options)
             print("**")
 
-        uri = core.UriBuilder(
-            ["project", self.destination, "commands", "_import"]
-        ).build()
+        uri = core.UriBuilder([
+            "project",
+            self.destination,
+            "commands",
+            "_import",
+        ]).build()
         response = request.post().resource(uri).content(json.dumps(options)).send()
 
         # get job status
@@ -207,11 +206,7 @@ class OpalImporter:
         mergeStr = "false"
         if self.merge:
             mergeStr = "true"
-        uri = (
-            core.UriBuilder(["project", self.destination, "transient-datasources"])
-            .query("merge", mergeStr)
-            .build()
-        )
+        uri = core.UriBuilder(["project", self.destination, "transient-datasources"]).query("merge", mergeStr).build()
         response = request.post().resource(uri).content(json.dumps(factory)).send()
         transient = json.loads(response.content)
 
@@ -223,14 +218,12 @@ class OpalImporter:
 
     def compare_datasource(self, transient):
         # Compare datasources : /datasource/<transient_name>/compare/<ds_name>
-        uri = core.UriBuilder(
-            [
-                "datasource",
-                transient["name"].encode("ascii", "ignore"),
-                "compare",
-                self.destination,
-            ]
-        ).build()
+        uri = core.UriBuilder([
+            "datasource",
+            transient["name"].encode("ascii", "ignore"),
+            "compare",
+            self.destination,
+        ]).build()
         request = self.client.new_request()
         request.fail_on_error().accept_json().content_type_json()
         if self.verbose:
@@ -241,9 +234,7 @@ class OpalImporter:
             if i["conflicts"]:
                 all_conflicts = []
                 for c in i["conflicts"]:
-                    all_conflicts.append(
-                        c["code"] + "(" + ", ".join(c["arguments"]) + ")"
-                    )
+                    all_conflicts.append(c["code"] + "(" + ", ".join(c["arguments"]) + ")")
 
                 raise Exception("Import conflicts: " + "; ".join(all_conflicts))
 
@@ -318,9 +309,12 @@ class OpalExporter:
         if self.verbose:
             request.verbose()
 
-        uri = core.UriBuilder(
-            ["project", self.datasource, "commands", "_export"]
-        ).build()
+        uri = core.UriBuilder([
+            "project",
+            self.datasource,
+            "commands",
+            "_export",
+        ]).build()
         response = request.post().resource(uri).content(json.dumps(options)).send()
 
         # get job status

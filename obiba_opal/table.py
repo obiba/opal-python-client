@@ -23,9 +23,7 @@ class CopyTableCommand:
         """
         Add data command specific options
         """
-        parser.add_argument(
-            "--project", "-pr", required=True, help="Source project name"
-        )
+        parser.add_argument("--project", "-pr", required=True, help="Source project name")
         parser.add_argument(
             "--tables",
             "-t",
@@ -33,9 +31,7 @@ class CopyTableCommand:
             required=False,
             help="List of table names to be copied (default is all)",
         )
-        parser.add_argument(
-            "--destination", "-d", required=True, help="Destination project name"
-        )
+        parser.add_argument("--destination", "-d", required=True, help="Destination project name")
         parser.add_argument(
             "--name",
             "-na",
@@ -43,12 +39,8 @@ class CopyTableCommand:
             help="New table name (required if source and destination are the "
             "same, ignored if more than one table is to be copied)",
         )
-        parser.add_argument(
-            "--incremental", "-i", action="store_true", help="Incremental copy"
-        )
-        parser.add_argument(
-            "--nulls", "-nu", action="store_true", help="Copy the null values"
-        )
+        parser.add_argument("--incremental", "-i", action="store_true", help="Incremental copy")
+        parser.add_argument("--nulls", "-nu", action="store_true", help="Copy the null values")
         parser.add_argument(
             "--json",
             "-j",
@@ -118,7 +110,8 @@ class CopyTableCommand:
         if self.verbose:
             request.verbose()
         response = (
-            request.fail_on_error()
+            request
+            .fail_on_error()
             .get()
             .resource(core.UriBuilder(["datasource", project, "tables"]).build())
             .send()
@@ -168,9 +161,7 @@ class DeleteTableService:
         # Build and send requests
         client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
         try:
-            DictionaryService(client, args.verbose).delete_tables(
-                args.project, args.tables
-            )
+            DictionaryService(client, args.verbose).delete_tables(args.project, args.tables)
         finally:
             client.close()
 
@@ -190,9 +181,7 @@ class BackupViewService:
         """
         Add command specific options
         """
-        parser.add_argument(
-            "--project", "-pr", required=True, help="Source project name"
-        )
+        parser.add_argument("--project", "-pr", required=True, help="Source project name")
         parser.add_argument(
             "--views",
             "-vw",
@@ -223,9 +212,7 @@ class BackupViewService:
         # Build and send request
         client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
         try:
-            BackupViewService(client, args.verbose).backup_views(
-                args.project, args.views, args.output, args.force
-            )
+            BackupViewService(client, args.verbose).backup_views(args.project, args.views, args.output, args.force)
         finally:
             client.close()
 
@@ -239,11 +226,7 @@ class BackupViewService:
         request.fail_on_error()
         if self.verbose:
             request.verbose()
-        response = (
-            request.get()
-            .resource(core.UriBuilder(["datasource", project, "view", view]).build())
-            .send()
-        )
+        response = request.get().resource(core.UriBuilder(["datasource", project, "view", view]).build()).send()
 
         dowrite = True
         if os.path.exists(outpath) and not force:
@@ -302,12 +285,7 @@ class BackupViewService:
         request.fail_on_error()
         if self.verbose:
             request.verbose()
-        response = (
-            request.get()
-            .resource(core.UriBuilder(["datasource", project, "tables"]).build())
-            .send()
-            .from_json()
-        )
+        response = request.get().resource(core.UriBuilder(["datasource", project, "tables"]).build()).send().from_json()
 
         views = []
         for table in response:
@@ -331,9 +309,7 @@ class RestoreViewService:
         """
         Add data command specific options
         """
-        parser.add_argument(
-            "--project", "-pr", required=True, help="Destination project name"
-        )
+        parser.add_argument("--project", "-pr", required=True, help="Destination project name")
         parser.add_argument(
             "--views",
             "-vw",
@@ -346,8 +322,7 @@ class RestoreViewService:
             "--input",
             "-in",
             required=False,
-            help="Input directory name or input zip file containing JSON views "
-            "(default is current directory)",
+            help="Input directory name or input zip file containing JSON views (default is current directory)",
         )
         parser.add_argument(
             "--force",
@@ -368,9 +343,7 @@ class RestoreViewService:
         service = RestoreViewService(client, args.verbose)
         service.restore_views(args.project, args.views, args.input, args.force)
 
-    def restore_views(
-        self, project: str, views: list, input: str = None, force: bool = False
-    ):
+    def restore_views(self, project: str, views: list, input: str = None, force: bool = False):
         obsviews = self._retrieve_datasource_views(project)
 
         # list input directory content
@@ -383,8 +356,7 @@ class RestoreViewService:
                 for viewfile in [
                     filename
                     for filename in inzip.namelist()
-                    if filename.endswith(".json")
-                    and (not views or filename[:-5] in views)
+                    if filename.endswith(".json") and (not views or filename[:-5] in views)
                 ]:
                     self._restore_zipped_view(project, obsviews, viewfile, inzip, force)
         else:
@@ -393,12 +365,7 @@ class RestoreViewService:
 
     def _retrieve_datasource_views(self, project: str):
         request = self._make_request()
-        response = (
-            request.get()
-            .resource(core.UriBuilder(["datasource", project, "tables"]).build())
-            .send()
-            .from_json()
-        )
+        response = request.get().resource(core.UriBuilder(["datasource", project, "tables"]).build()).send().from_json()
 
         views = []
         for table in response:
@@ -407,9 +374,7 @@ class RestoreViewService:
 
         return views
 
-    def _restore_view(
-        self, project: str, obsviews: list, infile: str, force: bool = False
-    ):
+    def _restore_view(self, project: str, obsviews: list, infile: str, force: bool = False):
         view = os.path.basename(infile[:-5])  # supposed to be a .json file path
 
         dowrite = True
@@ -429,15 +394,11 @@ class RestoreViewService:
 
             if view in obsviews:
                 request.put().resource(
-                    core.UriBuilder(["datasource", project, "view", view])
-                    .query("comment", "restore-view")
-                    .build()
+                    core.UriBuilder(["datasource", project, "view", view]).query("comment", "restore-view").build()
                 ).send()
             else:
                 request.post().resource(
-                    core.UriBuilder(["datasource", project, "views"])
-                    .query("comment", "restore-view")
-                    .build()
+                    core.UriBuilder(["datasource", project, "views"]).query("comment", "restore-view").build()
                 ).send()
 
     def _restore_zipped_view(
@@ -466,15 +427,11 @@ class RestoreViewService:
 
             if view in obsviews:
                 request.put().resource(
-                    core.UriBuilder(["datasource", project, "view", view])
-                    .query("comment", "restore-view")
-                    .build()
+                    core.UriBuilder(["datasource", project, "view", view]).query("comment", "restore-view").build()
                 ).send()
             else:
                 request.post().resource(
-                    core.UriBuilder(["datasource", project, "views"])
-                    .query("comment", "restore-view")
-                    .build()
+                    core.UriBuilder(["datasource", project, "views"]).query("comment", "restore-view").build()
                 ).send()
 
     def _list_json_files(self, dirref: str, basenames):

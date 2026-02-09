@@ -29,9 +29,7 @@ class TestClass(unittest.TestCase):
             # Read and modify the taxonomy file to use randomized name
             with open("./tests/resources/OBiBa_taxonomyTest.yml") as f:
                 content = f.read()
-            content = content.replace(
-                '"OBiBa_taxonomyTest"', f'"{self.TEST_TAXONOMY_NAME}"'
-            )
+            content = content.replace('"OBiBa_taxonomyTest"', f'"{self.TEST_TAXONOMY_NAME}"')
             with open(self.LOCAL_TAXONOMY_FILE, "w") as f:
                 f.write(content)
             try:

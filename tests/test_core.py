@@ -13,20 +13,17 @@ class TestClass(unittest.TestCase):
         cls.SSL_KEY = "./resources/certificates/privatekey.pem"
 
     def test_sendRestBadServer(self):
-        # FIXME for some reason, the cookie_file is not removed (despite the os.remove() is called and os.path.exists() says it was removed)
+        # FIXME for some reason, the cookie_file is not removed (despite the os.remove()
+        # is called and os.path.exists() says it was removed)
         try:
             # this one will make a request to check if an OTP is needed
-            OpalClient.buildWithAuthentication(
-                server="http://deadbeef:8080", user=TEST_USER, password=TEST_PASSWORD
-            )
+            OpalClient.buildWithAuthentication(server="http://deadbeef:8080", user=TEST_USER, password=TEST_PASSWORD)
             assert False
         except Exception:
             assert True
 
     def test_sendRestBadCredentials(self):
-        client = OpalClient.buildWithAuthentication(
-            server=TEST_SERVER, user="admin", password=TEST_PASSWORD
-        )
+        client = OpalClient.buildWithAuthentication(server=TEST_SERVER, user="admin", password=TEST_PASSWORD)
 
         try:
             self.assertRaises(Exception, self.__sendSimpleRequest, client.new_request())
@@ -36,9 +33,7 @@ class TestClass(unittest.TestCase):
     def test_sendRest(self):
         client = None
         try:
-            client = OpalClient.buildWithAuthentication(
-                server=TEST_SERVER, user=TEST_USER, password=TEST_PASSWORD
-            )
+            client = OpalClient.buildWithAuthentication(server=TEST_SERVER, user=TEST_USER, password=TEST_PASSWORD)
             self.__sendSimpleRequest(client.new_request())
         except Exception as e:
             self.fail(e)

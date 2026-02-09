@@ -20,7 +20,9 @@ class SQLService:
             "--project",
             "-pr",
             required=False,
-            help="Source project name, that will be used to resolve the table names in the FROM statement. If not provided, the fully qualified table names must be specified in the query (escaped by backquotes: `<project>.<table>`).",
+            help="Source project name, that will be used to resolve the table names in the FROM statement. If not "
+            "provided, the fully qualified table names must be specified in the query (escaped by backquotes: "
+            "`<project>.<table>`).",
         )
         parser.add_argument("--query", "-q", required=True, help="SQL query")
         parser.add_argument(
@@ -97,13 +99,15 @@ class SQLHistoryService:
             "--project",
             "-pr",
             required=False,
-            help="Project name used as the SQL execution context to filter. If not specified, history from any context is returned. If '*' is specified, history of SQL execution without context is returned.",
+            help="Project name used as the SQL execution context to filter. If not specified, history from any context "
+            "is returned. If '*' is specified, history of SQL execution without context is returned.",
         )
         parser.add_argument(
             "--offset",
             "-os",
             required=False,
-            help="Number of history items to skip. Default is 0 (note that the items are ordered by most recent first).",
+            help="Number of history items to skip. Default is 0 (note that the items are ordered by most recent "
+            "first).",
         )
         parser.add_argument(
             "--limit",
@@ -115,7 +119,8 @@ class SQLHistoryService:
             "--subject",
             "-sb",
             required=False,
-            help="Filter by user name, only administrators can retrieve SQL history of other users. If '*' is specified, history of all users is retrieved. Default is the current user name.",
+            help="Filter by user name, only administrators can retrieve SQL history of other users. If '*' is "
+            "specified, history of all users is retrieved. Default is the current user name.",
         )
         parser.add_argument(
             "--json",
@@ -134,13 +139,19 @@ class SQLHistoryService:
         client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
         try:
             if args.subject and args.subject != args.user:
-                builder = core.UriBuilder(
-                    ["system", "subject-profile", args.subject, "sql-history"]
-                )
+                builder = core.UriBuilder([
+                    "system",
+                    "subject-profile",
+                    args.subject,
+                    "sql-history",
+                ])
             else:
-                builder = core.UriBuilder(
-                    ["system", "subject-profile", "_current", "sql-history"]
-                )
+                builder = core.UriBuilder([
+                    "system",
+                    "subject-profile",
+                    "_current",
+                    "sql-history",
+                ])
             if args.project:
                 builder.query("datasource", args.project)
             if args.offset:

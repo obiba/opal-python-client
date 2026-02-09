@@ -36,15 +36,13 @@ class DataService:
             "--raw",
             "-r",
             action="store_true",
-            help="Get raw value, output to stdout, useful for downloading "
-            "a binary value",
+            help="Get raw value, output to stdout, useful for downloading a binary value",
         )
         parser.add_argument(
             "--pos",
             "-po",
             required=False,
-            help="Position of the value to query in case of a repeatable "
-            "variable (starting at 0).",
+            help="Position of the value to query in case of a repeatable variable (starting at 0).",
         )
         parser.add_argument(
             "--json",
@@ -64,9 +62,7 @@ class DataService:
             fd = None
             if args.raw:
                 fd = sys.stdout.fileno()
-            res = DataService(client, args.verbose)._get_data(
-                args.name, args.id, args.pos, fd
-            )
+            res = DataService(client, args.verbose)._get_data(args.name, args.id, args.pos, fd)
             # format response
             core.Formatter.print_json(res, args.json)
         finally:
@@ -91,9 +87,7 @@ class DataService:
         """
         return self._get_data(f"{project}.{table}", id)
 
-    def get_value(
-        self, project: str, table: str, variable: str, id: str, pos: str = None, fd=None
-    ) -> dict:
+    def get_value(self, project: str, table: str, variable: str, id: str, pos: str = None, fd=None) -> dict:
         """
         Get the variable value of an entity in a project's table.
 
@@ -187,8 +181,7 @@ class EntityService:
             "--tables",
             "-ta",
             action="store_true",
-            help="Get the list of tables in which the entity with given "
-            "identifier exists.",
+            help="Get the list of tables in which the entity with given identifier exists.",
         )
         parser.add_argument(
             "--json",
@@ -207,9 +200,7 @@ class EntityService:
         try:
             res = None
             if args.tables:
-                res = EntityService(client, args.verbose).get_entity_tables(
-                    args.id, args.type
-                )
+                res = EntityService(client, args.verbose).get_entity_tables(args.id, args.type)
             else:
                 res = EntityService(client, args.verbose).get_entity(args.id, args.type)
 
@@ -223,13 +214,7 @@ class EntityService:
         if self.verbose:
             request.verbose()
         # send request
-        response = (
-            request.fail_on_error()
-            .accept_json()
-            .get()
-            .resource(self._make_ws(id, type, False))
-            .send()
-        )
+        response = request.fail_on_error().accept_json().get().resource(self._make_ws(id, type, False)).send()
         return response.from_json()
 
     def get_entity_tables(self, id: str, type: str = None) -> list:
@@ -237,13 +222,7 @@ class EntityService:
         if self.verbose:
             request.verbose()
         # send request
-        response = (
-            request.fail_on_error()
-            .accept_json()
-            .get()
-            .resource(self._make_ws(id, type, True))
-            .send()
-        )
+        response = request.fail_on_error().accept_json().get().resource(self._make_ws(id, type, True)).send()
         return response.from_json()
 
     def _make_ws(self, id: str, type: str = None, tables: bool = False):

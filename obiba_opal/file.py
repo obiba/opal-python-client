@@ -28,9 +28,7 @@ class FileService:
             action="store_true",
             help="Download file, or folder (as a zip file).",
         )
-        parser.add_argument(
-            "--download-password", "-dlp", help="Password to encrypt the file content."
-        )
+        parser.add_argument("--download-password", "-dlp", help="Password to encrypt the file content.")
         parser.add_argument(
             "--upload",
             "-up",
@@ -43,9 +41,7 @@ class FileService:
             action="store_true",
             help="Delete a file on Opal file system.",
         )
-        parser.add_argument(
-            "--force", "-f", action="store_true", help="Skip confirmation."
-        )
+        parser.add_argument("--force", "-f", action="store_true", help="Skip confirmation.")
         parser.add_argument(
             "--json",
             "-j",
@@ -65,9 +61,7 @@ class FileService:
 
             # send request
             if args.download or args.download_password:
-                service.download_file(
-                    args.path, sys.stdout.fileno(), args.download_password
-                )
+                service.download_file(args.path, sys.stdout.fileno(), args.download_password)
             else:
                 if args.upload:
                     service.upload_file(args.upload, args.path)
@@ -76,9 +70,7 @@ class FileService:
                     if args.force:
                         service.delete_file(args.path)
                     else:
-                        confirmed = input(
-                            'Delete the file "' + args.path + '"? [y/N]: '
-                        )
+                        confirmed = input('Delete the file "' + args.path + '"? [y/N]: ')
                         if confirmed == "y":
                             service.delete_file(args.path)
                         else:
@@ -108,9 +100,7 @@ class FileService:
         file = FileService.OpalFile(path)
 
         fp = os.fdopen(fd, "wb")
-        request.get().resource(file.get_ws()).accept("*/*").header(
-            "X-File-Key", download_password
-        ).send(fp)
+        request.get().resource(file.get_ws()).accept("*/*").header("X-File-Key", download_password).send(fp)
         fp.flush()
 
     def upload_file(self, upload: str, path: str):

@@ -7,6 +7,4 @@ TEST_PASSWORD = "password"
 
 
 def make_client():
-    return OpalClient.buildWithAuthentication(
-        server=TEST_SERVER, user=TEST_USER, password=TEST_PASSWORD
-    )
+    return OpalClient.buildWithAuthentication(server=TEST_SERVER, user=TEST_USER, password=TEST_PASSWORD)

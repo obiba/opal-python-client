@@ -19,8 +19,9 @@ extend-exclude = [
 # Assume Python 3.10.
 target-version = "py310"
 
-# Same as Black.
-line-length = 88
+# Line length with preview to format
+line-length = 120
+preview = true
 
 [lint]
 # Enable flake8-bugbear rules

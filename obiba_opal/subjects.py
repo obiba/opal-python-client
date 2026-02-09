@@ -25,7 +25,8 @@ class UserService:
             "--upassword",
             "-upa",
             required=False,
-            help="User password of at least 8 characters, must contain at least one digit, one upper case alphabet, one lower case alphabet, one special character (which includes @#$%^&+=!) and no white space.",
+            help="User password of at least 8 characters, must contain at least one digit, one upper case alphabet, "
+            "one lower case alphabet, one special character (which includes @#$%^&+=!) and no white space.",
         )
         parser.add_argument(
             "--ucertificate",
@@ -40,9 +41,7 @@ class UserService:
             required=False,
             help="Disable user account (if omitted the user is enabled by default).",
         )
-        parser.add_argument(
-            "--groups", "-g", nargs="+", required=False, help="User groups"
-        )
+        parser.add_argument("--groups", "-g", nargs="+", required=False, help="User groups")
 
         parser.add_argument(
             "--fetch",
@@ -164,7 +163,8 @@ class UserService:
         Update a user.
 
         :param name: The user name
-        :param upassword: The user password of at least 8 characters, must contain at least one digit, one upper case alphabet, one lower case alphabet, one special character (which includes @#$%^&+=!) and no white space
+        :param upassword: The user password of at least 8 characters, must contain at least one digit, one upper case
+            alphabet, one lower case alphabet, one special character (which includes @#$%^&+=!) and no white space
         :param ucertificate: The user certificate file.
         :param groups: The list of groups
         :param disabled: Not enabled
@@ -182,9 +182,7 @@ class UserService:
 
         if upassword:
             if userInfo["authenticationType"] == "CERTIFICATE":
-                raise ValueError(
-                    f"{user['name']} requires a certificate (public key) file"
-                )
+                raise ValueError(f"{user['name']} requires a certificate (public key) file")
             if len(upassword) < 8:
                 raise ValueError("Password must contain at least 8 characters.")
             user["authenticationType"] = "PASSWORD"
@@ -218,7 +216,8 @@ class UserService:
         Add a user.
 
         :param name: The user name
-        :param upassword: The user password of at least 8 characters, must contain at least one digit, one upper case alphabet, one lower case alphabet, one special character (which includes @#$%^&+=!) and no white space
+        :param upassword: The user password of at least 8 characters, must contain at least one digit, one upper case
+            alphabet, one lower case alphabet, one special character (which includes @#$%^&+=!) and no white space
         :param ucertificate: The user certificate file.
         :param groups: The list of groups
         :param disabled: Not enabled

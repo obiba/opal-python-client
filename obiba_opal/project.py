@@ -35,9 +35,7 @@ class ProjectService:
             help="Project database name. If not provided only views can be added.",
         )
         parser.add_argument("--title", "-t", required=False, help="Project title.")
-        parser.add_argument(
-            "--description", "-dc", required=False, help="Project description."
-        )
+        parser.add_argument("--description", "-dc", required=False, help="Project description.")
         parser.add_argument(
             "--tags",
             "-tg",
@@ -134,9 +132,7 @@ class ProjectService:
         if not name:
             raise ValueError("The project name is required.")
         request = self._make_request(fail_safe)
-        response = (
-            request.get().resource(core.UriBuilder(["project", name]).build()).send()
-        )
+        response = request.get().resource(core.UriBuilder(["project", name]).build()).send()
         return response.from_json() if response.code == 200 else None
 
     def delete_project(self, name: str):
@@ -163,7 +159,8 @@ class ProjectService:
         Add a project.
 
         :param name: The project name
-        :param database: The project database name. If not provided only views can be added. See get_databases() for the list of databases available for storage.
+        :param database: The project database name. If not provided only views can be added. See
+            get_databases() for the list of databases available for storage.
         :param title: The project title
         :param description: The project description
         :param tags: The list of project tags
@@ -189,9 +186,7 @@ class ProjectService:
 
         request = self._make_request()
         request.accept_json().content_type_json()
-        request.post().resource(core.UriBuilder(["projects"]).build()).content(
-            json.dumps(project)
-        ).send()
+        request.post().resource(core.UriBuilder(["projects"]).build()).content(json.dumps(project)).send()
 
     def get_databases(self, usage: str = "storage") -> list:
         """
@@ -201,13 +196,7 @@ class ProjectService:
         """
         request = self._make_request()
         request.accept_json()
-        response = (
-            request.get()
-            .resource(
-                core.UriBuilder(["system", "databases"]).query("usage", usage).build()
-            )
-            .send()
-        )
+        response = request.get().resource(core.UriBuilder(["system", "databases"]).query("usage", usage).build()).send()
         return response.from_json()
 
     def _make_request(self, fail_safe: bool = False):
@@ -233,9 +222,7 @@ class BackupProjectCommand:
         """
         Add command specific options
         """
-        parser.add_argument(
-            "--project", "-pr", required=True, help="Source project name"
-        )
+        parser.add_argument("--project", "-pr", required=True, help="Source project name")
         parser.add_argument(
             "--archive",
             "-ar",
@@ -288,7 +275,8 @@ class BackupProjectCommand:
 
         :param project: The project name
         :param archive: The archive directory path in the Opal file system
-        :param views_as_tables: Treat views as tables, i.e. export data instead of keeping derivation scripts
+        :param views_as_tables: Treat views as tables, i.e. export data instead of
+            keeping derivation scripts
         :param force: Force overwriting an existing backup folder
         """
         # Build and send request

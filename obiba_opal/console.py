@@ -102,9 +102,7 @@ def add_opal_arguments(parser):
         nargs="?",
         help="Credentials auth: user password (requires a user name)",
     )
-    parser.add_argument(
-        "--token", "-tk", required=False, help="Token auth: User access token"
-    )
+    parser.add_argument("--token", "-tk", required=False, help="Token auth: User access token")
     parser.add_argument(
         "--ssl-cert",
         "-sc",
@@ -145,8 +143,7 @@ def run():
     parser = argparse.ArgumentParser(description="Opal command line tool.")
     subparsers = parser.add_subparsers(
         title="sub-commands",
-        help="Available sub-commands. Use --help option on the sub-command "
-        "for more details.",
+        help="Available sub-commands. Use --help option on the sub-command for more details.",
     )
 
     # Add subcommands
@@ -188,24 +185,21 @@ def run():
     add_subcommand(
         subparsers,
         "taxonomy",
-        "Manage taxonomies: list available taxonomies, download, import or "
-        "delete a taxonomy.",
+        "Manage taxonomies: list available taxonomies, download, import or delete a taxonomy.",
         TaxonomyService.add_arguments,
         TaxonomyService.do_command,
     )
     add_subcommand(
         subparsers,
         "backup-project",
-        "Backup project data: tables (data export), views, resources, report "
-        "templates, files.",
+        "Backup project data: tables (data export), views, resources, report templates, files.",
         BackupProjectCommand.add_arguments,
         BackupProjectCommand.do_command,
     )
     add_subcommand(
         subparsers,
         "restore-project",
-        "Restore project data: tables (data import), views, resources, report "
-        "templates, files.",
+        "Restore project data: tables (data import), views, resources, report templates, files.",
         RestoreProjectCommand.add_arguments,
         RestoreProjectCommand.do_command,
     )
@@ -268,8 +262,7 @@ def run():
     add_subcommand(
         subparsers,
         "import-r-rds",
-        "Import data from a RDS file (single serialized R object, expected to "
-        "be a tibble, using R).",
+        "Import data from a RDS file (single serialized R object, expected to be a tibble, using R).",
         ImportRDSCommand.add_arguments,
         ImportRDSCommand.do_command,
     )
@@ -318,8 +311,7 @@ def run():
     add_subcommand(
         subparsers,
         "import-annot",
-        "Apply data dictionary annotations specified in a file in CSV/TSV "
-        "format (see export-annot).",
+        "Apply data dictionary annotations specified in a file in CSV/TSV format (see export-annot).",
         ImportAnnotationsService.add_arguments,
         ImportAnnotationsService.do_command,
     )
