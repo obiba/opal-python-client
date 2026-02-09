@@ -371,11 +371,7 @@ class ExportRSASCommand:
             multilines=multilines,
             verbose=self.verbose,
         )
-        response = None
-        if output.endswith(".sas7bdat"):
-            response = exporter.submit("RSAS")
-        else:
-            response = exporter.submit("RXPT")
+        response = exporter.submit("RSAS") if output.endswith(".sas7bdat") else exporter.submit("RXPT")
         return response.from_json()
 
 
@@ -475,11 +471,7 @@ class ExportRSPSSCommand:
             multilines=multilines,
             verbose=self.verbose,
         )
-        response = None
-        if output.endswith(".sav"):
-            response = exporter.submit("RSPSS")
-        else:
-            response = exporter.submit("RZSPSS")
+        response = exporter.submit("RSPSS") if output.endswith(".sav") else exporter.submit("RZSPSS")
         return response.from_json()
 
 
@@ -772,7 +764,7 @@ class ExportVCFCommand:
         # Build and send requests
         client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
         try:
-            res = ExportVCFCommand(client, args.verbose).export_data(
+            ExportVCFCommand(client, args.verbose).export_data(
                 args.project,
                 args.vcf,
                 args.destination,

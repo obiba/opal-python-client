@@ -2,19 +2,21 @@
 Opal permissions
 """
 
+from dataclasses import dataclass
+
 import obiba_opal.core as core
 
 
+@dataclass
 class PermService:
     """
     Base class for permissions management.
     """
 
-    SUBJECT_TYPES = ("USER", "GROUP")
+    client: core.OpalClient
+    verbose: bool = False
 
-    def __init__(self, client: core.OpalClient, verbose: bool = False):
-        self.client = client
-        self.verbose = verbose
+    SUBJECT_TYPES = ("USER", "GROUP")
 
     @classmethod
     def _add_permission_arguments(self, parser, permissions: list):
@@ -78,9 +80,8 @@ class PermService:
             if self._map_permission(args.permission, permissions) is None:
                 raise ValueError(f"Valid permissions are: {', '.join(list(permissions.keys()))}")
 
-        if args.delete:
-            if not args.subject:
-                raise ValueError("The subject name is required")
+        if args.delete and not args.subject:
+            raise ValueError("The subject name is required")
 
         if not args.type or args.type.upper() not in self.SUBJECT_TYPES:
             raise ValueError(f"Valid subject types are: {', '.join(self.SUBJECT_TYPES).lower()}")

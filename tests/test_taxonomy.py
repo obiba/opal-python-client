@@ -40,20 +40,26 @@ class TestClass(unittest.TestCase):
                     fileService.delete_file(self.TEST_TAXONOMY_FILE)
                     assert response.code == 201
                 else:
-                    assert False
+                    raise AssertionError(
+                        "Failed to import taxonomy, check if the file exists and if the name is correct."
+                    ) from None
             finally:
                 if os.path.exists(self.LOCAL_TAXONOMY_FILE):
                     os.remove(self.LOCAL_TAXONOMY_FILE)
-        except Exception:
-            assert False
+        except Exception as e:
+            raise AssertionError(
+                "Failed to import taxonomy, check if the file exists and if the name is correct."
+            ) from e
 
     def test_2_downloadTaxonomy(self):
         try:
             response = self.service.download(self.TEST_TAXONOMY_NAME)
             assert response.code == 200 and self.TEST_TAXONOMY_NAME in str(response)
 
-        except Exception:
-            assert False
+        except Exception as e:
+            raise AssertionError(
+                "Failed to download taxonomy, check if the name is correct and if the taxonomy was properly imported."
+            ) from e
 
     def test_3_taxonomiesSummary(self):
         try:
@@ -71,8 +77,10 @@ class TestClass(unittest.TestCase):
                 )
                 > 0
             )
-        except Exception:
-            assert False
+        except Exception as e:
+            raise AssertionError(
+                "Failed to get taxonomies summaries, check if the taxonomy was properly imported."
+            ) from e
 
     def test_4_deleteTaxonomy(self):
         try:
@@ -82,5 +90,7 @@ class TestClass(unittest.TestCase):
             response = self.service.delete(name)
             assert response.code == 200
 
-        except Exception:
-            assert False
+        except Exception as e:
+            raise AssertionError(
+                "Failed to delete taxonomy, check if it was already deleted or if the name is correct."
+            ) from e

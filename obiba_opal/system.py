@@ -324,7 +324,7 @@ class TaxonomyService:
             elif args.import_file:
                 response = service.importFile(args.import_file)
             elif args.delete:
-                taxo = cls.OpalTaxonomyResource(args.delete)
+                cls.OpalTaxonomyResource(args.delete)
                 # confirm
                 if args.force:
                     response = service.delete(args.delete)

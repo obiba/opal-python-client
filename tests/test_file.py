@@ -31,12 +31,14 @@ class TestClass(unittest.TestCase):
                 if response["name"] == self.TEST_FILENAME:
                     assert True
                 else:
-                    assert False
+                    raise AssertionError(
+                        "Failed to upload file, check if the file exists and if the name is correct."
+                    ) from None
             finally:
                 if os.path.exists(self.LOCAL_UPLOAD_FILE):
                     os.remove(self.LOCAL_UPLOAD_FILE)
-        except Exception:
-            assert False
+        except Exception as e:
+            raise AssertionError("Failed to upload file, check if the file exists and if the name is correct.") from e
 
     def test_2_fileDownload(self):
         try:
@@ -47,9 +49,11 @@ class TestClass(unittest.TestCase):
                 os.remove(self.TEST_FILE)
                 assert True
             else:
-                assert False
-        except Exception:
-            assert False
+                raise AssertionError(
+                    "Failed to download file, check if the file exists and if the name is correct."
+                ) from None
+        except Exception as e:
+            raise AssertionError("Failed to download file, check if the file exists and if the name is correct.") from e
 
     def test_3_fileDownloadWithPassword(self):
         try:
@@ -61,9 +65,13 @@ class TestClass(unittest.TestCase):
                 os.remove(self.TEST_ZIPPED_FILE)
                 assert True
             else:
-                assert False
-        except Exception:
-            assert False
+                raise AssertionError(
+                    "Failed to download file with password, check if the file exists and if the name is correct."
+                ) from None
+        except Exception as e:
+            raise AssertionError(
+                "Failed to download file with password, check if the file exists and if the name is correct."
+            ) from e
 
     def test_4_deleteUpload(self):
         try:
@@ -71,5 +79,5 @@ class TestClass(unittest.TestCase):
             self.service.file_info(self.TEST_FILE)
         except HTTPError as e:
             assert e.code == 404
-        except Exception:
-            assert False
+        except Exception as e:
+            raise AssertionError("Failed to delete file, check if the file exists and if the name is correct.") from e

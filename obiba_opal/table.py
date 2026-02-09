@@ -436,11 +436,10 @@ class RestoreViewService:
 
     def _list_json_files(self, dirref: str, basenames):
         matches = []
-        for root, dirnames, filenames in os.walk(dirref):
+        for root, _, filenames in os.walk(dirref):
             for filename in filenames:
-                if filename.endswith(".json"):
-                    if not basenames or filename[:-5] in basenames:
-                        matches.append(os.path.join(root, filename))
+                if filename.endswith(".json") and (not basenames or filename[:-5] in basenames):
+                    matches.append(os.path.join(root, filename))
         return matches
 
     def _make_request(self, fail_safe: bool = False):

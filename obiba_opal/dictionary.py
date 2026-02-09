@@ -361,17 +361,16 @@ class ExportAnnotationsService:
                     if locale
                     else "namespace" in attribute and "locale" not in attribute
                 )
-                if do_search:
-                    if not taxonomies or attribute["namespace"] in taxonomies:
-                        row = [
-                            datasource,
-                            table,
-                            variableObject["name"],
-                            attribute["namespace"],
-                            attribute["name"],
-                            attribute["value"],
-                        ]
-                        writer.writerow(row)
+                if do_search and (not taxonomies or attribute["namespace"] in taxonomies):
+                    row = [
+                        datasource,
+                        table,
+                        variableObject["name"],
+                        attribute["namespace"],
+                        attribute["name"],
+                        attribute["value"],
+                    ]
+                    writer.writerow(row)
 
 
 class ImportAnnotationsService:

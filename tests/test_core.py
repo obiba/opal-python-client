@@ -1,7 +1,9 @@
 from argparse import Namespace
 import unittest
 from obiba_opal import OpalClient
+from obiba_opal.core import HTTPError
 from os.path import exists
+from requests.exceptions import RequestException
 from tests.utils import TEST_SERVER, TEST_USER, TEST_PASSWORD
 
 
@@ -18,15 +20,15 @@ class TestClass(unittest.TestCase):
         try:
             # this one will make a request to check if an OTP is needed
             OpalClient.buildWithAuthentication(server="http://deadbeef:8080", user=TEST_USER, password=TEST_PASSWORD)
-            assert False
-        except Exception:
+            raise AssertionError("Expected an exception when connecting to a non existing server") from None
+        except RequestException:
             assert True
 
     def test_sendRestBadCredentials(self):
         client = OpalClient.buildWithAuthentication(server=TEST_SERVER, user="admin", password=TEST_PASSWORD)
 
         try:
-            self.assertRaises(Exception, self.__sendSimpleRequest, client.new_request())
+            self.assertRaises(HTTPError, self.__sendSimpleRequest, client.new_request())
         finally:
             client.close()
 
@@ -86,11 +88,11 @@ class TestClass(unittest.TestCase):
 
     def test_invalidServerInfo(self):
         args = Namespace(opl=TEST_SERVER, user=TEST_USER, password=TEST_PASSWORD)
-        self.assertRaises(Exception, OpalClient.LoginInfo.parse, args)
+        self.assertRaises(ValueError, OpalClient.LoginInfo.parse, args)
 
     def test_invalidLoginInfo(self):
         args = Namespace(opal=TEST_SERVER, usr="administrator", password=TEST_PASSWORD)
-        self.assertRaises(Exception, OpalClient.LoginInfo.parse, args)
+        self.assertRaises(ValueError, OpalClient.LoginInfo.parse, args)
 
     def __sendSimpleRequest(self, request):
         request.fail_on_error()

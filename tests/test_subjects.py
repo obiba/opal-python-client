@@ -23,7 +23,7 @@ class TestClass:
         service.add_user(name, upassword, groups=[grp], disabled=True)
         user = service.get_user(name)
         assert user["name"] == name
-        assert user["enabled"] == False
+        assert not user["enabled"]
         assert len(user["groups"]) == 1
         assert user["groups"][0] == grp
         assert user["authenticationType"] == "PASSWORD"

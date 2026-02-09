@@ -100,11 +100,7 @@ class UserService:
             elif args.delete:
                 service.delete_user(args.name)
             else:
-                res = None
-                if args.name:
-                    res = service.get_user(args.name, False)
-                else:
-                    res = service.get_users()
+                res = service.get_user(args.name, False) if args.name else service.get_users()
                 core.Formatter.print_json(res, args.json)
         finally:
             client.close()
@@ -256,10 +252,7 @@ class UserService:
         """
         Build the web service resource path
         """
-        if not name:
-            ws = "/system/subject-credentials"
-        else:
-            ws = f"/system/subject-credential/{name}"
+        ws = "/system/subject-credentials" if not name else f"/system/subject-credential/{name}"
         return ws
 
 
@@ -311,11 +304,7 @@ class GroupService:
             if args.delete:
                 service.delete_group(args.name)
             else:
-                res = None
-                if args.name:
-                    res = service.get_group(args.name)
-                else:
-                    res = service.get_groups()
+                res = service.get_group(args.name) if args.name else service.get_groups()
                 core.Formatter.print_json(res, args.json)
         finally:
             client.close()

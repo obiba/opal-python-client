@@ -1410,10 +1410,6 @@ class ImportIDService:
         self.client = client
         self.verbose = verbose
 
-    def __init__(self, client: core.OpalClient, verbose: bool = False):
-        self.client = client
-        self.verbose = verbose
-
     @classmethod
     def add_arguments(cls, parser):
         """
@@ -1458,10 +1454,6 @@ class ImportIDMapService:
     """
     Import identifiers mapping into the identifiers database.
     """
-
-    def __init__(self, client: core.OpalClient, verbose: bool = False):
-        self.client = client
-        self.verbose = verbose
 
     def __init__(self, client: core.OpalClient, verbose: bool = False):
         self.client = client

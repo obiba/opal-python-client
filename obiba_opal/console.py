@@ -553,9 +553,13 @@ def run():
     if hasattr(args, "func"):
         try:
             # Prompt for a missing password only when user/password is required
-            if not (args.ssl_cert or args.ssl_key) and not args.token:
-                if not args.password or len(args.password) == 0:
-                    args.password = prompt_password()
+            if (
+                not (args.ssl_cert or args.ssl_key)
+                and not args.token
+                and (not args.password or len(args.password) == 0)
+                and args.user
+            ):
+                args.password = prompt_password()
             args.func(args)
         except HTTPError as e:
             Formatter.print_json(e.error, args.json if hasattr(args, "json") else False)
