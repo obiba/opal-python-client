@@ -23,9 +23,19 @@ class AnalysisCommand:
         """
         Add analyse command specific options
         """
-        parser.add_argument('--project', '-pr', required=True, help='Project name')
-        parser.add_argument('--config', '-c', required=True, help='A local JSON file containing the analysis configuration')
-        parser.add_argument('--json', '-j', action='store_true', help='Pretty JSON formatting of the response')
+        parser.add_argument("--project", "-pr", required=True, help="Project name")
+        parser.add_argument(
+            "--config",
+            "-c",
+            required=True,
+            help="A local JSON file containing the analysis configuration",
+        )
+        parser.add_argument(
+            "--json",
+            "-j",
+            action="store_true",
+            help="Pretty JSON formatting of the response",
+        )
 
     @classmethod
     def do_command(self, args):
@@ -34,11 +44,13 @@ class AnalysisCommand:
         """
         client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
         try:
-            res = AnalysisCommand(client, args.verbose).analyse(args.project, args.config)
+            res = AnalysisCommand(client, args.verbose).analyse(
+                args.project, args.config
+            )
             # format response
             core.Formatter.print_json(res, args.json)
         finally:
-            client.close
+            client.close()
 
     def analyse(self, project: str, config: str) -> dict:
         """
@@ -50,12 +62,12 @@ class AnalysisCommand:
         dto = self._create_dto(project, config)
         request = self.client.new_request()
         request.fail_on_error().accept_json().content_type_json()
-        ws = "/project/%s/commands/_analyse" % project
+        ws = f"/project/{project}/commands/_analyse"
         response = request.post().resource(ws).content(json.dumps(dto)).send()
 
         # get job status
         location = response.get_location()
-        job_resource = re.sub(r'http.*\/ws', r'', location)
+        job_resource = re.sub(r"http.*\/ws", r"", location)
         request = self.client.new_request()
         request.fail_on_error().accept_json()
         if self.verbose:
@@ -67,12 +79,13 @@ class AnalysisCommand:
         """
         Create an analysis option DTO
         """
-        dto = {'project': project}
-        configJson = json.loads(open(config, 'r').read())
-        if type(configJson) is list:
-            dto['analyses'] = configJson
+        dto = {"project": project}
+        with open(config) as f:
+            configJson = json.load(f)
+        if isinstance(configJson, list):
+            dto["analyses"] = configJson
         else:
-            dto['analyses'] = [configJson]
+            dto["analyses"] = [configJson]
         return dto
 
 
@@ -90,13 +103,30 @@ class ExportAnalysisService:
         """
         Add export analysis command specific options
         """
-        parser.add_argument('--project', '-pr', required=True,
-                            help='Project name for which analysis data will be exported.')
-        parser.add_argument('--table', '-t', required=False, help='Table name for which analysis data will be exported.')
-        parser.add_argument('--all-results', '-ar', action='store_true',
-                            help='Export all results (default exports last result).')
-        parser.add_argument('--analysis-id', '-ai', required=False,
-                            help='A table Analysis ID for which results will be exported.')
+        parser.add_argument(
+            "--project",
+            "-pr",
+            required=True,
+            help="Project name for which analysis data will be exported.",
+        )
+        parser.add_argument(
+            "--table",
+            "-t",
+            required=False,
+            help="Table name for which analysis data will be exported.",
+        )
+        parser.add_argument(
+            "--all-results",
+            "-ar",
+            action="store_true",
+            help="Export all results (default exports last result).",
+        )
+        parser.add_argument(
+            "--analysis-id",
+            "-ai",
+            required=False,
+            help="A table Analysis ID for which results will be exported.",
+        )
 
     @classmethod
     def do_command(self, args):
@@ -107,12 +137,18 @@ class ExportAnalysisService:
         client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
         try:
             fd = sys.stdout.fileno()
-            if args.table is None:    
-                ExportAnalysisService(client, args.verbose).export_project_analyses(args.project, fd, args.all_results)
+            if args.table is None:
+                ExportAnalysisService(client, args.verbose).export_project_analyses(
+                    args.project, fd, args.all_results
+                )
             elif args.analysis_id is None:
-                ExportAnalysisService(client, args.verbose).export_table_analyses(args.project, args.table, fd, args.all_results)
+                ExportAnalysisService(client, args.verbose).export_table_analyses(
+                    args.project, args.table, fd, args.all_results
+                )
             else:
-                ExportAnalysisService(client, args.verbose).export_table_analysis(args.project, args.table, args.analysis_id, fd, args.all_results)
+                ExportAnalysisService(client, args.verbose).export_table_analysis(
+                    args.project, args.table, args.analysis_id, fd, args.all_results
+                )
         finally:
             client.close()
 
@@ -126,11 +162,13 @@ class ExportAnalysisService:
         """
         request = self.client.new_request()
         request.fail_on_error().accept("application/zip")
-        fp = os.fdopen(fd, 'wb')
+        fp = os.fdopen(fd, "wb")
         request.get().resource(self._make_ws(project, all_results=all_results)).send(fp)
         fp.flush()
 
-    def export_table_analyses(self, project: str, table: str, fd, all_results: bool = True):
+    def export_table_analyses(
+        self, project: str, table: str, fd, all_results: bool = True
+    ):
         """
         Export project's analyses for a specific table in a zip file.
 
@@ -140,11 +178,15 @@ class ExportAnalysisService:
         """
         request = self.client.new_request()
         request.fail_on_error().accept("application/zip")
-        fp = os.fdopen(fd, 'wb')
-        request.get().resource(self._make_ws(project, table, all_results=all_results)).send()
+        fp = os.fdopen(fd, "wb")
+        request.get().resource(
+            self._make_ws(project, table, all_results=all_results)
+        ).send()
         fp.flush()
 
-    def export_table_analysis(self, project: str, table: str, analysis_id: str, fd, all_results: bool = True):
+    def export_table_analysis(
+        self, project: str, table: str, analysis_id: str, fd, all_results: bool = True
+    ):
         """
         Export project's analysis for a specific table and analyis in a zip file.
 
@@ -154,20 +196,28 @@ class ExportAnalysisService:
         :param fd: Destination file descriptor (see os.fdopen())
         """
         request = self.client.new_request()
-        request.fail_on_error().accept('application/zip')
-        fp = os.fdopen(fd, 'wb')
-        request.get().resource(self._make_ws(project, table, analysis_id, all_results)).send()
+        request.fail_on_error().accept("application/zip")
+        fp = os.fdopen(fd, "wb")
+        request.get().resource(
+            self._make_ws(project, table, analysis_id, all_results)
+        ).send()
         fp.flush()
 
-    def _make_ws(self, project: str, table: str = None, analysis_id: str = None, all_results: bool = True):
+    def _make_ws(
+        self,
+        project: str,
+        table: str = None,
+        analysis_id: str = None,
+        all_results: bool = True,
+    ):
         """
         Build the web service resource path
         """
         if table is None:
-            ws = '/project/%s/analyses/_export' % project
+            ws = f"/project/{project}/analyses/_export"
         elif analysis_id is None:
-            ws = '/project/%s/table/%s/analyses/_export' % (project, table)
+            ws = f"/project/{project}/table/{table}/analyses/_export"
         else:
-            ws = '/project/%s/table/%s/analysis/%s/_export' % (project, table, analysis_id)
+            ws = f"/project/{project}/table/{table}/analysis/{analysis_id}/_export"
 
-        return '%s?all=true' % ws if all_results else ws
+        return f"{ws}?all=true" if all_results else ws

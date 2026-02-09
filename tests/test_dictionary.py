@@ -2,12 +2,12 @@ from obiba_opal import DictionaryService, ExportAnnotationsService
 from tests.utils import make_client
 import io
 
-class TestClass:
 
+class TestClass:
     @classmethod
     def setup_class(cls):
         client = make_client()
-        setattr(cls, 'client', client)
+        cls.client = client
 
     @classmethod
     def teardown_class(cls):
@@ -15,50 +15,56 @@ class TestClass:
 
     def test_datasource(self):
         client = self.client
-        res = DictionaryService(client).get_datasource('CNSIM')
-        assert res['name'] == 'CNSIM'
+        res = DictionaryService(client).get_datasource("CNSIM")
+        assert res["name"] == "CNSIM"
 
     def test_datasources(self):
         client = self.client
         res = DictionaryService(client).get_datasources()
-        assert type(res) == list
-        assert 'CNSIM' in [x['name'] for x in res]
+        assert isinstance(res, list)
+        assert "CNSIM" in [x["name"] for x in res]
 
     def test_table(self):
         client = self.client
-        res = DictionaryService(client).get_table('CNSIM', 'CNSIM1')
-        assert res['name'] == 'CNSIM1'
-        assert res['datasourceName'] == 'CNSIM'
-        assert res['link'] == '/datasource/CNSIM/table/CNSIM1'
+        res = DictionaryService(client).get_table("CNSIM", "CNSIM1")
+        assert res["name"] == "CNSIM1"
+        assert res["datasourceName"] == "CNSIM"
+        assert res["link"] == "/datasource/CNSIM/table/CNSIM1"
 
     def test_tables(self):
         client = self.client
-        res = DictionaryService(client).get_tables('CNSIM')
-        assert type(res) == list
-        assert 'CNSIM1' in [x['name'] for x in res]
+        res = DictionaryService(client).get_tables("CNSIM")
+        assert isinstance(res, list)
+        assert "CNSIM1" in [x["name"] for x in res]
 
     def test_variable(self):
         client = self.client
-        res = DictionaryService(client).get_variable('CNSIM', 'CNSIM1', 'GENDER')
-        assert res['name'] == 'GENDER'
-        assert res['parentLink']['link'] == '/datasource/CNSIM/table/CNSIM1'
+        res = DictionaryService(client).get_variable("CNSIM", "CNSIM1", "GENDER")
+        assert res["name"] == "GENDER"
+        assert res["parentLink"]["link"] == "/datasource/CNSIM/table/CNSIM1"
 
     def test_variables(self):
         client = self.client
-        res = DictionaryService(client).get_variables('CNSIM', 'CNSIM1')
-        assert type(res) == list
+        res = DictionaryService(client).get_variables("CNSIM", "CNSIM1")
+        assert isinstance(res, list)
         assert len(res) == 11
 
     def test_variable_annotations(self):
         client = self.client
         output = io.StringIO()
-        ExportAnnotationsService(client).export_variable_annotations('CLSA', 'Tracking_60min_R1', 'WGHTS_PROV_TRM', output, taxonomies=['Mlstr_area'])
-        rows = output.getvalue().split('\r\n')
-        rows = [line.split('\t') for line in rows if len(line) > 0]
+        ExportAnnotationsService(client).export_variable_annotations(
+            "CLSA",
+            "Tracking_60min_R1",
+            "WGHTS_PROV_TRM",
+            output,
+            taxonomies=["Mlstr_area"],
+        )
+        rows = output.getvalue().split("\r\n")
+        rows = [line.split("\t") for line in rows if len(line) > 0]
         assert len(rows) == 3
         assert len(rows[0]) == 6
         row = rows[2]
-        assert row[0] == 'CLSA'
-        assert row[1] == 'Tracking_60min_R1'
-        assert row[2] == 'WGHTS_PROV_TRM'
-        assert row[3] == 'Mlstr_area'
+        assert row[0] == "CLSA"
+        assert row[1] == "Tracking_60min_R1"
+        assert row[2] == "WGHTS_PROV_TRM"
+        assert row[3] == "Mlstr_area"

@@ -6,70 +6,70 @@ import os
 import shutil
 from uuid import uuid4
 
+
 class TestClass(unittest.TestCase):
+    TEST_FILE = "/tmp/data.csv"
+    TEST_ZIPPED_FILE = "/tmp/data.zip"
+    TEST_FILENAME = "data.csv"
+    LOCAL_UPLOAD_FILE = "/tmp/data.csv"
 
-  TEST_FILE = '/tmp/data.csv'
-  TEST_ZIPPED_FILE = '/tmp/data.zip'
-  TEST_FILENAME = 'data.csv'
-  LOCAL_UPLOAD_FILE = '/tmp/data.csv'
+    @classmethod
+    def setup_class(cls):
+        cls.service = FileService(make_client())
+        suffix = uuid4().hex
+        cls.TEST_FILENAME = f"data_{suffix}.csv"
+        cls.TEST_FILE = f"/tmp/{cls.TEST_FILENAME}"
+        cls.TEST_ZIPPED_FILE = f"/tmp/data_{suffix}.zip"
+        cls.LOCAL_UPLOAD_FILE = f"/tmp/{cls.TEST_FILENAME}"
 
-  @classmethod
-  def setup_class(cls):
-    cls.service = FileService(make_client())
-    suffix = uuid4().hex
-    cls.TEST_FILENAME = f'data_{suffix}.csv'
-    cls.TEST_FILE = f'/tmp/{cls.TEST_FILENAME}'
-    cls.TEST_ZIPPED_FILE = f'/tmp/data_{suffix}.zip'
-    cls.LOCAL_UPLOAD_FILE = f'/tmp/{cls.TEST_FILENAME}'
+    def test_1_fileUpload(self):
+        try:
+            shutil.copyfile("./tests/resources/data.csv", self.LOCAL_UPLOAD_FILE)
+            try:
+                self.service.upload_file(self.LOCAL_UPLOAD_FILE, "/tmp")
+                response = self.service.file_info(self.TEST_FILE)
+                if response["name"] == self.TEST_FILENAME:
+                    assert True
+                else:
+                    assert False
+            finally:
+                if os.path.exists(self.LOCAL_UPLOAD_FILE):
+                    os.remove(self.LOCAL_UPLOAD_FILE)
+        except Exception:
+            assert False
 
-  def test_1_fileUpload(self):
-    try:
-      shutil.copyfile('./tests/resources/data.csv', self.LOCAL_UPLOAD_FILE)
-      try:
-        self.service.upload_file(self.LOCAL_UPLOAD_FILE, '/tmp')
-        response = self.service.file_info(self.TEST_FILE)
-        if response['name'] == self.TEST_FILENAME:
-          assert True
-        else:
-          assert False
-      finally:
-        if os.path.exists(self.LOCAL_UPLOAD_FILE):
-          os.remove(self.LOCAL_UPLOAD_FILE)
-    except Exception as e:
-      assert False
+    def test_2_fileDownload(self):
+        try:
+            with open(self.TEST_FILE, "wb") as outfile:
+                fd = outfile.fileno()
+                self.service.download_file(self.TEST_FILE, fd)
+            if os.path.exists(self.TEST_FILE):
+                os.remove(self.TEST_FILE)
+                assert True
+            else:
+                assert False
+        except Exception:
+            assert False
 
-  def test_2_fileDownload(self):
-    try:
-      outfile = open(self.TEST_FILE, "wb")
-      fd = outfile.fileno()
-      self.service.download_file(self.TEST_FILE, fd)
-      if os.path.exists(self.TEST_FILE):
-        os.remove(self.TEST_FILE)
-        assert True
-      else:
-        assert False
-    except Exception as e:
-      assert False
+    def test_3_fileDownloadWithPassword(self):
+        try:
+            with open(self.TEST_ZIPPED_FILE, "wb") as outfile:
+                fd = outfile.fileno()
+                self.service.download_file(self.TEST_FILE, fd, "12345678")
+            stat = os.stat(self.TEST_ZIPPED_FILE)
+            if stat.st_size > 0:
+                os.remove(self.TEST_ZIPPED_FILE)
+                assert True
+            else:
+                assert False
+        except Exception:
+            assert False
 
-  def test_3_fileDownloadWithPassword(self):
-    try:
-      outfile = open(self.TEST_ZIPPED_FILE, "wb")
-      fd = outfile.fileno()
-      self.service.download_file(self.TEST_FILE, fd, "12345678")
-      stat = os.stat(self.TEST_ZIPPED_FILE)
-      if stat.st_size > 0:
-        os.remove(self.TEST_ZIPPED_FILE)
-        assert True
-      else:
-        assert False
-    except Exception as e:
-      assert False
-
-  def test_4_deleteUpload(self):
-    try:
-      self.service.delete_file(self.TEST_FILE)
-      self.service.file_info(self.TEST_FILE)
-    except HTTPError as e:
-      assert e.code == 404
-    except Exception as e:
-      assert False
+    def test_4_deleteUpload(self):
+        try:
+            self.service.delete_file(self.TEST_FILE)
+            self.service.file_info(self.TEST_FILE)
+        except HTTPError as e:
+            assert e.code == 404
+        except Exception:
+            assert False

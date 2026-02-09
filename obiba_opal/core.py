@@ -67,12 +67,13 @@ class OpalClient:
         :param server - Opal server address
         :param cert - public certificate/key (must be named as 'publickey.pem')
         :param key - private key (must be named as 'privatekey.pem')
-        :param no_ssl_verify - if True, the SSL certificate is not verified (not recommended)
+        :param no_ssl_verify - if True, the SSL certificate is not verified
+        (not recommended)
         """
 
         client = cls(server)
         if client.base_url.startswith("https:"):
-            client.session.verify = False if no_ssl_verify else True
+            client.session.verify = not no_ssl_verify
         client.session.cert = (cert, key)
 
         return client
@@ -87,7 +88,8 @@ class OpalClient:
         :param server - Opal server address
         :param user - username
         :param password - user password
-        :param no_ssl_verify - if True, the SSL certificate is not verified (not recommended)
+        :param no_ssl_verify - if True, the SSL certificate is not verified
+        (not recommended)
         """
         client = cls(server)
         if client.base_url.startswith("https:"):
@@ -114,26 +116,25 @@ class OpalClient:
 
         :param server - Opal server address
         :param token - token key
-        :param no_ssl_verify - if True, the SSL certificate is not verified (not recommended)
+        :param no_ssl_verify - if True, the SSL certificate is not verified
+        (not recommended)
         """
         client = cls(server)
         if client.base_url.startswith("https:"):
-            client.session.verify = False if no_ssl_verify else True
+            client.session.verify = not no_ssl_verify
         client.token(token)
         return client
 
     def __ensure_entry(self, text, entry, pwd=False):
         e = entry
         if not entry:
-            if pwd:
-                e = getpass.getpass(prompt=text + ": ")
-            else:
-                e = input(text + ": ")
+            e = getpass.getpass(prompt=text + ": ") if pwd else input(text + ": ")
         return e
 
     def credentials(self, user, password):
         """
-        Creates the authorization header and attempts to input the required user/password
+        Creates the authorization header and attempts to input the required
+        user/password
 
         :param user - username
         :param password - user password
@@ -142,8 +143,7 @@ class OpalClient:
         p = self.__ensure_entry("Password", password, True)
         return self.header(
             "Authorization",
-            "Basic "
-            + base64.b64encode("{}:{}".format(u, p).encode("utf-8")).decode("utf-8"),
+            "Basic " + base64.b64encode(f"{u}:{p}".encode()).decode("utf-8"),
         )
 
     def token(self, token):
@@ -178,7 +178,8 @@ class OpalClient:
         """
         Ignore or validate certificate
 
-        :param value = True/False to validation or not. Value can also be a CA_BUNDLE file or directory (e.g. 'verify=/etc/ssl/certs/ca-certificates.crt')
+        :param value = True/False to validation or not. Value can also be a
+        CA_BUNDLE file or directory (e.g. 'verify=/etc/ssl/certs/ca-certificates.crt')
         """
         self.session.verify = value
         return self
@@ -205,7 +206,7 @@ class OpalClient:
             try:
                 self.new_request().resource("/auth/session/_current").delete().send()
                 self.session.close()
-            except Exception as e:
+            except Exception:
                 pass
             self.id = None
 
@@ -238,21 +239,18 @@ class OpalClient:
                 data["key"] = argv["ssl_key"]
             else:
                 raise ValueError(
-                    "Invalid login information. Requires user-password or token or certificate-key information"
+                    "Invalid login information. Requires user-password or token "
+                    "or certificate-key information"
                 )
 
-            setattr(cls, "data", data)
+            cls.data = data
             return cls()
 
         def isToken(self):
-            if self.data.keys() & {"token"}:
-                return True
-            return False
+            return bool(self.data.keys() & {"token"})
 
         def isSsl(self):
-            if self.data.keys() & {"cert", "key"}:
-                return True
-            return False
+            return bool(self.data.keys() & {"cert", "key"})
 
 
 class OpalRequest:
@@ -276,7 +274,8 @@ class OpalRequest:
     def timeout(self, value):
         """
         Sets the connection and read timeout
-        Note: value can be a tupple to have different timeouts for connection and reading (connTimout, readTimeout)
+        Note: value can be a tupple to have different timeouts for connection
+        and reading (connTimout, readTimeout)
 
         :param value - connection/read timout
         """
@@ -413,10 +412,6 @@ class OpalRequest:
         else:
             raise ValueError("Resource is missing")
 
-        if self._upload_file is not None:
-            # Open file here, will be closed in send() method
-            self.files = {"file": (os.path.basename(self._upload_file), open(self._upload_file, "rb"))}
-
         if self.files is not None:
             request.files = self.files
 
@@ -429,8 +424,27 @@ class OpalRequest:
         """
         Sends the request via client session object
         """
-        request = self.__build_request()
-        try:
+        # Handle file upload with context manager
+        if self._upload_file is not None:
+            with open(self._upload_file, "rb") as file_handle:
+                self.files = {
+                    "file": (
+                        os.path.basename(self._upload_file),
+                        file_handle,
+                    )
+                }
+                request = self.__build_request()
+                response = OpalResponse(self.client.session.send(request.prepare()))
+
+                if self._fail_on_error and response.code >= 400:
+                    raise HTTPError(response)
+
+                if fp is not None:
+                    fp.write(response.content)
+
+                return response
+        else:
+            request = self.__build_request()
             response = OpalResponse(self.client.session.send(request.prepare()))
 
             if self._fail_on_error and response.code >= 400:
@@ -440,12 +454,6 @@ class OpalRequest:
                 fp.write(response.content)
 
             return response
-        finally:
-            # Close file handle if it was opened for upload
-            if self.files is not None and "file" in self.files:
-                file_tuple = self.files["file"]
-                if len(file_tuple) > 1 and hasattr(file_tuple[1], "close"):
-                    file_tuple[1].close()
 
 
 class OpalResponse:
@@ -453,7 +461,9 @@ class OpalResponse:
     Response from Opal: code, headers and content
     """
 
-    def __init__(self, response: Response = Response()):
+    def __init__(self, response: Response = None):
+        if response is None:
+            response = Response()
         self.response = response
 
     @property
@@ -474,8 +484,8 @@ class OpalResponse:
         else:
             try:
                 return self.response.json()
-            except Exception as e:
-                if type(self.content) == str:
+            except Exception:
+                if isinstance(self.content, str):
                     return self.response.content
                 else:
                     # FIXME silently fail
@@ -497,7 +507,7 @@ class OpalResponse:
 
     def extract_cookie_value(self, name: str) -> str | None:
         if "set-cookie" in self.response.headers:
-            if type(self.response.headers["set-cookie"]) == str:
+            if isinstance(self.response.headers["set-cookie"], str):
                 return self._extract_cookie_single_value(
                     name, self.response.headers["set-cookie"]
                 )
@@ -552,28 +562,19 @@ class MagmaNameResolver:
         return self.datasource is None or self.datasource == "*"
 
     def is_datasource(self):
-        if self.table:
-            return False
-        else:
-            return True
+        return not self.table
 
     def is_tables(self):
         return self.table == "*"
 
     def is_table(self):
-        if self.table and not self.variable:
-            return True
-        else:
-            return False
+        return bool(self.table and not self.variable)
 
     def is_variables(self):
         return self.variable == "*"
 
     def is_variable(self):
-        if self.variable:
-            return True
-        else:
-            return False
+        return bool(self.variable)
 
     def get_ws(self):
         if self.is_datasources():
@@ -615,9 +616,9 @@ class UriBuilder:
     Build a valid Uri.
     """
 
-    def __init__(self, path=[], params={}):
-        self._path = path
-        self._params = params
+    def __init__(self, path=None, params=None):
+        self._path = path if path is not None else []
+        self._params = params if params is not None else {}
 
     def path(self, path):
         self._path = path
@@ -632,29 +633,35 @@ class UriBuilder:
         return self
 
     def query(self, key, value):
-        val = "%s" % value
-        if type(value) == bool:
+        val = f"{value}"
+        if isinstance(value, bool):
             val = val.lower()
-        self._params.update([(key, val), ])
+        self._params.update(
+            [
+                (key, val),
+            ]
+        )
         return self
 
     def __str__(self):
         def concat_segment(p, s):
-            return "%s/%s" % (p, s)
+            return f"{p}/{s}"
 
         def concat_params(k):
-            return "%s=%s" % (
+            return "{}={}".format(
                 urllib.parse.quote(k),
                 urllib.parse.quote(str(self._params[k])),
             )
 
         def concat_query(q, p):
-            return "%s&%s" % (q, p)
+            return f"{q}&{p}"
 
         p = urllib.parse.quote("/" + reduce(concat_segment, self._path))
         if len(self._params):
-            q = reduce(concat_query, list(map(concat_params, list(self._params.keys()))))
-            return "%s?%s" % (p, q)
+            q = reduce(
+                concat_query, list(map(concat_params, list(self._params.keys())))
+            )
+            return f"{p}?{q}"
         else:
             return p
 
@@ -665,13 +672,11 @@ class UriBuilder:
 class HTTPError(Exception):
     def __init__(self, response: OpalResponse, message: str = None):
         # Call the base class constructor with the parameters it needs
-        super().__init__(message if message else "HTTP Error: %s" % response.code)
+        super().__init__(message if message else f"HTTP Error: {response.code}")
         self.code = response.code
         http_status = [x for x in list(HTTPStatus) if x.value == response.code][0]
         self.message = (
-            message
-            if message
-            else "%s: %s" % (http_status.phrase, http_status.description)
+            message if message else f"{http_status.phrase}: {http_status.description}"
         )
         self.error = (
             response.from_json()
@@ -679,7 +684,7 @@ class HTTPError(Exception):
             else {"code": response.code, "status": self.message}
         )
         # case the reported error is not a dict
-        if type(self.error) != dict:
+        if not isinstance(self.error, dict):
             self.error = {"code": response.code, "status": self.error}
 
     def is_client_error(self) -> bool:

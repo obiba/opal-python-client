@@ -31,6 +31,9 @@ dependencies = [
 test = [
     "pytest>=7.2.2",
 ]
+dev = [
+    "ruff>=0.10.0",
+]
 
 [project.scripts]
 opal = "obiba_opal.console:run"
