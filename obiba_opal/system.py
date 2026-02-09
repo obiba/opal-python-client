@@ -126,19 +126,24 @@ class PluginService:
             "--install",
             "-i",
             required=False,
-            help="Install a plugin by providing its name or name:version or a path to a plugin archive file (in Opal file system). If no version is specified, the latest version is installed. Requires system restart to be effective.",
+            help="Install a plugin by providing its name or name:version or a "
+            "path to a plugin archive file (in Opal file system). If no "
+            "version is specified, the latest version is installed. "
+            "Requires system restart to be effective.",
         )
         parser.add_argument(
             "--remove",
             "-rm",
             required=False,
-            help="Remove a plugin by providing its name. Requires system restart to be effective.",
+            help="Remove a plugin by providing its name. Requires system "
+            "restart to be effective.",
         )
         parser.add_argument(
             "--reinstate",
             "-ri",
             required=False,
-            help="Reinstate a plugin that was previously removed by providing its name.",
+            help="Reinstate a plugin that was previously removed by providing "
+            "its name.",
         )
         parser.add_argument(
             "--fetch", "-f", required=False, help="Get the named plugin description."
@@ -147,7 +152,8 @@ class PluginService:
             "--configure",
             "-c",
             required=False,
-            help="Configure the plugin site properties. Usually requires to restart the associated service to be effective.",
+            help="Configure the plugin site properties. Usually requires to "
+            "restart the associated service to be effective.",
         )
         parser.add_argument(
             "--status",
@@ -223,7 +229,8 @@ class PluginService:
             elif args.configure:
                 request.content_type_text_plain()
                 print(
-                    "Enter plugin site properties (one property per line, Ctrl-D to end input):"
+                    "Enter plugin site properties (one property per line, "
+                    "Ctrl-D to end input):"
                 )
                 request.content(sys.stdin.read())
                 response = (
@@ -427,7 +434,9 @@ class TaskService:
         parser.add_argument(
             "--id",
             required=False,
-            help="The task ID. If not provided, it will be read from the standard input (from the JSON representation of the task or a plain value).",
+            help="The task ID. If not provided, it will be read from the "
+            "standard input (from the JSON representation of the task or "
+            "a plain value).",
         )
         parser.add_argument(
             "--show",
@@ -594,7 +603,8 @@ class RESTService:
         """
         parser.add_argument(
             "ws",
-            help="Web service path, for instance: /datasource/xxx/table/yyy/variable/vvv",
+            help="Web service path, for instance: /datasource/xxx/table/yyy/"
+            "variable/vvv",
         )
         parser.add_argument(
             "--method",
@@ -618,7 +628,8 @@ class RESTService:
             "--headers",
             "-hs",
             required=False,
-            help='Custom headers in the form of: { "Key2": "Value2", "Key2": "Value2" }',
+            help='Custom headers in the form of: { "Key2": "Value2", '
+            '"Key2": "Value2" }',
         )
         parser.add_argument(
             "--json",
