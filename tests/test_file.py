@@ -1,3 +1,4 @@
+from turtle import fd
 import unittest
 from tests.utils import make_client
 from obiba_opal.file import FileService
@@ -24,6 +25,7 @@ class TestClass(unittest.TestCase):
 
     def test_1_fileUpload(self):
         try:
+            print(f"Uploading file to {self.TEST_FILE}...")
             shutil.copyfile("./tests/resources/data.csv", self.LOCAL_UPLOAD_FILE)
             try:
                 self.service.upload_file(self.LOCAL_UPLOAD_FILE, "/tmp")
@@ -42,9 +44,10 @@ class TestClass(unittest.TestCase):
 
     def test_2_fileDownload(self):
         try:
+            print(f"Downloading file to {self.TEST_FILE}...")
+            # New: pythonic way
             with open(self.TEST_FILE, "wb") as outfile:
-                fd = outfile.fileno()
-                self.service.download_file(self.TEST_FILE, fd)
+                self.service.download_file(self.TEST_FILE, outfile)
             if os.path.exists(self.TEST_FILE):
                 os.remove(self.TEST_FILE)
                 assert True
@@ -57,9 +60,10 @@ class TestClass(unittest.TestCase):
 
     def test_3_fileDownloadWithPassword(self):
         try:
+            print(f"Downloading file with password to {self.TEST_ZIPPED_FILE}...")
+            # New: pythonic way
             with open(self.TEST_ZIPPED_FILE, "wb") as outfile:
-                fd = outfile.fileno()
-                self.service.download_file(self.TEST_FILE, fd, "12345678")
+                self.service.download_file(self.TEST_FILE, outfile, "12345678")
             stat = os.stat(self.TEST_ZIPPED_FILE)
             if stat.st_size > 0:
                 os.remove(self.TEST_ZIPPED_FILE)
@@ -75,6 +79,7 @@ class TestClass(unittest.TestCase):
 
     def test_4_deleteUpload(self):
         try:
+            print(f"Deleting file {self.TEST_FILE}...")
             self.service.delete_file(self.TEST_FILE)
             self.service.file_info(self.TEST_FILE)
         except HTTPError as e:
