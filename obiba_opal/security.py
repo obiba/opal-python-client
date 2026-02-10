@@ -1,5 +1,6 @@
 import obiba_opal.core as core
 
+
 class EncryptService:
     """
     Encryption by Opal.
@@ -7,7 +8,7 @@ class EncryptService:
 
     @classmethod
     def add_arguments(cls, parser):
-        parser.add_argument('plain', help='Plain text to encrypt')
+        parser.add_argument("plain", help="Plain text to encrypt")
 
     @classmethod
     def do_command(cls, args):
@@ -24,6 +25,7 @@ class EncryptService:
         finally:
             client.close()
 
+
 class DecryptService:
     """
     Decryption by Opal.
@@ -31,7 +33,7 @@ class DecryptService:
 
     @classmethod
     def add_arguments(cls, parser):
-        parser.add_argument('encrypted', help='Encrypted text to decrypt')
+        parser.add_argument("encrypted", help="Encrypted text to decrypt")
 
     @classmethod
     def do_command(cls, args):

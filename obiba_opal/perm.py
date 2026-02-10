@@ -2,31 +2,60 @@
 Opal permissions
 """
 
+from dataclasses import dataclass
+
 import obiba_opal.core as core
 
+
+@dataclass
 class PermService:
     """
     Base class for permissions management.
     """
 
-    SUBJECT_TYPES = ('USER', 'GROUP')
+    client: core.OpalClient
+    verbose: bool = False
 
-    def __init__(self, client: core.OpalClient, verbose: bool = False):
-        self.client = client
-        self.verbose = verbose
+    SUBJECT_TYPES = ("USER", "GROUP")
 
     @classmethod
     def _add_permission_arguments(self, parser, permissions: list):
         """
         Add permission arguments
         """
-        parser.add_argument('--fetch', '-f', action='store_true', required=False, help='Fetch permissions')
-        parser.add_argument('--add', '-a', action='store_true', required=False, help='Add a permission')
-        parser.add_argument('--delete', '-d', action='store_true', required=False, help='Delete a permission')
-        parser.add_argument('--permission', '-pe', help="Permission to apply: %s" % ', '.join(permissions))
-        parser.add_argument('--subject', '-s', required=False, help='Subject name to which the permission will be granted/removed (required on add/delete)')
-        parser.add_argument('--type', '-ty', required=True, help='Subject type: user or group')
-        parser.add_argument('--json', '-j', action='store_true', help='Pretty JSON formatting of the response')
+        parser.add_argument(
+            "--fetch",
+            "-f",
+            action="store_true",
+            required=False,
+            help="Fetch permissions",
+        )
+        parser.add_argument("--add", "-a", action="store_true", required=False, help="Add a permission")
+        parser.add_argument(
+            "--delete",
+            "-d",
+            action="store_true",
+            required=False,
+            help="Delete a permission",
+        )
+        parser.add_argument(
+            "--permission",
+            "-pe",
+            help=f"Permission to apply: {', '.join(permissions)}",
+        )
+        parser.add_argument(
+            "--subject",
+            "-s",
+            required=False,
+            help="Subject name to which the permission will be granted/removed (required on add/delete)",
+        )
+        parser.add_argument("--type", "-ty", required=True, help="Subject type: user or group")
+        parser.add_argument(
+            "--json",
+            "-j",
+            action="store_true",
+            help="Pretty JSON formatting of the response",
+        )
 
     @classmethod
     def _map_permission(self, permission: str, permissions: dict):
@@ -47,35 +76,32 @@ class PermService:
             if not args.subject:
                 raise ValueError("The subject name is required")
             if not args.permission:
-                raise ValueError("A permission name is required: %s" % ', '.join(list(permissions.keys())))
+                raise ValueError(f"A permission name is required: {', '.join(list(permissions.keys()))}")
             if self._map_permission(args.permission, permissions) is None:
-                raise ValueError("Valid permissions are: %s" % ', '.join(list(permissions.keys())))
+                raise ValueError(f"Valid permissions are: {', '.join(list(permissions.keys()))}")
 
-        if args.delete:
-            if not args.subject:
-                raise ValueError("The subject name is required")
-        
+        if args.delete and not args.subject:
+            raise ValueError("The subject name is required")
+
         if not args.type or args.type.upper() not in self.SUBJECT_TYPES:
-            raise ValueError("Valid subject types are: %s" % ', '.join(self.SUBJECT_TYPES).lower())
+            raise ValueError(f"Valid subject types are: {', '.join(self.SUBJECT_TYPES).lower()}")
 
     def _make_add_ws(self, path: list, subject: str, type: str, permission: str, permissions: dict):
-        return core.UriBuilder(path) \
-            .query('type', type.upper()) \
-            .query('permission', self._map_permission(permission, permissions)) \
-            .query('principal', subject) \
+        return (
+            core
+            .UriBuilder(path)
+            .query("type", type.upper())
+            .query("permission", self._map_permission(permission, permissions))
+            .query("principal", subject)
             .build()
-    
-    def _make_delete_ws(self, path: list, subject: str, type: str = 'user'):
-        return core.UriBuilder(path) \
-            .query('type', type.upper()) \
-            .query('principal', subject) \
-            .build()
-    
-    def _make_get_ws(self, path: list, type: str = 'user'):
-        return core.UriBuilder(path) \
-            .query('type', type.upper()) \
-            .build()
-    
+        )
+
+    def _make_delete_ws(self, path: list, subject: str, type: str = "user"):
+        return core.UriBuilder(path).query("type", type.upper()).query("principal", subject).build()
+
+    def _make_get_ws(self, path: list, type: str = "user"):
+        return core.UriBuilder(path).query("type", type.upper()).build()
+
     def _make_request(self, fail_safe: bool = False):
         request = self.client.new_request()
         if not fail_safe:
@@ -90,9 +116,7 @@ class ProjectPermService(PermService):
     Project permissions management.
     """
 
-    PERMISSIONS = {
-        'administrate': 'PROJECT_ALL'
-    }
+    PERMISSIONS = {"administrate": "PROJECT_ALL"}
 
     def __init__(self, client: core.OpalClient, verbose: bool = False):
         super().__init__(client, verbose)
@@ -103,7 +127,7 @@ class ProjectPermService(PermService):
         Add command specific options
         """
         cls._add_permission_arguments(parser, list(cls.PERMISSIONS.keys()))
-        parser.add_argument('--project', '-pr', required=True, help='Project name')
+        parser.add_argument("--project", "-pr", required=True, help="Project name")
 
     @classmethod
     def do_command(cls, args):
@@ -126,7 +150,7 @@ class ProjectPermService(PermService):
                 core.Formatter.print_json(res, args.json)
         finally:
             client.close()
-    
+
     def get_perms(self, project: str, type: str) -> list:
         """
         Get the project permissions.
@@ -135,10 +159,11 @@ class ProjectPermService(PermService):
         :param type: The subject type ('user' or 'group')
         """
         request = self._make_request()
-        response = request.get().resource(
-                        self._make_get_ws(['project', project, 'permissions', 'project'], type)).send()
+        response = (
+            request.get().resource(self._make_get_ws(["project", project, "permissions", "project"], type)).send()
+        )
         return response.from_json()
-    
+
     def delete_perm(self, project: str, subject: str, type: str):
         """
         Delete project level permissions.
@@ -149,7 +174,8 @@ class ProjectPermService(PermService):
         """
         request = self._make_request()
         request.delete().resource(
-                self._make_delete_ws(['project', project, 'permissions', 'project'], subject, type)).send()
+            self._make_delete_ws(["project", project, "permissions", "project"], subject, type)
+        ).send()
 
     def add_perm(self, project: str, subject: str, type: str, permission: str):
         """
@@ -162,8 +188,15 @@ class ProjectPermService(PermService):
         """
         request = self._make_request()
         request.post().resource(
-                self._make_add_ws(['project', project, 'permissions', 'project'], subject, type, permission, self.PERMISSIONS)).send()
-    
+            self._make_add_ws(
+                ["project", project, "permissions", "project"],
+                subject,
+                type,
+                permission,
+                self.PERMISSIONS,
+            )
+        ).send()
+
 
 class DatasourcePermService(PermService):
     """
@@ -171,11 +204,11 @@ class DatasourcePermService(PermService):
     """
 
     PERMISSIONS = {
-        'view-value': 'DATASOURCE_VIEW',
-        'add-table': 'TABLE_ADD',
-        'administrate': 'DATASOURCE_ALL'
+        "view-value": "DATASOURCE_VIEW",
+        "add-table": "TABLE_ADD",
+        "administrate": "DATASOURCE_ALL",
     }
-    
+
     def __init__(self, client: core.OpalClient, verbose: bool = False):
         super().__init__(client, verbose)
 
@@ -185,7 +218,12 @@ class DatasourcePermService(PermService):
         Add command specific options
         """
         cls._add_permission_arguments(parser, list(cls.PERMISSIONS.keys()))
-        parser.add_argument('--project', '-pr', required=True, help='Project name to which the tables belong')
+        parser.add_argument(
+            "--project",
+            "-pr",
+            required=True,
+            help="Project name to which the tables belong",
+        )
 
     @classmethod
     def do_command(cls, args):
@@ -217,10 +255,11 @@ class DatasourcePermService(PermService):
         :param type: The subject type ('user' or 'group')
         """
         request = self._make_request()
-        response = request.get().resource(
-                        self._make_get_ws(['project', project, 'permissions', 'datasource'], type)).send()
+        response = (
+            request.get().resource(self._make_get_ws(["project", project, "permissions", "datasource"], type)).send()
+        )
         return response.from_json()
-    
+
     def delete_perm(self, project: str, subject: str, type: str):
         """
         Delete project's datasource level permissions.
@@ -231,7 +270,8 @@ class DatasourcePermService(PermService):
         """
         request = self._make_request()
         request.delete().resource(
-                self._make_delete_ws(['project', project, 'permissions', 'datasource'], subject, type)).send()
+            self._make_delete_ws(["project", project, "permissions", "datasource"], subject, type)
+        ).send()
 
     def add_perm(self, project: str, subject: str, type: str, permission: str):
         """
@@ -244,7 +284,14 @@ class DatasourcePermService(PermService):
         """
         request = self._make_request()
         request.post().resource(
-                self._make_add_ws(['project', project, 'permissions', 'datasource'], subject, type, permission, self.PERMISSIONS)).send()
+            self._make_add_ws(
+                ["project", project, "permissions", "datasource"],
+                subject,
+                type,
+                permission,
+                self.PERMISSIONS,
+            )
+        ).send()
 
 
 class TablePermService(PermService):
@@ -253,11 +300,11 @@ class TablePermService(PermService):
     """
 
     PERMISSIONS = {
-        'view': 'TABLE_READ',
-        'view-value': 'TABLE_VALUES',
-        'edit': 'TABLE_EDIT',
-        'edit-values': 'TABLE_VALUES_EDIT',
-        'administrate': 'TABLE_ALL'
+        "view": "TABLE_READ",
+        "view-value": "TABLE_VALUES",
+        "edit": "TABLE_EDIT",
+        "edit-values": "TABLE_VALUES_EDIT",
+        "administrate": "TABLE_ALL",
     }
 
     def __init__(self, client: core.OpalClient, verbose: bool = False):
@@ -269,11 +316,21 @@ class TablePermService(PermService):
         Add command specific options
         """
         cls._add_permission_arguments(parser, list(cls.PERMISSIONS.keys()))
-        parser.add_argument('--project', '-pr', required=True, help='Project name to which the tables belong')
-        parser.add_argument('--tables', '-t', nargs='+', required=False,
-                            help='List of table names on which the permission is to be get/set (default is all)')
+        parser.add_argument(
+            "--project",
+            "-pr",
+            required=True,
+            help="Project name to which the tables belong",
+        )
+        parser.add_argument(
+            "--tables",
+            "-t",
+            nargs="+",
+            required=False,
+            help="List of table names on which the permission is to be get/set (default is all)",
+        )
 
-    @classmethod        
+    @classmethod
     def do_command(cls, args):
         """
         Execute permission command
@@ -301,13 +358,14 @@ class TablePermService(PermService):
     def get_perms(self, project: str, table: str, type: str) -> list:
         """
         Get the table permissions.
-        
+
         :param project: The project name
         :param type: The subject type ('user' or 'group')
         """
         request = self._make_request()
-        response = request.get().resource(
-                        self._make_get_ws(['project', project, 'permissions', 'table', table], type)).send()
+        response = (
+            request.get().resource(self._make_get_ws(["project", project, "permissions", "table", table], type)).send()
+        )
         return response.from_json()
 
     def delete_perms(self, project: str, tables: list, subject: str, type: str):
@@ -334,7 +392,8 @@ class TablePermService(PermService):
         """
         request = self._make_request()
         request.delete().resource(
-                self._make_delete_ws(['project', project, 'permissions', 'table', table], subject, type)).send()
+            self._make_delete_ws(["project", project, "permissions", "table", table], subject, type)
+        ).send()
 
     def add_perms(self, project: str, tables: list, subject: str, type: str, permission: str):
         """
@@ -362,16 +421,23 @@ class TablePermService(PermService):
         """
         request = self._make_request()
         request.post().resource(
-                self._make_add_ws(['project', project, 'permissions', 'table', table], subject, type, permission, self.PERMISSIONS)).send()
-    
+            self._make_add_ws(
+                ["project", project, "permissions", "table", table],
+                subject,
+                type,
+                permission,
+                self.PERMISSIONS,
+            )
+        ).send()
+
     def _ensure_tables(self, project: str, tables: list) -> list:
         """
         Get the table names of the project's datasource if none is specified.
         """
         if not tables:
             request = self._make_request()
-            res = request.get().resource(core.UriBuilder(['datasource', project, 'tables']).build()).send().from_json()
-            return [x['name'] for x in res]
+            res = request.get().resource(core.UriBuilder(["datasource", project, "tables"]).build()).send().from_json()
+            return [x["name"] for x in res]
         else:
             return tables
 
@@ -381,9 +447,7 @@ class VariablePermService(PermService):
     Project table variables permissions management.
     """
 
-    PERMISSIONS = {
-        'view': 'VARIABLE_READ'
-    }
+    PERMISSIONS = {"view": "VARIABLE_READ"}
 
     def __init__(self, client: core.OpalClient, verbose: bool = False):
         super().__init__(client, verbose)
@@ -394,12 +458,27 @@ class VariablePermService(PermService):
         Add command specific options
         """
         cls._add_permission_arguments(parser, list(cls.PERMISSIONS.keys()))
-        parser.add_argument('--project', '-pr', required=True, help='Project name to which the tables belong')
-        parser.add_argument('--table', '-t', required=True, help='Table name to which the variables belong')
-        parser.add_argument('--variables', '-va', nargs='+', required=False,
-                            help='List of variable names on which the permission is to be get/set (default is all)')
+        parser.add_argument(
+            "--project",
+            "-pr",
+            required=True,
+            help="Project name to which the tables belong",
+        )
+        parser.add_argument(
+            "--table",
+            "-t",
+            required=True,
+            help="Table name to which the variables belong",
+        )
+        parser.add_argument(
+            "--variables",
+            "-va",
+            nargs="+",
+            required=False,
+            help="List of variable names on which the permission is to be get/set (default is all)",
+        )
 
-    @classmethod        
+    @classmethod
     def do_command(cls, args):
         """
         Execute permission command
@@ -415,7 +494,14 @@ class VariablePermService(PermService):
             if args.delete:
                 service.delete_perms(args.project, args.table, args.variables, args.subject, args.type)
             elif args.add:
-                service.add_perms(args.project, args.table, args.variables, args.subject, args.type, args.permission)
+                service.add_perms(
+                    args.project,
+                    args.table,
+                    args.variables,
+                    args.subject,
+                    args.type,
+                    args.permission,
+                )
             else:
                 res = []
                 for variable in service._ensure_variables(args.project, args.table, args.variables):
@@ -434,10 +520,27 @@ class VariablePermService(PermService):
         :param type: The subject type ('user' or 'group')
         """
         request = self._make_request()
-        response = request.get().resource(
-                        self._make_get_ws(['project', project, 'permissions', 'table', table, 'variable', variable], type)).send()
+        response = (
+            request
+            .get()
+            .resource(
+                self._make_get_ws(
+                    [
+                        "project",
+                        project,
+                        "permissions",
+                        "table",
+                        table,
+                        "variable",
+                        variable,
+                    ],
+                    type,
+                )
+            )
+            .send()
+        )
         return response.from_json()
-    
+
     def delete_perms(self, project: str, table: str, variables: list, subject: str, type: str):
         """
         Delete project's table variables level permissions.
@@ -464,9 +567,30 @@ class VariablePermService(PermService):
         """
         request = self._make_request()
         request.delete().resource(
-                self._make_delete_ws(['project', project, 'permissions', 'table', table, 'variable', variable], subject, type)).send()
+            self._make_delete_ws(
+                [
+                    "project",
+                    project,
+                    "permissions",
+                    "table",
+                    table,
+                    "variable",
+                    variable,
+                ],
+                subject,
+                type,
+            )
+        ).send()
 
-    def add_perms(self, project: str, table: str, variables: list, subject: str, type: str, permission: str):
+    def add_perms(
+        self,
+        project: str,
+        table: str,
+        variables: list,
+        subject: str,
+        type: str,
+        permission: str,
+    ):
         """
         Add project's table variables level permissions.
 
@@ -481,7 +605,15 @@ class VariablePermService(PermService):
         for variable in variables_:
             self.add_perm(project, table, variable, subject, type, permission)
 
-    def add_perm(self, project: str, table: str, variable: str, subject: str, type: str, permission: str):
+    def add_perm(
+        self,
+        project: str,
+        table: str,
+        variable: str,
+        subject: str,
+        type: str,
+        permission: str,
+    ):
         """
         Add project's table variable level permissions.
 
@@ -494,16 +626,45 @@ class VariablePermService(PermService):
         """
         request = self._make_request()
         request.post().resource(
-                self._make_add_ws(['project', project, 'permissions', 'table', table, 'variable', variable], subject, type, permission, self.PERMISSIONS)).send()
-    
+            self._make_add_ws(
+                [
+                    "project",
+                    project,
+                    "permissions",
+                    "table",
+                    table,
+                    "variable",
+                    variable,
+                ],
+                subject,
+                type,
+                permission,
+                self.PERMISSIONS,
+            )
+        ).send()
+
     def _ensure_variables(self, project: str, table: str, variables: list) -> list:
         """
         Get the table's variable names of the project's datasource if none is specified.
         """
         if not variables:
             request = self._make_request()
-            res = request.get().resource(core.UriBuilder(['datasource', project, 'table', table, 'variables']).build()).send().from_json()
-            return [x['name'] for x in res]
+            res = (
+                request
+                .get()
+                .resource(
+                    core.UriBuilder([
+                        "datasource",
+                        project,
+                        "table",
+                        table,
+                        "variables",
+                    ]).build()
+                )
+                .send()
+                .from_json()
+            )
+            return [x["name"] for x in res]
         else:
             return variables
 
@@ -513,10 +674,7 @@ class ResourcePermService(PermService):
     Project resource permissions management.
     """
 
-    PERMISSIONS = {
-        'view': 'RESOURCE_VIEW',
-        'administrate': 'RESOURCE_ALL'
-    }
+    PERMISSIONS = {"view": "RESOURCE_VIEW", "administrate": "RESOURCE_ALL"}
 
     def __init__(self, client: core.OpalClient, verbose: bool = False):
         super().__init__(client, verbose)
@@ -527,11 +685,21 @@ class ResourcePermService(PermService):
         Add command specific options
         """
         cls._add_permission_arguments(parser, list(cls.PERMISSIONS.keys()))
-        parser.add_argument('--project', '-pr', required=True, help='Project name to which the resources belong')
-        parser.add_argument('--resources', '-r', nargs='+', required=False,
-                            help='List of resource names on which the permission is to be get/set (default is all)')
-    
-    @classmethod        
+        parser.add_argument(
+            "--project",
+            "-pr",
+            required=True,
+            help="Project name to which the resources belong",
+        )
+        parser.add_argument(
+            "--resources",
+            "-r",
+            nargs="+",
+            required=False,
+            help="List of resource names on which the permission is to be get/set (default is all)",
+        )
+
+    @classmethod
     def do_command(cls, args):
         """
         Execute permission command
@@ -547,7 +715,13 @@ class ResourcePermService(PermService):
             if args.delete:
                 service.delete_perms(args.project, args.resources, args.subject, args.type)
             elif args.add:
-                service.add_perms(args.project, args.resources, args.subject, args.type, args.permission)
+                service.add_perms(
+                    args.project,
+                    args.resources,
+                    args.subject,
+                    args.type,
+                    args.permission,
+                )
             else:
                 res = []
                 for resource in service._ensure_resources(args.project, args.resources):
@@ -564,10 +738,14 @@ class ResourcePermService(PermService):
         :param type: The subject type ('user' or 'group')
         """
         request = self._make_request()
-        response = request.get().resource(
-                        self._make_get_ws(['project', project, 'permissions', 'resource', resource], type)).send()
+        response = (
+            request
+            .get()
+            .resource(self._make_get_ws(["project", project, "permissions", "resource", resource], type))
+            .send()
+        )
         return response.from_json()
-    
+
     def delete_perms(self, project: str, resources: list, subject: str, type: str):
         """
         Delete project's resources level permissions.
@@ -592,7 +770,8 @@ class ResourcePermService(PermService):
         """
         request = self._make_request()
         request.delete().resource(
-                self._make_delete_ws(['project', project, 'permissions', 'resource', resource], subject, type)).send()
+            self._make_delete_ws(["project", project, "permissions", "resource", resource], subject, type)
+        ).send()
 
     def add_perms(self, project: str, resources: list, subject: str, type: str, permission: str):
         """
@@ -620,16 +799,23 @@ class ResourcePermService(PermService):
         """
         request = self._make_request()
         request.post().resource(
-                self._make_add_ws(['project', project, 'permissions', 'resource', resource], subject, type, permission, self.PERMISSIONS)).send()
-    
+            self._make_add_ws(
+                ["project", project, "permissions", "resource", resource],
+                subject,
+                type,
+                permission,
+                self.PERMISSIONS,
+            )
+        ).send()
+
     def _ensure_resources(self, project: str, resources: list) -> list:
         """
         Get the resource names of the project if none is specified.
         """
         if not resources:
             request = self._make_request()
-            res = request.get().resource(core.UriBuilder(['project', project, 'resources']).build()).send().from_json()
-            return [x['name'] for x in res]
+            res = request.get().resource(core.UriBuilder(["project", project, "resources"]).build()).send().from_json()
+            return [x["name"] for x in res]
         else:
             return resources
 
@@ -639,10 +825,7 @@ class ResourcesPermService(PermService):
     Project resources permissions management.
     """
 
-    PERMISSIONS = {
-        'view': 'RESOURCES_VIEW',
-        'administrate': 'RESOURCES_ALL'
-    }
+    PERMISSIONS = {"view": "RESOURCES_VIEW", "administrate": "RESOURCES_ALL"}
 
     def __init__(self, client: core.OpalClient, verbose: bool = False):
         super().__init__(client, verbose)
@@ -653,7 +836,12 @@ class ResourcesPermService(PermService):
         Add command specific options
         """
         cls._add_permission_arguments(parser, list(cls.PERMISSIONS.keys()))
-        parser.add_argument('--project', '-pr', required=True, help='Project name to which the resources belong')
+        parser.add_argument(
+            "--project",
+            "-pr",
+            required=True,
+            help="Project name to which the resources belong",
+        )
 
     @classmethod
     def do_command(cls, args):
@@ -685,10 +873,11 @@ class ResourcesPermService(PermService):
         :param type: The subject type ('user' or 'group')
         """
         request = self._make_request()
-        response = request.get().resource(
-                        self._make_get_ws(['project', project, 'permissions', 'resources'], type)).send()
+        response = (
+            request.get().resource(self._make_get_ws(["project", project, "permissions", "resources"], type)).send()
+        )
         return response.from_json()
-    
+
     def delete_perm(self, project: str, subject: str, type: str):
         """
         Delete project resources level permissions.
@@ -699,7 +888,8 @@ class ResourcesPermService(PermService):
         """
         request = self._make_request()
         request.delete().resource(
-                self._make_delete_ws(['project', project, 'permissions', 'resources'], subject, type)).send()
+            self._make_delete_ws(["project", project, "permissions", "resources"], subject, type)
+        ).send()
 
     def add_perm(self, project: str, subject: str, type: str, permission: str):
         """
@@ -712,7 +902,14 @@ class ResourcesPermService(PermService):
         """
         request = self._make_request()
         request.post().resource(
-                self._make_add_ws(['project', project, 'permissions', 'resources'], subject, type, permission, self.PERMISSIONS)).send()
+            self._make_add_ws(
+                ["project", project, "permissions", "resources"],
+                subject,
+                type,
+                permission,
+                self.PERMISSIONS,
+            )
+        ).send()
 
 
 class RPermService(PermService):
@@ -720,9 +917,7 @@ class RPermService(PermService):
     R service permissions management.
     """
 
-    PERMISSIONS = {
-        'use': 'R_USE'
-    }
+    PERMISSIONS = {"use": "R_USE"}
 
     def __init__(self, client: core.OpalClient, verbose: bool = False):
         super().__init__(client, verbose)
@@ -763,10 +958,9 @@ class RPermService(PermService):
         :param type: The subject type ('user' or 'group')
         """
         request = self._make_request()
-        response = request.get().resource(
-                        self._make_get_ws(['system', 'permissions', 'r'], type)).send()
+        response = request.get().resource(self._make_get_ws(["system", "permissions", "r"], type)).send()
         return response.from_json()
-    
+
     def delete_perm(self, subject: str, type: str):
         """
         Delete R level permissions.
@@ -775,8 +969,7 @@ class RPermService(PermService):
         :param type: The subject type ('user' or 'group')
         """
         request = self._make_request()
-        request.delete().resource(
-                self._make_delete_ws(['system', 'permissions', 'r'], subject, type)).send()
+        request.delete().resource(self._make_delete_ws(["system", "permissions", "r"], subject, type)).send()
 
     def add_perm(self, subject: str, type: str, permission: str):
         """
@@ -788,18 +981,22 @@ class RPermService(PermService):
         """
         request = self._make_request()
         request.post().resource(
-                self._make_add_ws(['system', 'permissions', 'r'], subject, type, permission, self.PERMISSIONS)).send()
-    
+            self._make_add_ws(
+                ["system", "permissions", "r"],
+                subject,
+                type,
+                permission,
+                self.PERMISSIONS,
+            )
+        ).send()
+
 
 class DataSHIELDPermService(PermService):
     """
     DataSHIELD service permissions management.
     """
 
-    PERMISSIONS = {
-        'use': 'DATASHIELD_USE',
-        'administrate': 'DATASHIELD_ALL'
-    }
+    PERMISSIONS = {"use": "DATASHIELD_USE", "administrate": "DATASHIELD_ALL"}
 
     def __init__(self, client: core.OpalClient, verbose: bool = False):
         super().__init__(client, verbose)
@@ -840,10 +1037,9 @@ class DataSHIELDPermService(PermService):
         :param type: The subject type ('user' or 'group')
         """
         request = self._make_request()
-        response = request.get().resource(
-                        self._make_get_ws(['system', 'permissions', 'datashield'], type)).send()
+        response = request.get().resource(self._make_get_ws(["system", "permissions", "datashield"], type)).send()
         return response.from_json()
-    
+
     def delete_perm(self, subject: str, type: str):
         """
         Delete DataSHIELD level permissions.
@@ -852,8 +1048,7 @@ class DataSHIELDPermService(PermService):
         :param type: The subject type ('user' or 'group')
         """
         request = self._make_request()
-        request.delete().resource(
-                self._make_delete_ws(['system', 'permissions', 'datashield'], subject, type)).send()
+        request.delete().resource(self._make_delete_ws(["system", "permissions", "datashield"], subject, type)).send()
 
     def add_perm(self, subject: str, type: str, permission: str):
         """
@@ -865,18 +1060,22 @@ class DataSHIELDPermService(PermService):
         """
         request = self._make_request()
         request.post().resource(
-                self._make_add_ws(['system', 'permissions', 'datashield'], subject, type, permission, self.PERMISSIONS)).send()
-    
+            self._make_add_ws(
+                ["system", "permissions", "datashield"],
+                subject,
+                type,
+                permission,
+                self.PERMISSIONS,
+            )
+        ).send()
+
 
 class SystemPermService(PermService):
     """
     System administration permissions management.
     """
 
-    PERMISSIONS = {
-        'add-project': 'PROJECT_ADD',
-        'administrate': 'SYSTEM_ALL'
-    }
+    PERMISSIONS = {"add-project": "PROJECT_ADD", "administrate": "SYSTEM_ALL"}
 
     def __init__(self, client: core.OpalClient, verbose: bool = False):
         super().__init__(client, verbose)
@@ -909,7 +1108,7 @@ class SystemPermService(PermService):
                 core.Formatter.print_json(res, args.json)
         finally:
             client.close()
-    
+
     def get_perms(self, type: str) -> list:
         """
         Get the system administration permissions.
@@ -917,10 +1116,8 @@ class SystemPermService(PermService):
         :param type: The subject type ('user' or 'group')
         """
         request = self._make_request()
-        response = request.get().resource(
-                        self._make_get_ws(['system', 'permissions', 'administration'], type)).send()
+        response = request.get().resource(self._make_get_ws(["system", "permissions", "administration"], type)).send()
         return response.from_json()
-    
 
     def delete_perm(self, subject: str, type: str):
         """
@@ -931,7 +1128,8 @@ class SystemPermService(PermService):
         """
         request = self._make_request()
         request.delete().resource(
-                self._make_delete_ws(['system', 'permissions', 'administration'], subject, type)).send()
+            self._make_delete_ws(["system", "permissions", "administration"], subject, type)
+        ).send()
 
     def add_perm(self, subject: str, type: str, permission: str):
         """
@@ -943,4 +1141,11 @@ class SystemPermService(PermService):
         """
         request = self._make_request()
         request.post().resource(
-                self._make_add_ws(['system', 'permissions', 'administration'], subject, type, permission, self.PERMISSIONS)).send()
+            self._make_add_ws(
+                ["system", "permissions", "administration"],
+                subject,
+                type,
+                permission,
+                self.PERMISSIONS,
+            )
+        ).send()

@@ -4,12 +4,12 @@ import random
 import shutil
 import os
 
-class TestClass:
 
+class TestClass:
     @classmethod
     def setup_class(cls):
         client = make_client()
-        setattr(cls, 'client', client)
+        cls.client = client
 
     @classmethod
     def teardown_class(cls):
@@ -19,21 +19,21 @@ class TestClass:
         client = self.client
         fs = FileService(client)
         id = random.choice(list(range(1, 999, 1)))
-        inname = 'data%s' % id
-        inpath = '/tmp/%s.csv' % inname
-        shutil.copy('./tests/resources/data.csv', inpath)
-        fs.upload_file(inpath, '/tmp')
+        inname = f"data{id}"
+        inpath = f"/tmp/{inname}.csv"
+        shutil.copy("./tests/resources/data.csv", inpath)
+        fs.upload_file(inpath, "/tmp")
         os.remove(inpath)
         assert fs.file_info(inpath) is not None
         service = ImportCSVCommand(client)
-        task = service.import_data(inpath, 'CNSIM')
-        assert 'id' in task
-        status = TaskService(client).wait_task(task['id'])
-        assert status in ['SUCCEEDED', 'CANCELED', 'FAILED']
+        task = service.import_data(inpath, "CNSIM")
+        assert "id" in task
+        status = TaskService(client).wait_task(task["id"])
+        assert status in ["SUCCEEDED", "CANCELED", "FAILED"]
         fs.delete_file(inpath)
         dico = DictionaryService(client)
-        table = dico.get_table('CNSIM', inname)
+        table = dico.get_table("CNSIM", inname)
         assert table is not None
-        dico.delete_tables('CNSIM', [inname])
-        ds = dico.get_datasource('CNSIM')
-        assert inname not in ds['table']
+        dico.delete_tables("CNSIM", [inname])
+        ds = dico.get_datasource("CNSIM")
+        assert inname not in ds["table"]

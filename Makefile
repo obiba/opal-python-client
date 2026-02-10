@@ -4,6 +4,17 @@ install:
 test:
 	uv run --all-extras pytest
 
+lint:
+	uv run ruff check .
+
+fix:
+	uv run ruff check . --fix
+
+format:
+	uv run ruff format .
+
+check: format fix
+
 build:
 	uv build
 
