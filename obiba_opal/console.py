@@ -1,575 +1,232 @@
 #
-# Opal commands main entry point
+# Opal commands main entry point (Typer-based)
 #
-import argparse
-import sys
-import getpass
+from __future__ import annotations
 
-from obiba_opal.core import Formatter, HTTPError
-from obiba_opal.project import (
-    ProjectService,
-    BackupProjectCommand,
-    RestoreProjectCommand,
+import typer
+
+from obiba_opal import commands as cmd
+
+app = typer.Typer(
+    help="Opal command line tool.",
+    add_completion=False,
+    context_settings={"help_option_names": ["-h", "--help"]},
 )
-from obiba_opal.table import (
-    CopyTableCommand,
-    DeleteTableService,
-    BackupViewService,
-    RestoreViewService,
-)
-from obiba_opal.dictionary import (
-    DictionaryService,
-    ExportAnnotationsService,
-    ImportAnnotationsService,
-)
-from obiba_opal.data import DataService, EntityService
-from obiba_opal.analysis import AnalysisCommand, ExportAnalysisService
-from obiba_opal.file import FileService
-from obiba_opal.exports import (
-    ExportPluginCommand,
-    ExportCSVCommand,
-    ExportXMLCommand,
-    ExportRSASCommand,
-    ExportRSPSSCommand,
-    ExportRSTATACommand,
-    ExportRDSCommand,
-    ExportSQLCommand,
-    ExportVCFCommand,
-)
-from obiba_opal.subjects import UserService, GroupService
-from obiba_opal.perm import (
-    ProjectPermService,
-    DatasourcePermService,
-    TablePermService,
-    VariablePermService,
-    ResourcePermService,
-    ResourcesPermService,
-    RPermService,
-    DataSHIELDPermService,
-    SystemPermService,
-)
-from obiba_opal.imports import (
-    ImportPluginCommand,
-    ImportCSVCommand,
-    ImportIDMapService,
-    ImportIDService,
-    ImportLimeSurveyCommand,
-    ImportOpalCommand,
-    ImportRDSCommand,
-    ImportRSASCommand,
-    ImportRSPSSCommand,
-    ImportRSTATACommand,
-    ImportSQLCommand,
-    ImportVCFCommand,
-    ImportXMLCommand,
-)
-from obiba_opal.system import (
-    PluginService,
-    SystemService,
-    TaxonomyService,
-    TaskService,
-    RESTService,
-)
-from obiba_opal.sql import SQLService, SQLHistoryService
-from obiba_opal.security import EncryptService, DecryptService
 
 
-def prompt_password():
-    return getpass.getpass(prompt="Enter password: ")
+# =============================================================================
+# Register all commands
+# =============================================================================
+
+# Core commands
+app.command(name="project", help="Fetch, create, delete a project.")(cmd.project_command)
+app.command(name="dict", help="Query for data dictionary.")(cmd.dict_command)
+app.command(name="data", help="Query for data.")(cmd.data_command)
+app.command(name="entity", help="Query for entities (Participant, etc.).")(cmd.entity_command)
+app.command(name="file", help="Manage Opal file system.")(cmd.file_command)
+
+# Backup/Restore commands
+app.command(
+    name="backup_project",
+    help="Backup project data: tables (data export), views, resources, report templates, files.",
+)(cmd.backup_project_command)
+app.command(
+    name="restore_project",
+    help="Restore project data: tables (data import), views, resources, report templates, files.",
+)(cmd.restore_project_command)
+app.command(name="backup_view", help="Backup views of a project.")(cmd.backup_view_command)
+app.command(name="restore_view", help="Restore views of a project.")(cmd.restore_view_command)
+
+# Table commands
+app.command(name="copy_table", help="Copy a table into another table.")(cmd.copy_table_command)
+app.command(name="delete_table", help="Delete some tables.")(cmd.delete_table_command)
+
+# Dictionary annotation commands
+app.command(
+    name="export_annot",
+    help="Extract data dictionary annotations in CSV/TSV format.",
+)(cmd.export_annot_command)
+app.command(
+    name="import_annot",
+    help="Apply data dictionary annotations specified in a file in CSV/TSV format (see export-annot).",
+)(cmd.import_annot_command)
+
+# Import commands
+app.command(name="import_opal", help="Import data from a remote Opal server.")(cmd.import_opal_command)
+app.command(name="import_csv", help="Import data from a CSV file.")(cmd.import_csv_command)
+app.command(name="import_xml", help="Import data from a ZIP file.")(cmd.import_xml_command)
+app.command(
+    name="import_r_sas",
+    help="Import data from a SAS or SAS Transport file (using R).",
+)(cmd.import_r_sas_command)
+app.command(name="import_r_stata", help="Import data from a Stata file (using R).")(cmd.import_r_stata_command)
+app.command(
+    name="import_r_spss",
+    help="Import data from a SPSS or compressed SPSS file (using R).",
+)(cmd.import_r_spss_command)
+app.command(
+    name="import_r_rds",
+    help="Import data from a RDS file (single serialized R object, expected to be a tibble, using R).",
+)(cmd.import_r_rds_command)
+app.command(name="import_plugin", help="Import data from an Opal datasource plugin.")(cmd.import_plugin_command)
+app.command(
+    name="import_limesurvey",
+    help="Import data from a LimeSurvey database.",
+)(cmd.import_limesurvey_command)
+app.command(name="import_sql", help="Import data from a SQL database.")(cmd.import_sql_command)
+app.command(name="import_vcf", help="Import genotypes data from some VCF/BCF files.")(cmd.import_vcf_command)
+app.command(name="import_ids", help="Import system identifiers.")(cmd.import_ids_command)
+app.command(name="import_ids_map", help="Import identifiers mappings.")(cmd.import_ids_map_command)
+
+# Export commands
+app.command(name="export_xml", help="Export data to a zip of Opal XML files.")(cmd.export_xml_command)
+app.command(name="export_csv", help="Export data to a folder of CSV files.")(cmd.export_csv_command)
+app.command(
+    name="export_r_sas",
+    help="Export data to a SAS or SAS Transport file (using R).",
+)(cmd.export_r_sas_command)
+app.command(name="export_r_stata", help="Export data to a Stata file (using R).")(cmd.export_r_stata_command)
+app.command(
+    name="export_r_spss",
+    help="Export data to a SPSS or compressed SPSS file (using R).",
+)(cmd.export_r_spss_command)
+app.command(
+    name="export_r_rds",
+    help="Export data to a RDS file (single serialized R object, using R).",
+)(cmd.export_r_rds_command)
+app.command(name="export_sql", help="Export data to a SQL database.")(cmd.export_sql_command)
+app.command(name="export_plugin", help="Export data to a Opal datasource plugin.")(cmd.export_plugin_command)
+app.command(name="export_vcf", help="Export genotypes data to VCF/BCF files.")(cmd.export_vcf_command)
+
+# Analysis export
+app.command(
+    name="export_analysis_plugin",
+    help="Exports analysis data of a project or specific tables.",
+)(cmd.export_analysis_plugin_command)
+
+# User/Group commands
+app.command(name="user", help="Manage users.")(cmd.user_command)
+app.command(name="group", help="Manage groups.")(cmd.group_command)
+
+# Permission commands
+app.command(name="perm_project", help="Get or apply permission on a project.")(cmd.perm_project_command)
+app.command(name="perm_datasource", help="Get or apply permission on a datasource.")(cmd.perm_datasource_command)
+app.command(name="perm_table", help="Get or apply permission on a set of tables.")(cmd.perm_table_command)
+app.command(name="perm_variable", help="Get or apply permission on a set of variables.")(cmd.perm_variable_command)
+app.command(
+    name="perm_resources",
+    help="Get or apply permission on resources as a whole.",
+)(cmd.perm_resources_command)
+app.command(name="perm_resource", help="Get or apply permission on a set of resources.")(cmd.perm_resource_command)
+app.command(name="perm_r", help="Get or apply R permission.")(cmd.perm_r_command)
+app.command(name="perm_datashield", help="Get or apply DataSHIELD permission.")(cmd.perm_datashield_command)
+app.command(name="perm_system", help="Get or apply system permission.")(cmd.perm_system_command)
+
+# System commands
+app.command(name="plugin", help="Manage system plugins.")(cmd.plugin_command)
+app.command(name="system", help="Query for system status and configuration.")(cmd.system_command)
+app.command(name="task", help="Manage a task.")(cmd.task_command)
+app.command(name="rest", help="Request directly the Opal REST API, for advanced users.")(cmd.rest_command)
+app.command(
+    name="taxonomy",
+    help="Manage taxonomies: list available taxonomies, download, import or delete a taxonomy.",
+)(cmd.taxonomy_command)
+
+# Security commands
+app.command(name="encrypt", help="Encrypt string using Opal's secret key.")(cmd.encrypt_command)
+app.command(name="decrypt", help="Decrypt string using Opal's secret key.")(cmd.decrypt_command)
+
+# SQL commands
+app.command(name="sql", help="Execute a SQL statement on project's tables.")(cmd.sql_command)
+app.command(
+    name="sql_history",
+    help="SQL execution history of current user or of other users (administrator only).",
+)(cmd.sql_history_command)
+
+# Analysis commands
+app.command(
+    name="analysis_plugin",
+    help="Analyses a project variables using external R plugins.",
+)(cmd.analysis_plugin_command)
 
 
-def add_opal_arguments(parser):
-    """
-    Add Opal access arguments
-    """
-    parser.add_argument(
+# =============================================================================
+# Global options callback
+# =============================================================================
+
+
+def prompt_password() -> str:
+    return typer.prompt("Enter password", hide_input=True)
+
+
+@app.callback(invoke_without_command=True)
+def main(
+    ctx: typer.Context,
+    opal: str = typer.Option(
+        "http://localhost:8080",
         "--opal",
         "-o",
-        required=False,
-        default="http://localhost:8080",
         help="Opal server base url (default: http://localhost:8080)",
-    )
-    parser.add_argument(
+    ),
+    user: str | None = typer.Option(
+        None,
         "--user",
         "-u",
-        required=False,
         help="Credentials auth: user name (requires a password)",
-    )
-    parser.add_argument(
+    ),
+    password: str | None = typer.Option(
+        None,
         "--password",
         "-p",
-        required=False,
-        nargs="?",
         help="Credentials auth: user password (requires a user name)",
-    )
-    parser.add_argument("--token", "-tk", required=False, help="Token auth: User access token")
-    parser.add_argument(
+    ),
+    token: str | None = typer.Option(
+        None,
+        "--token",
+        "-tk",
+        help="Token auth: User access token",
+    ),
+    ssl_cert: str | None = typer.Option(
+        None,
         "--ssl-cert",
         "-sc",
-        required=False,
         help="Two-way SSL auth: certificate/public key file (requires a private key)",
-    )
-    parser.add_argument(
+    ),
+    ssl_key: str | None = typer.Option(
+        None,
         "--ssl-key",
         "-sk",
-        required=False,
         help="Two-way SSL auth: private key file (requires a certificate)",
-    )
-    parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
-    parser.add_argument(
+    ),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Verbose output"),
+    no_ssl_verify: bool = typer.Option(
+        False,
         "--no-ssl-verify",
         "-nv",
-        action="store_true",
         help="Do not verify SSL certificates for HTTPS.",
-    )
+    ),
+) -> None:
+    ctx.ensure_object(dict)
+
+    # Prompt for password if needed
+    if not (ssl_cert or ssl_key) and not token and not password and user:
+        password = prompt_password()
+
+    ctx.obj.update({
+        "opal": opal,
+        "user": user,
+        "password": password,
+        "token": token,
+        "ssl_cert": ssl_cert,
+        "ssl_key": ssl_key,
+        "verbose": verbose,
+        "no_ssl_verify": no_ssl_verify,
+    })
+    if ctx.invoked_subcommand is None:
+        typer.echo("Opal command line tool.")
+        typer.echo("For more details: opal --help")
+        raise typer.Exit()
 
 
-def add_subcommand(subparsers, name, help, add_args_func, default_func):
-    """
-    Make a sub-parser, add default arguments to it, add sub-command arguments
-    and set the sub-command callback function.
-    """
-    subparser = subparsers.add_parser(name, help=help)
-    add_opal_arguments(subparser)
-    add_args_func(subparser)
-    subparser.set_defaults(func=default_func)
-
-
-def run():
-    """
-    Command-line entry point.
-    """
-    # Parse arguments
-    parser = argparse.ArgumentParser(description="Opal command line tool.")
-    subparsers = parser.add_subparsers(
-        title="sub-commands",
-        help="Available sub-commands. Use --help option on the sub-command for more details.",
-    )
-
-    # Add subcommands
-    add_subcommand(
-        subparsers,
-        "project",
-        "Fetch, create, delete a project.",
-        ProjectService.add_arguments,
-        ProjectService.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "dict",
-        "Query for data dictionary.",
-        DictionaryService.add_arguments,
-        DictionaryService.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "data",
-        "Query for data.",
-        DataService.add_arguments,
-        DataService.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "entity",
-        "Query for entities (Participant, etc.).",
-        EntityService.add_arguments,
-        EntityService.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "file",
-        "Manage Opal file system.",
-        FileService.add_arguments,
-        FileService.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "taxonomy",
-        "Manage taxonomies: list available taxonomies, download, import or delete a taxonomy.",
-        TaxonomyService.add_arguments,
-        TaxonomyService.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "backup-project",
-        "Backup project data: tables (data export), views, resources, report templates, files.",
-        BackupProjectCommand.add_arguments,
-        BackupProjectCommand.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "restore-project",
-        "Restore project data: tables (data import), views, resources, report templates, files.",
-        RestoreProjectCommand.add_arguments,
-        RestoreProjectCommand.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "backup-view",
-        "Backup views of a project.",
-        BackupViewService.add_arguments,
-        BackupViewService.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "restore-view",
-        "Restore views of a project.",
-        RestoreViewService.add_arguments,
-        RestoreViewService.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "import-opal",
-        "Import data from a remote Opal server.",
-        ImportOpalCommand.add_arguments,
-        ImportOpalCommand.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "import-csv",
-        "Import data from a CSV file.",
-        ImportCSVCommand.add_arguments,
-        ImportCSVCommand.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "import-xml",
-        "Import data from a ZIP file.",
-        ImportXMLCommand.add_arguments,
-        ImportXMLCommand.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "import-r-sas",
-        "Import data from a SAS or SAS Transport file (using R).",
-        ImportRSASCommand.add_arguments,
-        ImportRSASCommand.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "import-r-stata",
-        "Import data from a Stata file (using R).",
-        ImportRSTATACommand.add_arguments,
-        ImportRSTATACommand.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "import-r-spss",
-        "Import data from a SPSS or compressed SPSS file (using R).",
-        ImportRSPSSCommand.add_arguments,
-        ImportRSPSSCommand.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "import-r-rds",
-        "Import data from a RDS file (single serialized R object, expected to be a tibble, using R).",
-        ImportRDSCommand.add_arguments,
-        ImportRDSCommand.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "import-plugin",
-        "Import data from an Opal datasource plugin.",
-        ImportPluginCommand.add_arguments,
-        ImportPluginCommand.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "import-limesurvey",
-        "Import data from a LimeSurvey database.",
-        ImportLimeSurveyCommand.add_arguments,
-        ImportLimeSurveyCommand.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "import-sql",
-        "Import data from a SQL database.",
-        ImportSQLCommand.add_arguments,
-        ImportSQLCommand.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "import-vcf",
-        "Import genotypes data from some VCF/BCF files.",
-        ImportVCFCommand.add_arguments,
-        ImportVCFCommand.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "import-ids",
-        "Import system identifiers.",
-        ImportIDService.add_arguments,
-        ImportIDService.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "import-ids-map",
-        "Import identifiers mappings.",
-        ImportIDMapService.add_arguments,
-        ImportIDMapService.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "import-annot",
-        "Apply data dictionary annotations specified in a file in CSV/TSV format (see export-annot).",
-        ImportAnnotationsService.add_arguments,
-        ImportAnnotationsService.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "export-xml",
-        "Export data to a zip of Opal XML files.",
-        ExportXMLCommand.add_arguments,
-        ExportXMLCommand.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "export-csv",
-        "Export data to a folder of CSV files.",
-        ExportCSVCommand.add_arguments,
-        ExportCSVCommand.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "export-r-sas",
-        "Export data to a SAS or SAS Transport file (using R).",
-        ExportRSASCommand.add_arguments,
-        ExportRSASCommand.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "export-r-stata",
-        "Export data to a Stata file (using R).",
-        ExportRSTATACommand.add_arguments,
-        ExportRSTATACommand.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "export-r-spss",
-        "Export data to a SPSS or compressed SPSS file (using R).",
-        ExportRSPSSCommand.add_arguments,
-        ExportRSPSSCommand.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "export-r-rds",
-        "Export data to a RDS file (single serialized R object, using R).",
-        ExportRDSCommand.add_arguments,
-        ExportRDSCommand.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "export-sql",
-        "Export data to a SQL database.",
-        ExportSQLCommand.add_arguments,
-        ExportSQLCommand.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "export-plugin",
-        "Export data to a Opal datasource plugin.",
-        ExportPluginCommand.add_arguments,
-        ExportPluginCommand.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "export-vcf",
-        "Export genotypes data to VCF/BCF files.",
-        ExportVCFCommand.add_arguments,
-        ExportVCFCommand.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "export-annot",
-        "Extract data dictionary annotations in CSV/TSV format.",
-        ExportAnnotationsService.add_arguments,
-        ExportAnnotationsService.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "copy-table",
-        "Copy a table into another table.",
-        CopyTableCommand.add_arguments,
-        CopyTableCommand.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "delete-table",
-        "Delete some tables.",
-        DeleteTableService.add_arguments,
-        DeleteTableService.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "user",
-        "Manage users.",
-        UserService.add_arguments,
-        UserService.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "group",
-        "Manage groups.",
-        GroupService.add_arguments,
-        GroupService.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "perm-project",
-        "Get or apply permission on a project.",
-        ProjectPermService.add_arguments,
-        ProjectPermService.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "perm-datasource",
-        "Get or apply permission on a datasource.",
-        DatasourcePermService.add_arguments,
-        DatasourcePermService.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "perm-table",
-        "Get or apply permission on a set of tables.",
-        TablePermService.add_arguments,
-        TablePermService.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "perm-variable",
-        "Get or apply permission on a set of variables.",
-        VariablePermService.add_arguments,
-        VariablePermService.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "perm-resources",
-        "Get or apply permission on resources as a whole.",
-        ResourcesPermService.add_arguments,
-        ResourcesPermService.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "perm-resource",
-        "Get or apply permission on a set of resources.",
-        ResourcePermService.add_arguments,
-        ResourcePermService.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "perm-r",
-        "Get or apply R permission.",
-        RPermService.add_arguments,
-        RPermService.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "perm-datashield",
-        "Get or apply DataSHIELD permission.",
-        DataSHIELDPermService.add_arguments,
-        DataSHIELDPermService.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "perm-system",
-        "Get or apply system permission.",
-        SystemPermService.add_arguments,
-        SystemPermService.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "plugin",
-        "Manage system plugins.",
-        PluginService.add_arguments,
-        PluginService.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "encrypt",
-        "Encrypt string using Opal's secret key.",
-        EncryptService.add_arguments,
-        EncryptService.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "decrypt",
-        "Decrypt string using Opal's secret key.",
-        DecryptService.add_arguments,
-        DecryptService.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "task",
-        "Manage a task.",
-        TaskService.add_arguments,
-        TaskService.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "system",
-        "Query for system status and configuration.",
-        SystemService.add_arguments,
-        SystemService.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "rest",
-        "Request directly the Opal REST API, for advanced users.",
-        RESTService.add_arguments,
-        RESTService.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "analysis-plugin",
-        "Analyses a project variables using external R plugins.",
-        AnalysisCommand.add_arguments,
-        AnalysisCommand.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "export-analysis-plugin",
-        "Exports analysis data of a project or specific tables.",
-        ExportAnalysisService.add_arguments,
-        ExportAnalysisService.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "sql",
-        "Execute a SQL statement on project's tables.",
-        SQLService.add_arguments,
-        SQLService.do_command,
-    )
-    add_subcommand(
-        subparsers,
-        "sql-history",
-        "SQL execution history of current user or of other users (administrator only).",
-        SQLHistoryService.add_arguments,
-        SQLHistoryService.do_command,
-    )
-
-    # Execute selected command
-    args = parser.parse_args()
-
-    if hasattr(args, "func"):
-        try:
-            # Prompt for a missing password only when user/password is required
-            if (
-                not (args.ssl_cert or args.ssl_key)
-                and not args.token
-                and (not args.password or len(args.password) == 0)
-                and args.user
-            ):
-                args.password = prompt_password()
-            args.func(args)
-        except HTTPError as e:
-            Formatter.print_json(e.error, args.json if hasattr(args, "json") else False)
-            sys.exit(2)
-        except Exception as e:
-            if hasattr(e, "message"):
-                print(e.message)
-            else:
-                print(e)
-            sys.exit(2)
-    else:
-        print("Opal command line tool.")
-        print("For more details: opal --help")
+def run() -> None:
+    app()

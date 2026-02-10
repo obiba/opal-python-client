@@ -21,5 +21,5 @@ build:
 clean:
 	rm -rf dist
 
-local-install:
+local-install: clean build
 	pip install ./dist/obiba_opal-*.tar.gz 
