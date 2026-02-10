@@ -1,4 +1,3 @@
-from turtle import fd
 import unittest
 from tests.utils import make_client
 from obiba_opal.file import FileService
