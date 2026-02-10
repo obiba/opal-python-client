@@ -173,7 +173,7 @@ class ExportAnalysisService:
         request = self.client.new_request()
         request.fail_on_error().accept("application/zip")
         fp = os.fdopen(fd, "wb")
-        request.get().resource(self._make_ws(project, table, all_results=all_results)).send()
+        request.get().resource(self._make_ws(project, table, all_results=all_results)).send(fp)
         fp.flush()
 
     def export_table_analysis(self, project: str, table: str, analysis_id: str, fd, all_results: bool = True):
@@ -188,7 +188,7 @@ class ExportAnalysisService:
         request = self.client.new_request()
         request.fail_on_error().accept("application/zip")
         fp = os.fdopen(fd, "wb")
-        request.get().resource(self._make_ws(project, table, analysis_id, all_results)).send()
+        request.get().resource(self._make_ws(project, table, analysis_id, all_results)).send(fp)
         fp.flush()
 
     def _make_ws(

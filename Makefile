@@ -13,6 +13,8 @@ fix:
 format:
 	uv run ruff format .
 
+check: format fix
+
 build:
 	uv build
 

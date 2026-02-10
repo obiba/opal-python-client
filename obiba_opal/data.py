@@ -125,7 +125,7 @@ class DataService:
         request.fail_on_error().get().resource(ws)
         if raw:
             fp = os.fdopen(fd, "wb")
-            response = request.accept("*/*").send(fp)
+            request.accept("*/*").send(fp)
             fp.flush()
             return None
         else:

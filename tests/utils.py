@@ -7,5 +7,5 @@ TEST_PASSWORD = "password"
 
 
 def make_client():
-    print(f"Creating OpalClient for server {TEST_SERVER} with user {TEST_USER}...")
+    # print(f"Creating OpalClient for server {TEST_SERVER} with user {TEST_USER}...")
     return OpalClient.buildWithAuthentication(server=TEST_SERVER, user=TEST_USER, password=TEST_PASSWORD)

@@ -24,7 +24,7 @@ class TestClass(unittest.TestCase):
 
     def test_1_fileUpload(self):
         try:
-            print(f"Uploading file to {self.TEST_FILE}...")
+            # print(f"Uploading file to {self.TEST_FILE}...")
             shutil.copyfile("./tests/resources/data.csv", self.LOCAL_UPLOAD_FILE)
             try:
                 self.service.upload_file(self.LOCAL_UPLOAD_FILE, "/tmp")
@@ -43,7 +43,7 @@ class TestClass(unittest.TestCase):
 
     def test_2_fileDownload(self):
         try:
-            print(f"Downloading file to {self.TEST_FILE}...")
+            # print(f"Downloading file to {self.TEST_FILE}...")
             # New: pythonic way
             with open(self.TEST_FILE, "wb") as outfile:
                 self.service.download_file(self.TEST_FILE, outfile)
@@ -59,7 +59,7 @@ class TestClass(unittest.TestCase):
 
     def test_3_fileDownloadWithPassword(self):
         try:
-            print(f"Downloading file with password to {self.TEST_ZIPPED_FILE}...")
+            # print(f"Downloading file with password to {self.TEST_ZIPPED_FILE}...")
             # New: pythonic way
             with open(self.TEST_ZIPPED_FILE, "wb") as outfile:
                 self.service.download_file(self.TEST_FILE, outfile, "12345678")
@@ -78,7 +78,7 @@ class TestClass(unittest.TestCase):
 
     def test_4_deleteUpload(self):
         try:
-            print(f"Deleting file {self.TEST_FILE}...")
+            # print(f"Deleting file {self.TEST_FILE}...")
             self.service.delete_file(self.TEST_FILE)
             self.service.file_info(self.TEST_FILE)
         except HTTPError as e:

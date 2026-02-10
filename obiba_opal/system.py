@@ -31,7 +31,7 @@ class SystemService:
             "--env",
             action="store_true",
             required=False,
-            help="Opal java execution environment (JVM related statistic properties",
+            help="Opal java execution environment (JVM related statistic properties)",
         )
         parser.add_argument(
             "--status",

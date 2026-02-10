@@ -201,6 +201,7 @@ class OpalClient:
                 self.new_request().resource("/auth/session/_current").delete().send()
                 self.session.close()
             except Exception:
+                # silently fail as the session might be already closed or the server not reachable
                 pass
             self.id = None
 

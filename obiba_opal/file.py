@@ -82,12 +82,12 @@ class FileService:
         finally:
             client.close()
 
-    def download_file(self, path: str, outfile: os.PathLike, download_password: str = None):
+    def download_file(self, path: str, fd: int | os.PathLike, download_password: str = None):
         """
         Download a file.
 
         :param path: The file path in Opal
-        :param outfile: The destination file object opened in 'wb' mode
+        :param fd: The file descriptor or path to the destination file
         :param download_password: The password to use to encrypt the
                                 downloaded zip archive
         """
@@ -98,9 +98,10 @@ class FileService:
             request.verbose()
 
         file = FileService.OpalFile(path)
+        fp = os.fdopen(fd, "wb") if isinstance(fd, int) else fd
 
-        request.get().resource(file.get_ws()).accept("*/*").header("X-File-Key", download_password).send(outfile)
-        outfile.flush()
+        request.get().resource(file.get_ws()).accept("*/*").header("X-File-Key", download_password).send(fp)
+        fp.flush()
 
     def upload_file(self, upload: str, path: str):
         """
