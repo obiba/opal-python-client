@@ -194,6 +194,13 @@ def backup_project_command(
         help="Archive file path in Opal file system. Default is <project>.zip in the project folder.",
     ),
     force: bool = typer.Option(False, "--force", "-f", help="Skip confirmation"),
+    views_as_tables: bool = typer.Option(
+        False,
+        "--views-as-tables",
+        "-vt",
+        help="Treat views as tables, i.e. export data instead of keeping derivation scripts (default is false)",
+    ),
+    json_output: bool = typer.Option(False, "--json", "-j", help="Pretty JSON formatting of the response"),
 ):
     """Backup project data: tables (data export), views, resources, report templates, files."""
     args = _make_args_with_globals(
@@ -209,6 +216,8 @@ def backup_project_command(
         project=project,
         archive=archive,
         force=force,
+        views_as_tables=views_as_tables,
+        json=json_output,
     )
     BackupProjectCommand.do_command(args)
 
@@ -239,6 +248,10 @@ def restore_project_command(
         help="Archive file path in Opal file system. Default is <project>.zip in the project folder.",
     ),
     force: bool = typer.Option(False, "--force", "-f", help="Skip confirmation"),
+    arpassword: str | None = typer.Option(
+        None, "--arpassword", "-arp", help="Password to decrypt zip archive (optional)"
+    ),
+    json_output: bool = typer.Option(False, "--json", "-j", help="Pretty JSON formatting of the response"),
 ):
     """Restore project data: tables (data import), views, resources, report templates, files."""
     args = _make_args_with_globals(
@@ -254,6 +267,8 @@ def restore_project_command(
         project=project,
         archive=archive,
         force=force,
+        arpassword=arpassword,
+        json=json_output,
     )
     RestoreProjectCommand.do_command(args)
 
@@ -905,6 +920,17 @@ def import_csv_command(
         "-mg",
         help="Merge imported data dictionary with the destination one (default is false, i.e. data dictionary is overridden).",
     ),
+    character_set: str | None = typer.Option(None, "--characterSet", "-c", help="Character set."),
+    separator: str | None = typer.Option(None, "--separator", "-s", help="Field separator."),
+    quote: str | None = typer.Option(None, "--quote", "-q", help="Quotation mark character."),
+    first_row: int | None = typer.Option(None, "--firstRow", "-f", help="From row."),
+    value_type: str | None = typer.Option(
+        None,
+        "--valueType",
+        "-vt",
+        help='Default value type (text, integer, decimal, boolean etc.). When not specified, "text" is the default.',
+    ),
+    entity_type: str = typer.Option(..., "--type", "-ty", help="Entity type (e.g. Participant)"),
     json_output: bool = typer.Option(False, "--json", "-j", help="Pretty JSON formatting of the response"),
 ):
     """Import data from a CSV file."""
@@ -926,6 +952,12 @@ def import_csv_command(
         identifiers=identifiers,
         policy=policy,
         merge=merge,
+        characterSet=character_set,
+        separator=separator,
+        quote=quote,
+        firstRow=first_row,
+        valueType=value_type,
+        type=entity_type,
         json=json_output,
     )
     ImportCSVCommand.do_command(args)
@@ -1583,9 +1615,7 @@ def import_ids_map_command(
     ),
     type: str = typer.Option(..., "--type", "-ty", help="Entity type (e.g. Participant)"),
     mapping: str = typer.Option(..., "--mapping", "-m", help="Mapping name"),
-    ids: list[str] = typer.Option(
-        ..., "--ids", "-id", help="List of entity identifiers mappings (format: id=mappedId)"
-    ),
+    separator: str | None = typer.Option(None, "--separator", "-s", help="Field separator (default is ,)."),
 ):
     """Import identifiers mappings."""
     args = _make_args_with_globals(
@@ -1599,8 +1629,8 @@ def import_ids_map_command(
         verbose=verbose,
         no_ssl_verify=no_ssl_verify,
         type=type,
-        mapping=mapping,
-        ids=ids,
+        map=mapping,
+        separator=separator,
     )
     ImportIDMapService.do_command(args)
 
@@ -2033,7 +2063,9 @@ def export_analysis_plugin_command(
     all_results: bool = typer.Option(
         False, "--all-results", "-ar", help="Export all results (default exports last result)."
     ),
-    output: str = typer.Option(..., "--output", "-o", help="Output file path in Opal file system."),
+    analysis_id: str | None = typer.Option(
+        None, "--analysis-id", "-ai", help="A table Analysis ID for which results will be exported."
+    ),
 ):
     """Exports analysis data of a project or specific tables."""
     args = _make_args_with_globals(
@@ -2049,7 +2081,7 @@ def export_analysis_plugin_command(
         project=project,
         table=table,
         all_results=all_results,
-        output=output,
+        analysis_id=analysis_id,
     )
     ExportAnalysisService.do_command(args)
 
@@ -2296,7 +2328,7 @@ def perm_table_command(
         False, "--no-ssl-verify", "-nv", help="Do not verify SSL certificates for HTTPS."
     ),
     project: str = typer.Option(..., "--project", "-pr", help="Project name"),
-    tables: list[str] = typer.Option(..., "--tables", "-t", help="Table names"),
+    tables: list[str] | None = typer.Option(None, "--tables", "-t", help="Table names"),
     fetch: bool = typer.Option(False, "--fetch", "-f", help="Fetch permissions"),
     add: bool = typer.Option(False, "--add", "-a", help="Add a permission"),
     delete: bool = typer.Option(False, "--delete", "-d", help="Delete a permission"),
@@ -2356,7 +2388,7 @@ def perm_variable_command(
     ),
     project: str = typer.Option(..., "--project", "-pr", help="Project name"),
     table: str = typer.Option(..., "--table", "-t", help="Table name"),
-    variables: list[str] = typer.Option(..., "--variables", "-v", help="Variable names"),
+    variables: list[str] | None = typer.Option(None, "--variables", "-v", help="Variable names"),
     fetch: bool = typer.Option(False, "--fetch", "-f", help="Fetch permissions"),
     add: bool = typer.Option(False, "--add", "-a", help="Add a permission"),
     delete: bool = typer.Option(False, "--delete", "-d", help="Delete a permission"),
@@ -2469,7 +2501,7 @@ def perm_resource_command(
         False, "--no-ssl-verify", "-nv", help="Do not verify SSL certificates for HTTPS."
     ),
     project: str = typer.Option(..., "--project", "-pr", help="Project name"),
-    resources: list[str] = typer.Option(..., "--resources", "-r", help="Resource names"),
+    resources: list[str] | None = typer.Option(None, "--resources", "-r", help="Resource names"),
     fetch: bool = typer.Option(False, "--fetch", "-f", help="Fetch permissions"),
     add: bool = typer.Option(False, "--add", "-a", help="Add a permission"),
     delete: bool = typer.Option(False, "--delete", "-d", help="Delete a permission"),
@@ -2757,6 +2789,11 @@ def plugin_command(
         "-c",
         help="Configure the plugin site properties. Usually requires to restart the associated service to be effective.",
     ),
+    status: str | None = typer.Option(
+        None, "--status", "-su", help="Get the status of the service associated to the named plugin."
+    ),
+    start: str | None = typer.Option(None, "--start", "-sa", help="Start the service associated to the named plugin."),
+    stop: str | None = typer.Option(None, "--stop", "-so", help="Stop the service associated to the named plugin."),
     json_output: bool = typer.Option(False, "--json", "-j", help="Pretty JSON formatting of the response"),
 ):
     """Manage system plugins."""
@@ -2778,6 +2815,9 @@ def plugin_command(
         reinstate=reinstate,
         fetch=fetch,
         configure=configure,
+        status=status,
+        start=start,
+        stop=stop,
         json=json_output,
     )
     PluginService.do_command(args)
@@ -2805,6 +2845,8 @@ def task_command(
     status: bool = typer.Option(False, "--status", "-st", help="Get the status of the task"),
     cancel: bool = typer.Option(False, "--cancel", "-c", help="Cancel the task"),
     delete: bool = typer.Option(False, "--delete", "-d", help="Delete the task"),
+    show: bool = typer.Option(False, "--show", "-sh", help="Show JSON representation of the task"),
+    wait: bool = typer.Option(False, "--wait", "-w", help="Wait for the task to complete (successfully or not)"),
     json_output: bool = typer.Option(False, "--json", "-j", help="Pretty JSON formatting of the response"),
 ):
     """Manage a task."""
@@ -2822,6 +2864,8 @@ def task_command(
         status=status,
         cancel=cancel,
         delete=delete,
+        show=show,
+        wait=wait,
         json=json_output,
     )
     TaskService.do_command(args)
@@ -2898,6 +2942,9 @@ def rest_command(
     content_type: str | None = typer.Option(None, "--content-type", "-ct", help="Content type of the request body"),
     accept: str | None = typer.Option(None, "--accept", "-a", help="Acceptable response content type"),
     content: str | None = typer.Option(None, "--content", "-c", help="Request body content"),
+    headers: str | None = typer.Option(
+        None, "--headers", "-hs", help='Custom headers in the form of: { "Key1": "Value1", "Key2": "Value2" }'
+    ),
     json_output: bool = typer.Option(False, "--json", "-j", help="Pretty JSON formatting of the response"),
 ):
     """Request directly the Opal REST API, for advanced users."""
@@ -2916,6 +2963,7 @@ def rest_command(
         content_type=content_type,
         accept=accept,
         content=content,
+        headers=headers,
         json=json_output,
     )
     RESTService.do_command(args)
