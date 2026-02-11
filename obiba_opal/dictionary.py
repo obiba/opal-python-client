@@ -59,7 +59,7 @@ class DictionaryService:
                 with open(args.excel, mode="wb") as excelFile:
                     excelFile.write(res)
             else:
-                res = service._get_dictionary()
+                res = service._get_dictionary(args.name)
 
                 # format response
                 core.Formatter.print_json(res, args.json)

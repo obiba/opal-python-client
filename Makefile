@@ -22,4 +22,7 @@ clean:
 	rm -rf dist
 
 local-install: clean build
-	pip install ./dist/obiba_opal-*.tar.gz 
+	pip install ./dist/obiba_opal-*.tar.gz
+
+local-install-force: clean build
+	pip install ./dist/obiba_opal-*.tar.gz --break-system-packages

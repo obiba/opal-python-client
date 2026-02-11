@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from types import SimpleNamespace
 
+import sys
 import typer
 
 from obiba_opal.project import (
@@ -328,14 +329,28 @@ def export_annot_command(
     no_ssl_verify: bool = typer.Option(
         False, "--no-ssl-verify", "-nv", help="Do not verify SSL certificates for HTTPS."
     ),
-    datasource: str = typer.Option(..., "--datasource", "-d", help="Project name"),
-    output: str = typer.Option(..., "--output", "-o", help="Output annotation file in CSV/TSV format."),
-    table: str | None = typer.Option(None, "--table", "-t", help="Table name"),
-    locale: str | None = typer.Option(
-        None, "--locale", "-l", help="Language of the annotation texts (default is Default or first available)."
+    name: str = typer.Argument(
+        ...,
+        help="Fully qualified name of a datasource/project or a table or a variable, for instance: "
+        "opal-data or opal-data.questionnaire or opal-data.questionnaire:Q1. "
+        'Wild cards can also be used, for instance: "opal-data.*", etc.',
+    ),
+    output: typer.FileTextWrite | None = typer.Option(
+        None, "--output", "-out", help="CSV/TSV file to output (default is stdout)"
+    ),
+    locale: str | None = typer.Option(None, "--locale", "-l", help="Exported locale (default is none)"),
+    separator: str | None = typer.Option(
+        None, "--separator", "-s", help="Separator char for CSV/TSV format (default is the tabulation character)"
+    ),
+    taxonomies: list[str] | None = typer.Option(
+        None,
+        "--taxonomies",
+        "-tx",
+        help="The list of taxonomy names of interest (default is any that are found in the variable attributes)",
     ),
 ):
     """Extract data dictionary annotations in CSV/TSV format."""
+
     args = _make_args_with_globals(
         ctx,
         opal=opal,
@@ -346,10 +361,11 @@ def export_annot_command(
         ssl_key=ssl_key,
         verbose=verbose,
         no_ssl_verify=no_ssl_verify,
-        datasource=datasource,
-        output=output,
-        table=table,
+        name=name,
+        output=output if output else sys.stdout,
         locale=locale,
+        separator=separator,
+        taxonomies=taxonomies,
     )
     ExportAnnotationsService.do_command(args)
 
@@ -372,14 +388,37 @@ def import_annot_command(
     no_ssl_verify: bool = typer.Option(
         False, "--no-ssl-verify", "-nv", help="Do not verify SSL certificates for HTTPS."
     ),
-    datasource: str = typer.Option(..., "--datasource", "-d", help="Destination project"),
-    input_file: str = typer.Option(..., "--input", "-in", help="Input annotation file in CSV/TSV format."),
-    locale: str | None = typer.Option(
-        None, "--locale", "-l", help="Language of the annotation texts (default is Default or first available)."
+    input_file: typer.FileText | None = typer.Option(
+        None,
+        "--input",
+        "-in",
+        help='CSV/TSV input file, typically the output of the "export-annot" command (default is stdin)',
     ),
-    table: str | None = typer.Option(None, "--table", "-t", help="Table name"),
+    locale: str | None = typer.Option(None, "--locale", "-l", help="Destination annotation locale (default is none)"),
+    separator: str | None = typer.Option(
+        None, "--separator", "-s", help="Separator char for CSV/TSV format (default is the tabulation character)"
+    ),
+    destination: str | None = typer.Option(
+        None,
+        "--destination",
+        "-d",
+        help="Destination datasource name (default is the one(s) specified in the input file)",
+    ),
+    tables: list[str] | None = typer.Option(
+        None,
+        "--tables",
+        "-t",
+        help="The list of tables which variables are to be annotated (defaults to all that are found in the input file)",
+    ),
+    taxonomies: list[str] | None = typer.Option(
+        None,
+        "--taxonomies",
+        "-tx",
+        help="The list of taxonomy names of interest (default is any that is found in the input file)",
+    ),
 ):
     """Apply data dictionary annotations specified in a file in CSV/TSV format (see export-annot)."""
+
     args = _make_args_with_globals(
         ctx,
         opal=opal,
@@ -390,10 +429,12 @@ def import_annot_command(
         ssl_key=ssl_key,
         verbose=verbose,
         no_ssl_verify=no_ssl_verify,
-        datasource=datasource,
-        input=input_file,
+        input=input_file if input_file else sys.stdin,
         locale=locale,
-        table=table,
+        separator=separator,
+        destination=destination,
+        tables=tables,
+        taxonomies=taxonomies,
     )
     ImportAnnotationsService.do_command(args)
 
@@ -475,8 +516,9 @@ def entity_command(
     no_ssl_verify: bool = typer.Option(
         False, "--no-ssl-verify", "-nv", help="Do not verify SSL certificates for HTTPS."
     ),
-    type: str = typer.Option(..., "--type", "-ty", help="Entity type"),
-    id: str | None = typer.Option(None, "--id", "-i", help="Entity identifier"),
+    id: str = typer.Argument(..., help="Identifier of the entity"),
+    type: str = typer.Option("Participant", "--type", "-ty", help="Entity type"),
+    tables: bool = typer.Option(False, "--tables", "-ta", help="Get the list of tables in which the entity exists"),
     json_output: bool = typer.Option(False, "--json", "-j", help="Pretty JSON formatting of the response"),
 ):
     """Query for entities (Participant, etc.)."""
@@ -492,6 +534,7 @@ def entity_command(
         no_ssl_verify=no_ssl_verify,
         type=type,
         id=id,
+        tables=tables,
         json=json_output,
     )
     EntityService.do_command(args)
@@ -634,7 +677,7 @@ def delete_table_command(
         False, "--no-ssl-verify", "-nv", help="Do not verify SSL certificates for HTTPS."
     ),
     project: str = typer.Option(..., "--project", "-pr", help="Project name"),
-    tables: list[str] = typer.Option(..., "--tables", "-t", help="List of table names to be deleted"),
+    tables: list[str] | None = typer.Option(None, "--tables", "-t", help="List of table names to be deleted"),
     force: bool = typer.Option(False, "--force", "-f", help="Skip confirmation"),
 ):
     """Delete some tables."""
@@ -674,13 +717,13 @@ def backup_view_command(
         False, "--no-ssl-verify", "-nv", help="Do not verify SSL certificates for HTTPS."
     ),
     project: str = typer.Option(..., "--project", "-pr", help="Source project name"),
-    views: list[str] = typer.Option(..., "--views", "-v", help="List of view names to be backed up"),
-    file: str | None = typer.Option(
-        None,
-        "--file",
-        "-f",
-        help="Destination backup file path in Opal file system. If not specified, will use <project>-views.zip.",
+    views: list[str] | None = typer.Option(
+        None, "--views", "-vw", help="List of view names to be backed up (default is all)"
     ),
+    output: str | None = typer.Option(
+        None, "--output", "-out", help="Output directory name (default is current directory)"
+    ),
+    force: bool = typer.Option(False, "--force", "-f", help="Skip confirmation when overwriting the backup file."),
 ):
     """Backup views of a project."""
     args = _make_args_with_globals(
@@ -695,7 +738,8 @@ def backup_view_command(
         no_ssl_verify=no_ssl_verify,
         project=project,
         views=views,
-        file=file,
+        output=output,
+        force=force,
     )
     BackupViewService.do_command(args)
 
