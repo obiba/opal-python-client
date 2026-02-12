@@ -778,7 +778,13 @@ def restore_view_command(
         False, "--no-ssl-verify", "-nv", help="Do not verify SSL certificates for HTTPS."
     ),
     project: str = typer.Option(..., "--project", "-pr", help="Destination project name"),
-    file: str = typer.Option(..., "--file", "-f", help="Backup file path in Opal file system"),
+    views: list[str] | None = typer.Option(
+        None, "--views", "-vw", help="List of view names to be restored (default is all)"
+    ),
+    input: str | None = typer.Option(
+        None, "--input", "-in", help="Input directory name (default is current directory)"
+    ),
+    force: bool = typer.Option(False, "--force", "-f", help="Skip confirmation when overwriting an existing view."),
 ):
     """Restore views of a project."""
     args = _make_args_with_globals(
@@ -792,7 +798,9 @@ def restore_view_command(
         verbose=verbose,
         no_ssl_verify=no_ssl_verify,
         project=project,
-        file=file,
+        views=views,
+        input=input,
+        force=force,
     )
     RestoreViewService.do_command(args)
 
@@ -1070,6 +1078,14 @@ def import_r_sas_command(
         help="Merge imported data dictionary with the destination one (default is false, i.e. data dictionary is overridden).",
     ),
     json_output: bool = typer.Option(False, "--json", "-j", help="Pretty JSON formatting of the response"),
+    locale: str | None = typer.Option(None, "--locale", "-l", help="Preferred locale (e.g. 'en')"),
+    type: str = typer.Option("Participant", "--type", "-ty", help="Entity type (e.g. 'Participant')"),
+    idVariable: str | None = typer.Option(
+        None,
+        "--idVariable",
+        "-iv",
+        help="The name of the column representing the entity identifier. If not specified, the first column will be used.",
+    ),
 ):
     """Import data from a SAS or SAS Transport file (using R)."""
     args = _make_args_with_globals(
@@ -1091,6 +1107,9 @@ def import_r_sas_command(
         policy=policy,
         merge=merge,
         json=json_output,
+        locale=locale,
+        type=type,
+        idVariable=idVariable,
     )
     ImportRSASCommand.do_command(args)
 
@@ -1136,6 +1155,14 @@ def import_r_stata_command(
         help="Merge imported data dictionary with the destination one (default is false, i.e. data dictionary is overridden).",
     ),
     json_output: bool = typer.Option(False, "--json", "-j", help="Pretty JSON formatting of the response"),
+    locale: str | None = typer.Option(None, "--locale", "-l", help="Preferred locale (e.g. 'en')"),
+    type: str = typer.Option("Participant", "--type", "-ty", help="Entity type (e.g. 'Participant')"),
+    idVariable: str | None = typer.Option(
+        None,
+        "--idVariable",
+        "-iv",
+        help="The name of the column representing the entity identifier. If not specified, the first column will be used.",
+    ),
 ):
     """Import data from a Stata file (using R)."""
     args = _make_args_with_globals(
@@ -1157,6 +1184,9 @@ def import_r_stata_command(
         policy=policy,
         merge=merge,
         json=json_output,
+        locale=locale,
+        type=type,
+        idVariable=idVariable,
     )
     ImportRSTATACommand.do_command(args)
 
@@ -1202,6 +1232,14 @@ def import_r_spss_command(
         help="Merge imported data dictionary with the destination one (default is false, i.e. data dictionary is overridden).",
     ),
     json_output: bool = typer.Option(False, "--json", "-j", help="Pretty JSON formatting of the response"),
+    locale: str | None = typer.Option(None, "--locale", "-l", help="Preferred locale (e.g. 'en')"),
+    type: str = typer.Option("Participant", "--type", "-ty", help="Entity type (e.g. 'Participant')"),
+    idVariable: str | None = typer.Option(
+        None,
+        "--idVariable",
+        "-iv",
+        help="The name of the column representing the entity identifier. If not specified, the first column will be used.",
+    ),
 ):
     """Import data from a SPSS or compressed SPSS file (using R)."""
     args = _make_args_with_globals(
@@ -1223,6 +1261,9 @@ def import_r_spss_command(
         policy=policy,
         merge=merge,
         json=json_output,
+        locale=locale,
+        type=type,
+        idVariable=idVariable,
     )
     ImportRSPSSCommand.do_command(args)
 
@@ -1268,6 +1309,13 @@ def import_r_rds_command(
         help="Merge imported data dictionary with the destination one (default is false, i.e. data dictionary is overridden).",
     ),
     json_output: bool = typer.Option(False, "--json", "-j", help="Pretty JSON formatting of the response"),
+    type: str = typer.Option("Participant", "--type", "-ty", help="Entity type (e.g. 'Participant')"),
+    idVariable: str | None = typer.Option(
+        None,
+        "--idVariable",
+        "-iv",
+        help="The name of the column representing the entity identifier. If not specified, the first column will be used.",
+    ),
 ):
     """Import data from a RDS file (single serialized R object, expected to be a tibble, using R)."""
     args = _make_args_with_globals(
@@ -1289,6 +1337,8 @@ def import_r_rds_command(
         policy=policy,
         merge=merge,
         json=json_output,
+        type=type,
+        idVariable=idVariable,
     )
     ImportRDSCommand.do_command(args)
 
@@ -1321,6 +1371,9 @@ def import_opal_command(
     remote_ssl_key: str | None = typer.Option(None, "--remote-ssl-key", "-rsk", help="Remote Opal SSL key file"),
     remote_no_ssl_verify: bool = typer.Option(
         False, "--remote-no-ssl-verify", "-rnv", help="Do not verify SSL certificates for remote Opal HTTPS"
+    ),
+    remote_datasource: str | None = typer.Option(
+        None, "--remote-datasource", "-rd", help="Remote datasource name (default is the destination datasource name)"
     ),
     destination: str = typer.Option(..., "--destination", "-d", help="Destination datasource name"),
     tables: list[str] | None = typer.Option(
@@ -1356,13 +1409,12 @@ def import_opal_command(
         ssl_key=ssl_key,
         verbose=verbose,
         no_ssl_verify=no_ssl_verify,
-        remote=remote,
-        remote_user=remote_user,
-        remote_password=remote_password,
-        remote_token=remote_token,
-        remote_ssl_cert=remote_ssl_cert,
-        remote_ssl_key=remote_ssl_key,
-        remote_no_ssl_verify=remote_no_ssl_verify,
+        ropal=remote,
+        rdatasource=remote_datasource,
+        ruser=remote_user,
+        rpassword=remote_password,
+        rtoken=remote_token,
+        vebose=verbose,
         destination=destination,
         tables=tables,
         incremental=incremental,
@@ -1393,10 +1445,14 @@ def import_limesurvey_command(
     no_ssl_verify: bool = typer.Option(
         False, "--no-ssl-verify", "-nv", help="Do not verify SSL certificates for HTTPS."
     ),
-    url: str = typer.Option(..., "--url", "-u", help="LimeSurvey URL"),
+    url: str = typer.Option(..., "--url", "-ur", help="LimeSurvey SQL database JDBC url"),
     sid: int = typer.Option(..., "--sid", "-s", help="LimeSurvey Survey ID"),
-    ls_user: str = typer.Option(..., "--ls-user", "-lus", help="LimeSurvey user name"),
-    ls_password: str | None = typer.Option(None, "--ls-password", "-lp", help="LimeSurvey user password"),
+    uname: str = typer.Option(..., "--uname", "-un", help="LimeSurvey SQL database user name"),
+    pword: str | None = typer.Option(None, "--pword", "-pw", help="LimeSurvey SQL database user password"),
+    prefix: str | None = typer.Option(None, "--prefix", "-pr", help="Table prefix"),
+    properties: str | None = typer.Option(
+        None, "--properties", "-pp", help="A JSON file containing LimeSurvey properties"
+    ),
     destination: str = typer.Option(..., "--destination", "-d", help="Destination datasource name"),
     tables: list[str] | None = typer.Option(
         None, "--tables", "-t", help="The list of tables to be imported (defaults to all)"
@@ -1433,8 +1489,10 @@ def import_limesurvey_command(
         no_ssl_verify=no_ssl_verify,
         url=url,
         sid=sid,
-        ls_user=ls_user,
-        ls_password=ls_password,
+        uname=uname,
+        pword=pword,
+        prefix=prefix,
+        properties=properties,
         destination=destination,
         tables=tables,
         incremental=incremental,
@@ -1465,7 +1523,7 @@ def import_sql_command(
     no_ssl_verify: bool = typer.Option(
         False, "--no-ssl-verify", "-nv", help="Do not verify SSL certificates for HTTPS."
     ),
-    url: str = typer.Option(..., "--url", "-u", help="SQL database URL"),
+    database: str = typer.Option(..., "--database", "-db", help="SQL database JDBC url"),
     destination: str = typer.Option(..., "--destination", "-d", help="Destination datasource name"),
     tables: list[str] | None = typer.Option(
         None, "--tables", "-t", help="The list of tables to be imported (defaults to all)"
@@ -1500,7 +1558,7 @@ def import_sql_command(
         ssl_key=ssl_key,
         verbose=verbose,
         no_ssl_verify=no_ssl_verify,
-        url=url,
+        database=database,
         destination=destination,
         tables=tables,
         incremental=incremental,
@@ -1531,10 +1589,10 @@ def import_vcf_command(
     no_ssl_verify: bool = typer.Option(
         False, "--no-ssl-verify", "-nv", help="Do not verify SSL certificates for HTTPS."
     ),
-    path: str = typer.Option(..., "--path", "-pa", help="Path to the VCF/BCF files in the Opal file system"),
-    destination: str = typer.Option(..., "--destination", "-d", help="Destination datasource name"),
-    participants: str | None = typer.Option(None, "--participants", "-pt", help="Participant IDs mapping file"),
-    sample: str | None = typer.Option(None, "--sample", "-sa", help="Sample ID"),
+    project: str = typer.Option(
+        ..., "--project", "-pr", help="Project name into which genotypes data will be imported"
+    ),
+    vcf: list[str] = typer.Option(..., "--vcf", help="List of VCF/BCF file paths (in Opal file system)"),
     json_output: bool = typer.Option(False, "--json", "-j", help="Pretty JSON formatting of the response"),
 ):
     """Import genotypes data from some VCF/BCF files."""
@@ -1548,10 +1606,8 @@ def import_vcf_command(
         ssl_key=ssl_key,
         verbose=verbose,
         no_ssl_verify=no_ssl_verify,
-        path=path,
-        destination=destination,
-        participants=participants,
-        sample=sample,
+        project=project,
+        vcf=vcf,
         json=json_output,
     )
     ImportVCFCommand.do_command(args)
@@ -1706,8 +1762,12 @@ def export_csv_command(
     ),
     datasource: str = typer.Option(..., "--datasource", "-d", help="Project name"),
     tables: list[str] = typer.Option(..., "--tables", "-t", help="The list of tables to be exported"),
-    output: str = typer.Option(..., "--output", "-o", help="Output folder path in Opal file system"),
+    output: str = typer.Option(..., "--output", "-out", help="Output folder path in Opal file system"),
     identifiers: str | None = typer.Option(None, "--identifiers", "-id", help="Name of the ID mapping"),
+    id_name: str | None = typer.Option(None, "--id-name", "-in", help='Name of the ID column name. Default is "_id".'),
+    no_multilines: bool = typer.Option(
+        False, "--no-multilines", "-nl", help="Do not write value sequences as multiple lines"
+    ),
     json_output: bool = typer.Option(False, "--json", "-j", help="Pretty JSON formatting of the response"),
 ):
     """Export data to a folder of CSV files."""
@@ -1725,6 +1785,8 @@ def export_csv_command(
         tables=tables,
         output=output,
         identifiers=identifiers,
+        id_name=id_name,
+        no_multilines=no_multilines,
         json=json_output,
     )
     ExportCSVCommand.do_command(args)
@@ -1750,7 +1812,7 @@ def export_xml_command(
     ),
     datasource: str = typer.Option(..., "--datasource", "-d", help="Project name"),
     tables: list[str] = typer.Option(..., "--tables", "-t", help="The list of tables to be exported"),
-    output: str = typer.Option(..., "--output", "-o", help="Output ZIP file path in Opal file system"),
+    output: str = typer.Option(..., "--output", "-out", help="Output ZIP file path in Opal file system"),
     identifiers: str | None = typer.Option(None, "--identifiers", "-id", help="Name of the ID mapping"),
     json_output: bool = typer.Option(False, "--json", "-j", help="Pretty JSON formatting of the response"),
 ):
@@ -1794,8 +1856,12 @@ def export_r_sas_command(
     ),
     datasource: str = typer.Option(..., "--datasource", "-d", help="Project name"),
     tables: list[str] = typer.Option(..., "--tables", "-t", help="The list of tables to be exported"),
-    output: str = typer.Option(..., "--output", "-o", help="Output file path in Opal file system"),
+    output: str = typer.Option(..., "--output", "-out", help="Output file path in Opal file system"),
     identifiers: str | None = typer.Option(None, "--identifiers", "-id", help="Name of the ID mapping"),
+    id_name: str | None = typer.Option(None, "--id-name", "-in", help='Name of the ID column name. Default is "_id".'),
+    no_multilines: bool = typer.Option(
+        False, "--no-multilines", "-nl", help="Do not write value sequences as multiple lines"
+    ),
     json_output: bool = typer.Option(False, "--json", "-j", help="Pretty JSON formatting of the response"),
 ):
     """Export data to a SAS or SAS Transport file (using R)."""
@@ -1813,6 +1879,8 @@ def export_r_sas_command(
         tables=tables,
         output=output,
         identifiers=identifiers,
+        id_name=id_name,
+        no_multilines=no_multilines,
         json=json_output,
     )
     ExportRSASCommand.do_command(args)
@@ -1838,8 +1906,12 @@ def export_r_stata_command(
     ),
     datasource: str = typer.Option(..., "--datasource", "-d", help="Project name"),
     tables: list[str] = typer.Option(..., "--tables", "-t", help="The list of tables to be exported"),
-    output: str = typer.Option(..., "--output", "-o", help="Output file path in Opal file system"),
+    output: str = typer.Option(..., "--output", "-out", help="Output file path in Opal file system"),
     identifiers: str | None = typer.Option(None, "--identifiers", "-id", help="Name of the ID mapping"),
+    id_name: str | None = typer.Option(None, "--id-name", "-in", help='Name of the ID column name. Default is "_id".'),
+    no_multilines: bool = typer.Option(
+        False, "--no-multilines", "-nl", help="Do not write value sequences as multiple lines"
+    ),
     json_output: bool = typer.Option(False, "--json", "-j", help="Pretty JSON formatting of the response"),
 ):
     """Export data to a Stata file (using R)."""
@@ -1857,6 +1929,8 @@ def export_r_stata_command(
         tables=tables,
         output=output,
         identifiers=identifiers,
+        id_name=id_name,
+        no_multilines=no_multilines,
         json=json_output,
     )
     ExportRSTATACommand.do_command(args)
@@ -1882,8 +1956,12 @@ def export_r_spss_command(
     ),
     datasource: str = typer.Option(..., "--datasource", "-d", help="Project name"),
     tables: list[str] = typer.Option(..., "--tables", "-t", help="The list of tables to be exported"),
-    output: str = typer.Option(..., "--output", "-o", help="Output file path in Opal file system"),
+    output: str = typer.Option(..., "--output", "-out", help="Output file path in Opal file system"),
     identifiers: str | None = typer.Option(None, "--identifiers", "-id", help="Name of the ID mapping"),
+    id_name: str | None = typer.Option(None, "--id-name", "-in", help='Name of the ID column name. Default is "_id".'),
+    no_multilines: bool = typer.Option(
+        False, "--no-multilines", "-nl", help="Do not write value sequences as multiple lines"
+    ),
     json_output: bool = typer.Option(False, "--json", "-j", help="Pretty JSON formatting of the response"),
 ):
     """Export data to a SPSS or compressed SPSS file (using R)."""
@@ -1901,6 +1979,8 @@ def export_r_spss_command(
         tables=tables,
         output=output,
         identifiers=identifiers,
+        id_name=id_name,
+        no_multilines=no_multilines,
         json=json_output,
     )
     ExportRSPSSCommand.do_command(args)
@@ -1926,8 +2006,12 @@ def export_r_rds_command(
     ),
     datasource: str = typer.Option(..., "--datasource", "-d", help="Project name"),
     tables: list[str] = typer.Option(..., "--tables", "-t", help="The list of tables to be exported"),
-    output: str = typer.Option(..., "--output", "-o", help="Output file path in Opal file system"),
+    output: str = typer.Option(..., "--output", "-out", help="Output file path in Opal file system"),
     identifiers: str | None = typer.Option(None, "--identifiers", "-id", help="Name of the ID mapping"),
+    id_name: str | None = typer.Option(None, "--id-name", "-in", help='Name of the ID column name. Default is "_id".'),
+    no_multilines: bool = typer.Option(
+        False, "--no-multilines", "-nl", help="Do not write value sequences as multiple lines"
+    ),
     json_output: bool = typer.Option(False, "--json", "-j", help="Pretty JSON formatting of the response"),
 ):
     """Export data to a RDS file (single serialized R object, using R)."""
@@ -1945,6 +2029,8 @@ def export_r_rds_command(
         tables=tables,
         output=output,
         identifiers=identifiers,
+        id_name=id_name,
+        no_multilines=no_multilines,
         json=json_output,
     )
     ExportRDSCommand.do_command(args)
@@ -1970,7 +2056,7 @@ def export_sql_command(
     ),
     datasource: str = typer.Option(..., "--datasource", "-d", help="Project name"),
     tables: list[str] = typer.Option(..., "--tables", "-t", help="The list of tables to be exported"),
-    url: str = typer.Option(..., "--url", "-u", help="SQL database URL"),
+    database: str = typer.Option(..., "--database", "-db", help="SQL database JDBC url"),
     identifiers: str | None = typer.Option(None, "--identifiers", "-id", help="Name of the ID mapping"),
     json_output: bool = typer.Option(False, "--json", "-j", help="Pretty JSON formatting of the response"),
 ):
@@ -1987,7 +2073,7 @@ def export_sql_command(
         no_ssl_verify=no_ssl_verify,
         datasource=datasource,
         tables=tables,
-        url=url,
+        database=database,
         identifiers=identifiers,
         json=json_output,
     )
@@ -2012,10 +2098,15 @@ def export_vcf_command(
     no_ssl_verify: bool = typer.Option(
         False, "--no-ssl-verify", "-nv", help="Do not verify SSL certificates for HTTPS."
     ),
-    datasource: str = typer.Option(..., "--datasource", "-d", help="Project name"),
-    table: str = typer.Option(..., "--table", "-t", help="Table name with VCF/BCF data"),
-    output: str = typer.Option(..., "--output", "-o", help="Output file path in Opal file system"),
-    identifiers: str | None = typer.Option(None, "--identifiers", "-id", help="Name of the ID mapping"),
+    project: str = typer.Option(..., "--project", "-pr", help="Project name"),
+    vcf: list[str] = typer.Option(..., "--vcf", help="List of VCF/BCF file names"),
+    destination: str = typer.Option(..., "--destination", "-d", help="Destination folder path in Opal file system"),
+    filter_table: str | None = typer.Option(
+        None, "--filter-table", "-f", help="Participant table name to be used to filter the samples by participant"
+    ),
+    no_case_controls: bool = typer.Option(
+        False, "--no-case-controls", "-nocc", help="Do not include case-control data"
+    ),
     json_output: bool = typer.Option(False, "--json", "-j", help="Pretty JSON formatting of the response"),
 ):
     """Export genotypes data to VCF/BCF files."""
@@ -2029,10 +2120,11 @@ def export_vcf_command(
         ssl_key=ssl_key,
         verbose=verbose,
         no_ssl_verify=no_ssl_verify,
-        datasource=datasource,
-        table=table,
-        output=output,
-        identifiers=identifiers,
+        project=project,
+        vcf=vcf,
+        destination=destination,
+        filter_table=filter_table,
+        no_case_controls=no_case_controls,
         json=json_output,
     )
     ExportVCFCommand.do_command(args)
@@ -2272,10 +2364,10 @@ def perm_datasource_command(
     no_ssl_verify: bool = typer.Option(
         False, "--no-ssl-verify", "-nv", help="Do not verify SSL certificates for HTTPS."
     ),
-    datasource: str = typer.Option(..., "--datasource", "-d", help="Datasource name"),
+    project: str = typer.Option(..., "--project", "-pr", help="Project name"),
     fetch: bool = typer.Option(False, "--fetch", "-f", help="Fetch permissions"),
     add: bool = typer.Option(False, "--add", "-a", help="Add a permission"),
-    delete: bool = typer.Option(False, "--delete", "-d", help="Delete a permission"),
+    delete: bool = typer.Option(False, "--delete", "-de", help="Delete a permission"),
     permission: str | None = typer.Option(None, "--permission", "-pe", help="Permission to apply: view, administrate"),
     subject: str | None = typer.Option(
         None,
@@ -2297,7 +2389,7 @@ def perm_datasource_command(
         ssl_key=ssl_key,
         verbose=verbose,
         no_ssl_verify=no_ssl_verify,
-        datasource=datasource,
+        project=project,
         fetch=fetch,
         add=add,
         delete=delete,
@@ -2388,7 +2480,7 @@ def perm_variable_command(
     ),
     project: str = typer.Option(..., "--project", "-pr", help="Project name"),
     table: str = typer.Option(..., "--table", "-t", help="Table name"),
-    variables: list[str] | None = typer.Option(None, "--variables", "-v", help="Variable names"),
+    variables: list[str] | None = typer.Option(None, "--variables", "-va", help="Variable names"),
     fetch: bool = typer.Option(False, "--fetch", "-f", help="Fetch permissions"),
     add: bool = typer.Option(False, "--add", "-a", help="Add a permission"),
     delete: bool = typer.Option(False, "--delete", "-d", help="Delete a permission"),
@@ -2890,7 +2982,9 @@ def taxonomy_command(
         False, "--no-ssl-verify", "-nv", help="Do not verify SSL certificates for HTTPS."
     ),
     name: str | None = typer.Option(None, "--name", "-n", help="Taxonomy name"),
-    file: str | None = typer.Option(None, "--file", "-f", help="Local path to the taxonomy YAML file to import"),
+    import_file: str | None = typer.Option(
+        None, "--import-file", "-if", help="Local path to the taxonomy YAML file to import"
+    ),
     download: str | None = typer.Option(
         None, "--download", "-dl", help="Download the taxonomy YAML file to the specified path"
     ),
@@ -2910,7 +3004,7 @@ def taxonomy_command(
         verbose=verbose,
         no_ssl_verify=no_ssl_verify,
         name=name,
-        file=file,
+        import_file=import_file,
         download=download,
         delete=delete,
         force=force,
@@ -3136,6 +3230,7 @@ def sql_history_command(
         None, "--limit", "-lm", help="Maximum number of history items to return. Default is 100."
     ),
     subject: str | None = typer.Option(None, "--subject", "-sb", help="Subject name to filter."),
+    json_output: bool = typer.Option(False, "--json", "-j", help="Pretty JSON formatting of the response"),
 ):
     """SQL execution history of current user or of other users (administrator only)."""
     args = _make_args_with_globals(
@@ -3152,6 +3247,7 @@ def sql_history_command(
         offset=offset,
         limit=limit,
         subject=subject,
+        json=json_output,
     )
     SQLHistoryService.do_command(args)
 
