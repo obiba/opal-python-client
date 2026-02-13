@@ -21,7 +21,7 @@ class EncryptService:
                 request.verbose()
 
             response = request.get().resource("/system/crypto/encrypt/" + args.plain).send()
-            print(response.content)
+            print(response.content.decode())
         finally:
             client.close()
 
@@ -46,6 +46,6 @@ class DecryptService:
                 request.verbose()
 
             response = request.get().resource("/system/crypto/decrypt/" + args.encrypted).send()
-            print(response.content)
+            print(response.content.decode())
         finally:
             client.close()

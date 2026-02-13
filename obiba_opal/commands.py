@@ -112,8 +112,10 @@ def _make_args_with_globals(
 
 def project_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -170,8 +172,10 @@ def project_command(
 
 def backup_project_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -224,8 +228,10 @@ def backup_project_command(
 
 def restore_project_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -280,8 +286,10 @@ def restore_project_command(
 
 def dict_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -328,8 +336,10 @@ def dict_command(
 
 def export_annot_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -387,8 +397,10 @@ def export_annot_command(
 
 def import_annot_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -461,8 +473,10 @@ def import_annot_command(
 
 def data_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -515,8 +529,10 @@ def data_command(
 
 def entity_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -562,8 +578,10 @@ def entity_command(
 
 def file_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -619,8 +637,10 @@ def file_command(
 
 def copy_table_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -675,8 +695,10 @@ def copy_table_command(
 
 def delete_table_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -693,7 +715,6 @@ def delete_table_command(
     ),
     project: str = typer.Option(..., "--project", "-pr", help="Project name"),
     tables: list[str] | None = typer.Option(None, "--tables", "-t", help="List of table names to be deleted"),
-    force: bool = typer.Option(False, "--force", "-f", help="Skip confirmation"),
 ):
     """Delete some tables."""
     args = _make_args_with_globals(
@@ -708,15 +729,16 @@ def delete_table_command(
         no_ssl_verify=no_ssl_verify,
         project=project,
         tables=tables,
-        force=force,
     )
     DeleteTableService.do_command(args)
 
 
 def backup_view_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -761,8 +783,10 @@ def backup_view_command(
 
 def restore_view_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -812,8 +836,10 @@ def restore_view_command(
 
 def import_plugin_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -885,8 +911,10 @@ def import_plugin_command(
 
 def import_csv_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -933,12 +961,12 @@ def import_csv_command(
     quote: str | None = typer.Option(None, "--quote", "-q", help="Quotation mark character."),
     first_row: int | None = typer.Option(None, "--firstRow", "-f", help="From row."),
     value_type: str | None = typer.Option(
-        None,
+        "text",
         "--valueType",
         "-vt",
-        help='Default value type (text, integer, decimal, boolean etc.). When not specified, "text" is the default.',
+        help="Default value type (text, integer, decimal, boolean etc.).",
     ),
-    entity_type: str = typer.Option(..., "--type", "-ty", help="Entity type (e.g. Participant)"),
+    entity_type: str = typer.Option("Participant", "--type", "-ty", help="Entity type (e.g. Participant)"),
     json_output: bool = typer.Option(False, "--json", "-j", help="Pretty JSON formatting of the response"),
 ):
     """Import data from a CSV file."""
@@ -973,8 +1001,10 @@ def import_csv_command(
 
 def import_xml_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -1039,8 +1069,10 @@ def import_xml_command(
 
 def import_r_sas_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -1116,8 +1148,10 @@ def import_r_sas_command(
 
 def import_r_stata_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -1193,8 +1227,10 @@ def import_r_stata_command(
 
 def import_r_spss_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -1270,8 +1306,10 @@ def import_r_spss_command(
 
 def import_r_rds_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -1345,8 +1383,10 @@ def import_r_rds_command(
 
 def import_opal_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -1361,19 +1401,12 @@ def import_opal_command(
     no_ssl_verify: bool = typer.Option(
         False, "--no-ssl-verify", "-nv", help="Do not verify SSL certificates for HTTPS."
     ),
-    remote: str = typer.Option(..., "--remote", "-rm", help="Remote Opal server URL"),
-    remote_user: str = typer.Option(..., "--remote-user", "-ru", help="Remote Opal user name"),
-    remote_password: str | None = typer.Option(None, "--remote-password", "-rp", help="Remote Opal user password"),
-    remote_token: str | None = typer.Option(None, "--remote-token", "-rt", help="Remote Opal user access token"),
-    remote_ssl_cert: str | None = typer.Option(
-        None, "--remote-ssl-cert", "-rsc", help="Remote Opal SSL certificate file"
-    ),
-    remote_ssl_key: str | None = typer.Option(None, "--remote-ssl-key", "-rsk", help="Remote Opal SSL key file"),
-    remote_no_ssl_verify: bool = typer.Option(
-        False, "--remote-no-ssl-verify", "-rnv", help="Do not verify SSL certificates for remote Opal HTTPS"
-    ),
+    remote: str = typer.Option(..., "--ropal", "-ro", help="Remote Opal server URL"),
+    remote_user: str = typer.Option(..., "--ruser", "-ru", help="Remote Opal user name"),
+    remote_password: str | None = typer.Option(None, "--rpassword", "-rp", help="Remote Opal user password"),
+    remote_token: str | None = typer.Option(None, "--rtoken", "-rt", help="Remote Opal user access token"),
     remote_datasource: str | None = typer.Option(
-        None, "--remote-datasource", "-rd", help="Remote datasource name (default is the destination datasource name)"
+        None, "--rdatasource", "-rd", help="Remote datasource name (default is the destination datasource name)"
     ),
     destination: str = typer.Option(..., "--destination", "-d", help="Destination datasource name"),
     tables: list[str] | None = typer.Option(
@@ -1414,7 +1447,6 @@ def import_opal_command(
         ruser=remote_user,
         rpassword=remote_password,
         rtoken=remote_token,
-        vebose=verbose,
         destination=destination,
         tables=tables,
         incremental=incremental,
@@ -1429,8 +1461,10 @@ def import_opal_command(
 
 def import_limesurvey_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -1446,7 +1480,6 @@ def import_limesurvey_command(
         False, "--no-ssl-verify", "-nv", help="Do not verify SSL certificates for HTTPS."
     ),
     url: str = typer.Option(..., "--url", "-ur", help="LimeSurvey SQL database JDBC url"),
-    sid: int = typer.Option(..., "--sid", "-s", help="LimeSurvey Survey ID"),
     uname: str = typer.Option(..., "--uname", "-un", help="LimeSurvey SQL database user name"),
     pword: str | None = typer.Option(None, "--pword", "-pw", help="LimeSurvey SQL database user password"),
     prefix: str | None = typer.Option(None, "--prefix", "-pr", help="Table prefix"),
@@ -1488,7 +1521,6 @@ def import_limesurvey_command(
         verbose=verbose,
         no_ssl_verify=no_ssl_verify,
         url=url,
-        sid=sid,
         uname=uname,
         pword=pword,
         prefix=prefix,
@@ -1507,8 +1539,10 @@ def import_limesurvey_command(
 
 def import_sql_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -1573,8 +1607,10 @@ def import_sql_command(
 
 def import_vcf_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -1593,7 +1629,6 @@ def import_vcf_command(
         ..., "--project", "-pr", help="Project name into which genotypes data will be imported"
     ),
     vcf: list[str] = typer.Option(..., "--vcf", help="List of VCF/BCF file paths (in Opal file system)"),
-    json_output: bool = typer.Option(False, "--json", "-j", help="Pretty JSON formatting of the response"),
 ):
     """Import genotypes data from some VCF/BCF files."""
     args = _make_args_with_globals(
@@ -1608,15 +1643,16 @@ def import_vcf_command(
         no_ssl_verify=no_ssl_verify,
         project=project,
         vcf=vcf,
-        json=json_output,
     )
     ImportVCFCommand.do_command(args)
 
 
 def import_ids_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -1631,8 +1667,7 @@ def import_ids_command(
     no_ssl_verify: bool = typer.Option(
         False, "--no-ssl-verify", "-nv", help="Do not verify SSL certificates for HTTPS."
     ),
-    type: str = typer.Option(..., "--type", "-ty", help="Entity type (e.g. Participant)"),
-    ids: list[str] = typer.Option(..., "--ids", "-id", help="List of entity identifiers"),
+    type: str = typer.Option("Participant", "--type", "-ty", help="Entity type (e.g. Participant)"),
 ):
     """Import system identifiers."""
     args = _make_args_with_globals(
@@ -1646,15 +1681,16 @@ def import_ids_command(
         verbose=verbose,
         no_ssl_verify=no_ssl_verify,
         type=type,
-        ids=ids,
     )
     ImportIDService.do_command(args)
 
 
 def import_ids_map_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -1669,9 +1705,9 @@ def import_ids_map_command(
     no_ssl_verify: bool = typer.Option(
         False, "--no-ssl-verify", "-nv", help="Do not verify SSL certificates for HTTPS."
     ),
-    type: str = typer.Option(..., "--type", "-ty", help="Entity type (e.g. Participant)"),
+    type: str = typer.Option("Participant", "--type", "-ty", help="Entity type (e.g. Participant)"),
     mapping: str = typer.Option(..., "--mapping", "-m", help="Mapping name"),
-    separator: str | None = typer.Option(None, "--separator", "-s", help="Field separator (default is ,)."),
+    separator: str | None = typer.Option(",", "--separator", "-s", help="Field separator in the mapping file"),
 ):
     """Import identifiers mappings."""
     args = _make_args_with_globals(
@@ -1698,8 +1734,10 @@ def import_ids_map_command(
 
 def export_plugin_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -1744,8 +1782,10 @@ def export_plugin_command(
 
 def export_csv_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -1794,8 +1834,10 @@ def export_csv_command(
 
 def export_xml_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -1838,8 +1880,10 @@ def export_xml_command(
 
 def export_r_sas_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -1888,8 +1932,10 @@ def export_r_sas_command(
 
 def export_r_stata_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -1938,8 +1984,10 @@ def export_r_stata_command(
 
 def export_r_spss_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -1988,8 +2036,10 @@ def export_r_spss_command(
 
 def export_r_rds_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -2038,8 +2088,10 @@ def export_r_rds_command(
 
 def export_sql_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -2082,8 +2134,10 @@ def export_sql_command(
 
 def export_vcf_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -2107,7 +2161,6 @@ def export_vcf_command(
     no_case_controls: bool = typer.Option(
         False, "--no-case-controls", "-nocc", help="Do not include case-control data"
     ),
-    json_output: bool = typer.Option(False, "--json", "-j", help="Pretty JSON formatting of the response"),
 ):
     """Export genotypes data to VCF/BCF files."""
     args = _make_args_with_globals(
@@ -2125,15 +2178,16 @@ def export_vcf_command(
         destination=destination,
         filter_table=filter_table,
         no_case_controls=no_case_controls,
-        json=json_output,
     )
     ExportVCFCommand.do_command(args)
 
 
 def export_analysis_plugin_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -2185,8 +2239,10 @@ def export_analysis_plugin_command(
 
 def user_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -2246,8 +2302,10 @@ def user_command(
 
 def group_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -2293,8 +2351,10 @@ def group_command(
 
 def perm_project_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -2313,7 +2373,7 @@ def perm_project_command(
     fetch: bool = typer.Option(False, "--fetch", "-f", help="Fetch permissions"),
     add: bool = typer.Option(False, "--add", "-a", help="Add a permission"),
     delete: bool = typer.Option(False, "--delete", "-d", help="Delete a permission"),
-    permission: str | None = typer.Option(None, "--permission", "-pe", help="Permission to apply: view, administrate"),
+    permission: str | None = typer.Option(None, "--permission", "-pe", help="Permission to apply: administrate"),
     subject: str | None = typer.Option(
         None,
         "--subject",
@@ -2348,8 +2408,10 @@ def perm_project_command(
 
 def perm_datasource_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -2368,7 +2430,9 @@ def perm_datasource_command(
     fetch: bool = typer.Option(False, "--fetch", "-f", help="Fetch permissions"),
     add: bool = typer.Option(False, "--add", "-a", help="Add a permission"),
     delete: bool = typer.Option(False, "--delete", "-de", help="Delete a permission"),
-    permission: str | None = typer.Option(None, "--permission", "-pe", help="Permission to apply: view, administrate"),
+    permission: str | None = typer.Option(
+        None, "--permission", "-pe", help="Permission to apply: view-value, add-table, administrate"
+    ),
     subject: str | None = typer.Option(
         None,
         "--subject",
@@ -2403,8 +2467,10 @@ def perm_datasource_command(
 
 def perm_table_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -2420,7 +2486,9 @@ def perm_table_command(
         False, "--no-ssl-verify", "-nv", help="Do not verify SSL certificates for HTTPS."
     ),
     project: str = typer.Option(..., "--project", "-pr", help="Project name"),
-    tables: list[str] | None = typer.Option(None, "--tables", "-t", help="Table names"),
+    tables: list[str] | None = typer.Option(
+        None, "--tables", "-t", help="List of table names on which the permission is to be get/set (default is all)"
+    ),
     fetch: bool = typer.Option(False, "--fetch", "-f", help="Fetch permissions"),
     add: bool = typer.Option(False, "--add", "-a", help="Add a permission"),
     delete: bool = typer.Option(False, "--delete", "-d", help="Delete a permission"),
@@ -2462,8 +2530,10 @@ def perm_table_command(
 
 def perm_variable_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -2479,12 +2549,17 @@ def perm_variable_command(
         False, "--no-ssl-verify", "-nv", help="Do not verify SSL certificates for HTTPS."
     ),
     project: str = typer.Option(..., "--project", "-pr", help="Project name"),
-    table: str = typer.Option(..., "--table", "-t", help="Table name"),
-    variables: list[str] | None = typer.Option(None, "--variables", "-va", help="Variable names"),
+    table: str = typer.Option(..., "--table", "-t", help="Table name to which the variables belong"),
+    variables: list[str] | None = typer.Option(
+        None,
+        "--variables",
+        "-va",
+        help="List of variable names on which the permission is to be get/set (default is all)",
+    ),
     fetch: bool = typer.Option(False, "--fetch", "-f", help="Fetch permissions"),
     add: bool = typer.Option(False, "--add", "-a", help="Add a permission"),
     delete: bool = typer.Option(False, "--delete", "-d", help="Delete a permission"),
-    permission: str | None = typer.Option(None, "--permission", "-pe", help="Permission to apply: view, view-value"),
+    permission: str | None = typer.Option(None, "--permission", "-pe", help="Permission to apply: view"),
     subject: str | None = typer.Option(
         None,
         "--subject",
@@ -2521,8 +2596,10 @@ def perm_variable_command(
 
 def perm_resources_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -2576,8 +2653,10 @@ def perm_resources_command(
 
 def perm_resource_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -2593,7 +2672,12 @@ def perm_resource_command(
         False, "--no-ssl-verify", "-nv", help="Do not verify SSL certificates for HTTPS."
     ),
     project: str = typer.Option(..., "--project", "-pr", help="Project name"),
-    resources: list[str] | None = typer.Option(None, "--resources", "-r", help="Resource names"),
+    resources: list[str] | None = typer.Option(
+        None,
+        "--resources",
+        "-r",
+        help="List of resource names on which the permission is to be get/set (default is all)",
+    ),
     fetch: bool = typer.Option(False, "--fetch", "-f", help="Fetch permissions"),
     add: bool = typer.Option(False, "--add", "-a", help="Add a permission"),
     delete: bool = typer.Option(False, "--delete", "-d", help="Delete a permission"),
@@ -2633,8 +2717,10 @@ def perm_resource_command(
 
 def perm_r_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -2686,8 +2772,10 @@ def perm_r_command(
 
 def perm_datashield_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -2705,7 +2793,7 @@ def perm_datashield_command(
     fetch: bool = typer.Option(False, "--fetch", "-f", help="Fetch permissions"),
     add: bool = typer.Option(False, "--add", "-a", help="Add a permission"),
     delete: bool = typer.Option(False, "--delete", "-d", help="Delete a permission"),
-    permission: str | None = typer.Option(None, "--permission", "-pe", help="Permission to apply: use"),
+    permission: str | None = typer.Option(None, "--permission", "-pe", help="Permission to apply: use, administrate"),
     subject: str | None = typer.Option(
         None,
         "--subject",
@@ -2739,8 +2827,10 @@ def perm_datashield_command(
 
 def perm_system_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -2759,7 +2849,7 @@ def perm_system_command(
     add: bool = typer.Option(False, "--add", "-a", help="Add a permission"),
     delete: bool = typer.Option(False, "--delete", "-d", help="Delete a permission"),
     permission: str | None = typer.Option(
-        None, "--permission", "-pe", help="Permission to apply: project_add, project_add_and_view"
+        None, "--permission", "-pe", help="Permission to apply: add-project, administrate"
     ),
     subject: str | None = typer.Option(
         None,
@@ -2799,8 +2889,10 @@ def perm_system_command(
 
 def system_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -2843,8 +2935,10 @@ def system_command(
 
 def plugin_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -2917,8 +3011,10 @@ def plugin_command(
 
 def task_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -2933,7 +3029,12 @@ def task_command(
     no_ssl_verify: bool = typer.Option(
         False, "--no-ssl-verify", "-nv", help="Do not verify SSL certificates for HTTPS."
     ),
-    id: str | None = typer.Option(None, "--id", "-i", help="Task ID"),
+    id: str | None = typer.Option(
+        None,
+        "--id",
+        "-i",
+        help="The task ID. If not provided, it will be read from the standard input (from the JSON representation of the task or a plain value).",
+    ),
     status: bool = typer.Option(False, "--status", "-st", help="Get the status of the task"),
     cancel: bool = typer.Option(False, "--cancel", "-c", help="Cancel the task"),
     delete: bool = typer.Option(False, "--delete", "-d", help="Delete the task"),
@@ -2965,8 +3066,10 @@ def task_command(
 
 def taxonomy_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -2981,12 +3084,11 @@ def taxonomy_command(
     no_ssl_verify: bool = typer.Option(
         False, "--no-ssl-verify", "-nv", help="Do not verify SSL certificates for HTTPS."
     ),
-    name: str | None = typer.Option(None, "--name", "-n", help="Taxonomy name"),
     import_file: str | None = typer.Option(
-        None, "--import-file", "-if", help="Local path to the taxonomy YAML file to import"
+        None, "--import-file", "-if", help="Import a taxonomy from the provided Opal file path (YAML format)."
     ),
     download: str | None = typer.Option(
-        None, "--download", "-dl", help="Download the taxonomy YAML file to the specified path"
+        None, "--download", "-dl", help="Download a taxonomy from the provided name, in YAML format"
     ),
     delete: str | None = typer.Option(None, "--delete", "-dt", help="Delete a taxonomy by name."),
     force: bool = typer.Option(False, "--force", "-f", help="Skip confirmation."),
@@ -3003,7 +3105,6 @@ def taxonomy_command(
         ssl_key=ssl_key,
         verbose=verbose,
         no_ssl_verify=no_ssl_verify,
-        name=name,
         import_file=import_file,
         download=download,
         delete=delete,
@@ -3015,8 +3116,10 @@ def taxonomy_command(
 
 def rest_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -3070,8 +3173,10 @@ def rest_command(
 
 def encrypt_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -3106,8 +3211,10 @@ def encrypt_command(
 
 def decrypt_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -3147,8 +3254,10 @@ def decrypt_command(
 
 def sql_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -3171,9 +3280,9 @@ def sql_command(
         help="Source project name, that will be used to resolve the table names in the FROM statement. If not provided, the fully qualified table names must be specified in the query (escaped by backquotes: `<project>.<table>`).",
     ),
     format: str | None = typer.Option(
-        None, "--format", "-f", help='The format of the output, can be "json" or "csv". Default is "csv".'
+        "csv", "--format", "-f", help='The format of the output, can be "json" or "csv".'
     ),
-    id_name: str | None = typer.Option(None, "--id-name", "-in", help='Name of the ID column name. Default is "_id".'),
+    id_name: str | None = typer.Option("_id", "--id-name", "-in", help='Name of the ID column name.'),
     json_output: bool = typer.Option(False, "--json", "-j", help="Pretty JSON formatting of the response"),
 ):
     """Execute a SQL statement on project's tables."""
@@ -3198,8 +3307,10 @@ def sql_command(
 
 def sql_history_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),
@@ -3259,8 +3370,10 @@ def sql_history_command(
 
 def analysis_plugin_command(
     ctx: typer.Context,
-    opal: str = typer.Option(None, "--opal", "-o", help="Opal server base url (default: http://localhost:8080)"),
-    user: str | None = typer.Option(None, "--user", "-u", help="Credentials auth: user name (requires a password)"),
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
     password: str | None = typer.Option(
         None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
     ),

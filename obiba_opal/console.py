@@ -217,13 +217,13 @@ def main(
         "http://localhost:8080",
         "--opal",
         "-o",
-        help="Opal server base url (default: http://localhost:8080)",
+        help="Opal server base url",
     ),
     user: str | None = typer.Option(
         None,
         "--user",
         "-u",
-        help="Credentials auth: user name (requires a password)",
+        help="Credentials auth: user name (password will be requested if not provided)",
     ),
     password: str | None = typer.Option(
         None,

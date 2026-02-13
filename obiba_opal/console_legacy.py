@@ -93,7 +93,7 @@ def add_opal_arguments(parser):
         "--user",
         "-u",
         required=False,
-        help="Credentials auth: user name (requires a password)",
+        help="Credentials auth: user name (password will be requested if not provided)",
     )
     parser.add_argument(
         "--password",
