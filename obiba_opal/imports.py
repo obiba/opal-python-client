@@ -520,7 +520,7 @@ class ImportOpalCommand:
         # Build and send request
         client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
         try:
-            res = cls(client, args.vebose).import_data(
+            res = cls(client, args.verbose).import_data(
                 args.ropal,
                 args.rdatasource,
                 args.ruser,

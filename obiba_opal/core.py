@@ -224,9 +224,12 @@ class OpalClient:
 
             data["no_ssl_verify"] = argv.get("no_ssl_verify")
 
-            if argv.get("user") and argv.get("password"):
+            if argv.get("user"):
                 data["user"] = argv["user"]
-                data["password"] = argv["password"]
+                if argv.get("password"):
+                    data["password"] = argv["password"]
+                else:
+                    data["password"] = getpass.getpass(prompt="Password: ")
             elif argv.get("token"):
                 data["token"] = argv["token"]
             elif argv.get("ssl_cert") and argv.get("ssl_key"):

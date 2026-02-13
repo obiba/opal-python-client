@@ -25,6 +25,7 @@ classifiers = [
 dependencies = [
     "requests>=2.31.0",
     "urllib3>=2.0",
+    "typer>=0.21.1",
 ]
 
 [project.optional-dependencies]
@@ -36,7 +37,8 @@ dev = [
 ]
 
 [project.scripts]
-opal = "obiba_opal.console:run"
+opal = "obiba_opal.console:app"
+opal-legacy = "obiba_opal.console_legacy:run"
 
 [project.urls]
 Homepage = "https://www.obiba.org"

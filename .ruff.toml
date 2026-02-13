@@ -38,6 +38,9 @@ select = [
 # Allow autofix for all enabled rules (when `--fix`) is provided.
 fixable = ["ALL"]
 
+# Ignore B008 for Typer - typer.Option in argument defaults is standard Typer practice
+# Ignore E501 - long lines in help text are acceptable
+ignore = ["B008", "E501"]
 
 # Allow unused variables when underscore-prefixed.
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"

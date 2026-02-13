@@ -26,7 +26,7 @@ class UserService:
             "-upa",
             required=False,
             help="User password of at least 8 characters, must contain at least one digit, one upper case alphabet, "
-            "one lower case alphabet, one special character (which includes @#$%^&+=!) and no white space.",
+            "one lower case alphabet, one special character (which includes @#$%%^&+=!) and no white space.",
         )
         parser.add_argument(
             "--ucertificate",
