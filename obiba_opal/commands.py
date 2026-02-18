@@ -3134,7 +3134,7 @@ def rest_command(
     no_ssl_verify: bool = typer.Option(
         False, "--no-ssl-verify", "-nv", help="Do not verify SSL certificates for HTTPS."
     ),
-    ws: str = typer.Option(..., "--ws", help="Web service path, e.g. /system/subject-profile/_current"),
+    ws: str = typer.Argument(..., help="Web service path, e.g. /system/subject-profile/_current"),
     method: str = typer.Option("GET", "--method", "-m", help="HTTP method: GET, POST, PUT, DELETE, OPTIONS"),
     content_type: str | None = typer.Option(None, "--content-type", "-ct", help="Content type of the request body"),
     accept: str | None = typer.Option(None, "--accept", "-a", help="Acceptable response content type"),
@@ -3282,7 +3282,7 @@ def sql_command(
     format: str | None = typer.Option(
         "csv", "--format", "-f", help='The format of the output, can be "json" or "csv".'
     ),
-    id_name: str | None = typer.Option("_id", "--id-name", "-in", help='Name of the ID column name.'),
+    id_name: str | None = typer.Option("_id", "--id-name", "-in", help="Name of the ID column name."),
     json_output: bool = typer.Option(False, "--json", "-j", help="Pretty JSON formatting of the response"),
 ):
     """Execute a SQL statement on project's tables."""
