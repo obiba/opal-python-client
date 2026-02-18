@@ -1,5 +1,7 @@
 from argparse import Namespace
 import unittest
+
+import pytest
 from obiba_opal import OpalClient
 from obiba_opal.core import HTTPError
 from os.path import exists
@@ -13,7 +15,7 @@ class TestClass(unittest.TestCase):
         # Make sure to place your own certificate files
         cls.SSL_CERTIFICATE = "./resources/certificates/publickey.pem"
         cls.SSL_KEY = "./resources/certificates/privatekey.pem"
-
+    
     def test_sendRestBadServer(self):
         # FIXME for some reason, the cookie_file is not removed (despite the os.remove()
         # is called and os.path.exists() says it was removed)
@@ -24,6 +26,7 @@ class TestClass(unittest.TestCase):
         except RequestException:
             assert True
 
+    @pytest.mark.integration
     def test_sendRestBadCredentials(self):
         client = OpalClient.buildWithAuthentication(server=TEST_SERVER, user="admin", password=TEST_PASSWORD)
 
@@ -32,6 +35,7 @@ class TestClass(unittest.TestCase):
         finally:
             client.close()
 
+    @pytest.mark.integration
     def test_sendRest(self):
         client = None
         try:
@@ -43,6 +47,7 @@ class TestClass(unittest.TestCase):
             if client:
                 client.close()
 
+    @pytest.mark.integration
     def test_sendSecuredRest(self):
         if exists(self.SSL_CERTIFICATE):
             client = None
@@ -57,6 +62,7 @@ class TestClass(unittest.TestCase):
                 if client:
                     client.close()
 
+    @pytest.mark.integration
     def test_validAuthLoginInfo(self):
         client = None
         try:
@@ -69,6 +75,7 @@ class TestClass(unittest.TestCase):
             if client:
                 client.close()
 
+    @pytest.mark.integration
     def test_validSslLoginInfo(self):
         if exists(self.SSL_CERTIFICATE):
             client = None
@@ -86,10 +93,12 @@ class TestClass(unittest.TestCase):
                 if client:
                     client.close()
 
+    @pytest.mark.integration
     def test_invalidServerInfo(self):
         args = Namespace(opl=TEST_SERVER, user=TEST_USER, password=TEST_PASSWORD)
         self.assertRaises(ValueError, OpalClient.LoginInfo.parse, args)
 
+    @pytest.mark.integration
     def test_invalidLoginInfo(self):
         args = Namespace(opal=TEST_SERVER, usr="administrator", password=TEST_PASSWORD)
         self.assertRaises(ValueError, OpalClient.LoginInfo.parse, args)

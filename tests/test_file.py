@@ -1,4 +1,6 @@
 import unittest
+
+import pytest
 from tests.utils import make_client
 from obiba_opal.file import FileService
 from obiba_opal.core import HTTPError
@@ -22,6 +24,7 @@ class TestClass(unittest.TestCase):
         cls.TEST_ZIPPED_FILE = f"/tmp/data_{suffix}.zip"
         cls.LOCAL_UPLOAD_FILE = f"/tmp/{cls.TEST_FILENAME}"
 
+    @pytest.mark.integration
     def test_1_fileUpload(self):
         try:
             # print(f"Uploading file to {self.TEST_FILE}...")
@@ -41,6 +44,7 @@ class TestClass(unittest.TestCase):
         except Exception as e:
             raise AssertionError("Failed to upload file, check if the file exists and if the name is correct.") from e
 
+    @pytest.mark.integration
     def test_2_fileDownload(self):
         try:
             # print(f"Downloading file to {self.TEST_FILE}...")
@@ -56,7 +60,8 @@ class TestClass(unittest.TestCase):
                 ) from None
         except Exception as e:
             raise AssertionError("Failed to download file, check if the file exists and if the name is correct.") from e
-
+    
+    @pytest.mark.integration
     def test_3_fileDownloadWithPassword(self):
         try:
             # print(f"Downloading file with password to {self.TEST_ZIPPED_FILE}...")
@@ -76,6 +81,7 @@ class TestClass(unittest.TestCase):
                 "Failed to download file with password, check if the file exists and if the name is correct."
             ) from e
 
+    @pytest.mark.integration
     def test_4_deleteUpload(self):
         try:
             # print(f"Deleting file {self.TEST_FILE}...")

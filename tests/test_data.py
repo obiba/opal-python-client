@@ -1,3 +1,4 @@
+import pytest
 from obiba_opal import DataService, EntityService
 from tests.utils import make_client
 
@@ -12,12 +13,14 @@ class TestClass:
     def teardown_class(cls):
         cls.client.close()
 
+    @pytest.mark.integration
     def test_entities(self):
         client = self.client
         res = DataService(client).get_entities("CNSIM", "CNSIM1")
         assert isinstance(res, list)
         assert len(res) == 2163
 
+    @pytest.mark.integration
     def test_valueset(self):
         client = self.client
         res = DataService(client).get_valueset("CNSIM", "CNSIM1", id="1604")
@@ -27,11 +30,13 @@ class TestClass:
         assert isinstance(res["variables"], list)
         assert len(res["variables"]) == 11
 
+    @pytest.mark.integration
     def test_value(self):
         client = self.client
         res = DataService(client).get_value("CNSIM", "CNSIM1", "GENDER", id="1604")
         assert res["value"] == "1"
 
+    @pytest.mark.integration
     def test_entity(self):
         client = self.client
         res = EntityService(client).get_entity("1604")
@@ -39,6 +44,7 @@ class TestClass:
         assert res["entityType"] == "Participant"
         assert res["identifier"] == "1604"
 
+    @pytest.mark.integration
     def test_entity_tables(self):
         client = self.client
         res = EntityService(client).get_entity_tables("1604")

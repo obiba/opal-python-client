@@ -1,3 +1,4 @@
+import pytest
 from obiba_opal import TablePermService
 from tests.utils import make_client
 import random
@@ -13,6 +14,7 @@ class TestClass:
     def teardown_class(cls):
         cls.client.close()
 
+    @pytest.mark.integration
     def test_table(self):
         client = self.client
         service = TablePermService(client)

@@ -1,3 +1,4 @@
+import pytest
 from obiba_opal import ProjectService, BackupProjectCommand
 from tests.utils import make_client
 import random
@@ -13,6 +14,7 @@ class TestClass:
     def teardown_class(cls):
         cls.client.close()
 
+    @pytest.mark.integration
     def test_project(self):
         client = self.client
         service = ProjectService(client)
@@ -24,6 +26,7 @@ class TestClass:
         assert isinstance(project, dict)
         assert project["name"] == "CNSIM"
 
+    @pytest.mark.integration
     def test_add_delete_project(self):
         client = self.client
         service = ProjectService(client)
@@ -36,6 +39,7 @@ class TestClass:
         project = service.get_project(name)
         assert project is None
 
+    @pytest.mark.integration
     def test_backup_command(self):
         client = self.client
         res = BackupProjectCommand(client).backup_project("CNSIM", "/tmp/test", force=True)

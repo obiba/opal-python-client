@@ -1,3 +1,4 @@
+import pytest
 from obiba_opal import DictionaryService, ExportAnnotationsService
 from tests.utils import make_client
 import io
@@ -13,17 +14,20 @@ class TestClass:
     def teardown_class(cls):
         cls.client.close()
 
+    @pytest.mark.integration
     def test_datasource(self):
         client = self.client
         res = DictionaryService(client).get_datasource("CNSIM")
         assert res["name"] == "CNSIM"
 
+    @pytest.mark.integration
     def test_datasources(self):
         client = self.client
         res = DictionaryService(client).get_datasources()
         assert isinstance(res, list)
         assert "CNSIM" in [x["name"] for x in res]
 
+    @pytest.mark.integration
     def test_table(self):
         client = self.client
         res = DictionaryService(client).get_table("CNSIM", "CNSIM1")
@@ -31,24 +35,28 @@ class TestClass:
         assert res["datasourceName"] == "CNSIM"
         assert res["link"] == "/datasource/CNSIM/table/CNSIM1"
 
+    @pytest.mark.integration
     def test_tables(self):
         client = self.client
         res = DictionaryService(client).get_tables("CNSIM")
         assert isinstance(res, list)
         assert "CNSIM1" in [x["name"] for x in res]
 
+    @pytest.mark.integration
     def test_variable(self):
         client = self.client
         res = DictionaryService(client).get_variable("CNSIM", "CNSIM1", "GENDER")
         assert res["name"] == "GENDER"
         assert res["parentLink"]["link"] == "/datasource/CNSIM/table/CNSIM1"
 
+    @pytest.mark.integration
     def test_variables(self):
         client = self.client
         res = DictionaryService(client).get_variables("CNSIM", "CNSIM1")
         assert isinstance(res, list)
         assert len(res) == 11
 
+    @pytest.mark.integration
     def test_variable_annotations(self):
         client = self.client
         output = io.StringIO()

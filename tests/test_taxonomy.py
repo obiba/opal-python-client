@@ -1,4 +1,6 @@
 import unittest
+
+import pytest
 from tests.utils import make_client
 from obiba_opal.system import TaxonomyService
 from obiba_opal.file import FileService
@@ -23,6 +25,7 @@ class TestClass(unittest.TestCase):
         cls.LOCAL_TAXONOMY_FILE = f"/tmp/{cls.TEST_TAXONOMY_FILENAME}"
         cls.TEST_TAXONOMY_NAME = f"OBiBa_taxonomyTest_{suffix}"
 
+    @pytest.mark.integration
     def test_1_importFile(self):
         try:
             fileService = FileService(make_client())
@@ -51,6 +54,7 @@ class TestClass(unittest.TestCase):
                 "Failed to import taxonomy, check if the file exists and if the name is correct."
             ) from e
 
+    @pytest.mark.integration
     def test_2_downloadTaxonomy(self):
         try:
             response = self.service.download(self.TEST_TAXONOMY_NAME)
@@ -61,6 +65,7 @@ class TestClass(unittest.TestCase):
                 "Failed to download taxonomy, check if the name is correct and if the taxonomy was properly imported."
             ) from e
 
+    @pytest.mark.integration
     def test_3_taxonomiesSummary(self):
         try:
             name = self.TEST_TAXONOMY_NAME
@@ -82,6 +87,7 @@ class TestClass(unittest.TestCase):
                 "Failed to get taxonomies summaries, check if the taxonomy was properly imported."
             ) from e
 
+    @pytest.mark.integration
     def test_4_deleteTaxonomy(self):
         try:
             name = self.TEST_TAXONOMY_NAME

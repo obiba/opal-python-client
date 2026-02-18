@@ -1,3 +1,4 @@
+import pytest
 from obiba_opal import ExportCSVCommand, TaskService
 from tests.utils import make_client
 import random
@@ -13,6 +14,7 @@ class TestClass:
     def teardown_class(cls):
         cls.client.close()
 
+    @pytest.mark.integration
     def test_csv(self):
         client = self.client
         service = ExportCSVCommand(client)
