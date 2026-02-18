@@ -15,7 +15,7 @@ class TestClass(unittest.TestCase):
         # Make sure to place your own certificate files
         cls.SSL_CERTIFICATE = "./resources/certificates/publickey.pem"
         cls.SSL_KEY = "./resources/certificates/privatekey.pem"
-    
+
     def test_sendRestBadServer(self):
         # FIXME for some reason, the cookie_file is not removed (despite the os.remove()
         # is called and os.path.exists() says it was removed)

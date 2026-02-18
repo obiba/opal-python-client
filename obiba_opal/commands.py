@@ -194,7 +194,7 @@ def backup_project_command(
     archive: str | None = typer.Option(
         None,
         "--archive",
-        "-a",
+        "-ar",
         help="Archive file path in Opal file system. Default is <project>.zip in the project folder.",
     ),
     force: bool = typer.Option(False, "--force", "-f", help="Skip confirmation"),
@@ -250,7 +250,7 @@ def restore_project_command(
     archive: str | None = typer.Option(
         None,
         "--archive",
-        "-a",
+        "-ar",
         help="Archive file path in Opal file system. Default is <project>.zip in the project folder.",
     ),
     force: bool = typer.Option(False, "--force", "-f", help="Skip confirmation"),

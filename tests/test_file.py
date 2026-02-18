@@ -60,7 +60,7 @@ class TestClass(unittest.TestCase):
                 ) from None
         except Exception as e:
             raise AssertionError("Failed to download file, check if the file exists and if the name is correct.") from e
-    
+
     @pytest.mark.integration
     def test_3_fileDownloadWithPassword(self):
         try:
