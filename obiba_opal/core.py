@@ -69,13 +69,14 @@ class OpalClient:
         :param key - private key (must be named as 'privatekey.pem')
         :param no_ssl_verify - if True, the SSL certificate is not verified
         (not recommended)
+        :return: the client instance
         """
 
         client = cls(server)
         if client.base_url.startswith("https:"):
             client.session.verify = not no_ssl_verify
         client.session.cert = (cert, key)
-
+        client.init()
         return client
 
     @classmethod
@@ -88,6 +89,7 @@ class OpalClient:
         :param password - user password
         :param no_ssl_verify - if True, the SSL certificate is not verified
         (not recommended)
+        :return: the client instance
         """
         client = cls(server)
         if client.base_url.startswith("https:"):
@@ -116,6 +118,7 @@ class OpalClient:
         :param token - token key
         :param no_ssl_verify - if True, the SSL certificate is not verified
         (not recommended)
+        :return: the client instance
         """
         client = cls(server)
         if client.base_url.startswith("https:"):
@@ -136,6 +139,7 @@ class OpalClient:
 
         :param user - username
         :param password - user password
+        :return: the client instance
         """
         u = self.__ensure_entry("User name", user)
         p = self.__ensure_entry("Password", password, True)
@@ -149,6 +153,7 @@ class OpalClient:
         Creates the authorization header and attempts to input the required token
 
         :param token - token key
+        :return: the client instance
         """
         tk = self.__ensure_entry("Token", token, True)
         self.header("X-Opal-Auth", tk)
@@ -190,6 +195,7 @@ class OpalClient:
 
         :param version - the version to compare with
         :return: -1 if the Opal version is lower than the provided version, 0 if they are equal, 1 if the Opal version is higher than the provided version
+        :raises Exception: if the Opal version is not initialized
         """
         if self.version is None:
             raise Exception("Opal version is not initialized")
