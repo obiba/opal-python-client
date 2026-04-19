@@ -117,15 +117,28 @@ class FileService:
             if download_password or info["type"] == "FOLDER":
                 # File to be bundled as zip archive
                 options = file.make_bundle_options(download_password)
-                response = request.post().resource("/shell/commands/_file-bundle").accept_json().content_type_json().content(json.dumps(options)).send()
+                bundle_request = self.client.new_request()
+                bundle_request.fail_on_error()
+                if self.verbose:
+                    bundle_request.verbose()
+                response = bundle_request.post().resource("/shell/commands/_file-bundle").accept_json().content_type_json().content(json.dumps(options)).send()
                 task = response.from_json()
                 task_service = TaskService(self.client)
                 status = task_service.wait_task(task["id"], True)
                 if status == "SUCCEEDED":
                     # Task succeeded, downloading file
-                    request.get().resource(f"/shell/command/{task['id']}/_result").accept("*/*").send(fp)
+                    download_request = self.client.new_request()
+                    download_request.fail_on_error()
+                    if self.verbose:
+                        download_request.verbose()
+                    download_request.get().resource(f"/shell/command/{task['id']}/_result").accept("*/*").send(fp)
                     fp.flush()
-                    request.delete().resource(f"/shell/command/{task['id']}").send()
+
+                    delete_request = self.client.new_request()
+                    delete_request.fail_on_error()
+                    if self.verbose:
+                        delete_request.verbose()
+                    delete_request.delete().resource(f"/shell/command/{task['id']}").send()
                 else:
                     raise Exception(f"File bundle task failed with status: {status}")
             else:
