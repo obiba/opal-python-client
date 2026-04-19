@@ -25,6 +25,8 @@ class OpalClient:
         self.base_url = self.__ensure_entry("Opal address", server)
         self.id = None
         self.rid = None
+        self.profile = None
+        self.version = None
 
     def __del__(self):
         self.close()
@@ -67,13 +69,14 @@ class OpalClient:
         :param key - private key (must be named as 'privatekey.pem')
         :param no_ssl_verify - if True, the SSL certificate is not verified
         (not recommended)
+        :return: the client instance
         """
 
         client = cls(server)
         if client.base_url.startswith("https:"):
             client.session.verify = not no_ssl_verify
         client.session.cert = (cert, key)
-
+        client.init()
         return client
 
     @classmethod
@@ -86,6 +89,7 @@ class OpalClient:
         :param password - user password
         :param no_ssl_verify - if True, the SSL certificate is not verified
         (not recommended)
+        :return: the client instance
         """
         client = cls(server)
         if client.base_url.startswith("https:"):
@@ -114,6 +118,7 @@ class OpalClient:
         :param token - token key
         :param no_ssl_verify - if True, the SSL certificate is not verified
         (not recommended)
+        :return: the client instance
         """
         client = cls(server)
         if client.base_url.startswith("https:"):
@@ -134,6 +139,7 @@ class OpalClient:
 
         :param user - username
         :param password - user password
+        :return: the client instance
         """
         u = self.__ensure_entry("User name", user)
         p = self.__ensure_entry("Password", password, True)
@@ -147,17 +153,18 @@ class OpalClient:
         Creates the authorization header and attempts to input the required token
 
         :param token - token key
+        :return: the client instance
         """
         tk = self.__ensure_entry("Token", token, True)
-        return self.header("X-Opal-Auth", tk)
+        self.header("X-Opal-Auth", tk)
+        self.init()
+        return self
 
     def init_otp(self):
         """
         Checks if an OTP is needed and if yes, prompts the user for the security code
         """
-        request = self.new_request()
-        profile_url = "/system/subject-profile/_current"
-        response = request.accept_json().get().resource(profile_url).send()
+        response = self.init()
         if response.code == 401:
             auth_header = response.get_header("WWW-Authenticate")
             if auth_header:
@@ -166,7 +173,41 @@ class OpalClient:
                     val = input("Enter 6-digits code: ")
                     # validate code and get the opalsid cookie for further requests
                     request = self.new_request()
-                    request.header(otp_header, val).accept_json().get().resource(profile_url).send()
+                    self.init(request.header(otp_header, val))
+
+    def init(self, request=None):
+        """
+        Initializes the client profile and version information by calling the system profile endpoint
+
+        :return: the response of the profile endpoint
+        """
+        _request = self.new_request() if request is None else request
+        profile_url = "/system/subject-profile/_current"
+        response = _request.accept_json().get().resource(profile_url).send()
+        if response.code == 200:
+            self.profile = response.from_json()
+            self.version = response.get_version()
+        return response
+
+    def compare_version(self, version):
+        """
+        Compares the Opal version with the provided version and raises an exception if the Opal version is lower than the provided version
+
+        :param version - the version to compare with
+        :return: -1 if the Opal version is lower than the provided version, 0 if they are equal, 1 if the Opal version is higher than the provided version
+        :raises Exception: if the Opal version is not initialized
+        """
+        if self.version is None:
+            raise Exception("Opal version is not initialized")
+        clean_version = self.version.split("-")[0]  # Remove any suffix like "-SNAPSHOT"
+        opal_version = tuple(map(int, clean_version.split(".")))
+        required_version = tuple(map(int, version.split(".")))
+        if opal_version < required_version:
+            return -1
+        elif opal_version > required_version:
+            return 1
+        else:
+            return 0
 
     def verify(self, value):
         """
@@ -499,6 +540,9 @@ class OpalResponse:
 
     def get_location(self):
         return self.get_header("Location")
+
+    def get_version(self):
+        return self.get_header("X-Opal-Version")
 
     def extract_cookie_value(self, name: str) -> str | None:
         if "set-cookie" in self.response.headers:

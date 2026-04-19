@@ -2,9 +2,12 @@
 Opal file management.
 """
 
-import obiba_opal.core as core
+import json
 import sys
 import os
+
+import obiba_opal.core as core
+from obiba_opal.system import TaskService
 
 
 class FileService:
@@ -90,7 +93,11 @@ class FileService:
         :param fd: The file descriptor or path to the destination file
         :param download_password: The password to use to encrypt the
                                 downloaded zip archive
+        :raises Exception: If the file is not readable
         """
+        info = self.file_info(path)
+        if not info["readable"]:
+            raise Exception(f"File {path} is not readable")
         request = self.client.new_request()
         request.fail_on_error()
 
@@ -100,8 +107,42 @@ class FileService:
         file = FileService.OpalFile(path)
         fp = os.fdopen(fd, "wb") if isinstance(fd, int) else fd
 
-        request.get().resource(file.get_ws()).accept("*/*").header("X-File-Key", download_password).send(fp)
-        fp.flush()
+        if self.client.compare_version("5.7.0") < 0:
+            # File download before Opal 5.7.0
+            request.get().resource(file.get_ws()).accept("*/*").header("X-File-Key", download_password).send(fp)
+            fp.flush()
+        else:
+            # File download with Opal 5.7.0 or later
+            if download_password or info["type"] == "FOLDER":
+                # File to be bundled as zip archive
+                options = file.make_bundle_options(download_password)
+                bundle_request = self.client.new_request().fail_on_error()
+                if self.verbose:
+                    bundle_request.verbose()
+                response = bundle_request.post().resource("/shell/commands/_file-bundle").accept_json().content_type_json().content(json.dumps(options)).send()
+                task = response.from_json()
+                task_service = TaskService(self.client)
+                try:
+                    status = task_service.wait_task(task["id"], True)
+                    if status == "SUCCEEDED":
+                        # Task succeeded, downloading file
+                        download_request = self.client.new_request().fail_on_error()
+                        if self.verbose:
+                            download_request.verbose()
+                        download_request.get().resource(f"/shell/command/{task['id']}/_result").accept("*/*").send(fp)
+                        fp.flush()
+                    else:
+                        raise Exception(f"File bundle task failed with status: {status}")
+                finally:
+                    # Ensure task is deleted in any case to avoid leaving pending tasks on the server
+                    delete_request = self.client.new_request().fail_on_error()
+                    if self.verbose:
+                        delete_request.verbose()
+                    delete_request.delete().resource(f"/shell/command/{task['id']}").send()
+            else:
+                # File to be downloaded as is
+                request.get().resource(file.get_ws()).accept("*/*").header("X-File-Key", download_password).send(fp)
+                fp.flush()
 
     def upload_file(self, upload: str, path: str):
         """
@@ -167,3 +208,11 @@ class FileService:
 
         def get_ws(self):
             return f"/files{self.path}"
+
+        def make_bundle_options(self, download_password):
+            options = {
+                "paths": [self.path]
+            }
+            if download_password:
+                options["password"] = download_password
+            return options

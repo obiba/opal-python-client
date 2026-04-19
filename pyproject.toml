@@ -1,6 +1,6 @@
 [project]
 name = "obiba-opal"
-version = "6.0.2"
+version = "6.1.0"
 description = "OBiBa/Opal python client."
 authors = [
     {name = "Yannick Marcon", email = "yannick.marcon@obiba.org"}
@@ -52,3 +52,8 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["obiba_opal"]
+
+[tool.pytest.ini_options]
+markers = [
+    "integration: marks tests that require a running Opal instance",
+]
