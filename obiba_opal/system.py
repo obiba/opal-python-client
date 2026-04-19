@@ -452,18 +452,20 @@ class TaskService:
         request.content("CANCELED")
         request.put().resource(f"/shell/command/{id}/status").send()
 
-    def wait_task(self, id: str | int):
+    def wait_task(self, id: str | int, silently: bool = False):
+        """ Wait for the task to complete or being canceled, and return its status. """
         task = self.get_task(id)
-        while task["status"] not in ["SUCCEEDED", "CANCELED", "FAILED"]:
-            if "progress" in task:
-                progress = task["progress"]
-                if "message" in progress:
-                    sys.stdout.write("\r\033[K" + str(progress["percent"]) + "% " + progress["message"])
+        while task["status"] not in ["SUCCEEDED", "CANCELED", "FAILED", "CANCEL_PENDING"]:
+            if not silently:
+                if "progress" in task:
+                    progress = task["progress"]
+                    if "message" in progress:
+                        sys.stdout.write("\r\033[K" + str(progress["percent"]) + "% " + progress["message"])
+                    else:
+                        sys.stdout.write("\r\033[K" + str(progress["percent"]) + "%")
                 else:
-                    sys.stdout.write("\r\033[K" + str(progress["percent"]) + "%")
-            else:
-                sys.stdout.write(".")
-            sys.stdout.flush()
+                    sys.stdout.write(".")
+                sys.stdout.flush()
             time.sleep(1)
             task = self.get_task(id)
         return task["status"]
