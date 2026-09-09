@@ -86,7 +86,7 @@ class DataSHIELDQuotaService:
             "-fe",
             action="store_true",
             required=False,
-            help="Fetch one or multiple quota(s).",
+            help="Fetch one or multiple quota(s). This is the default action.",
         )
         parser.add_argument("--add", "-a", action="store_true", help="Add a quota.")
         parser.add_argument(
@@ -155,6 +155,7 @@ class DataSHIELDQuotaService:
                 res = service.get_usage(args.subject) if args.subject else service.get_current_usage()
                 core.Formatter.print_json(res, args.json)
             else:
+                # fetching is the default action, --fetch being accepted to state it explicitly
                 res = service.get_quota(args.id) if args.id else service.get_quotas()
                 core.Formatter.print_json(res, args.json)
         finally:

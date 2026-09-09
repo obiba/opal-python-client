@@ -3480,7 +3480,9 @@ def datashield_quota_command(
         help="Enable the quota (on update, when neither --enabled nor --disabled is specified, the quota is left "
         "as it is).",
     ),
-    fetch: bool = typer.Option(False, "--fetch", "-fe", help="Fetch one or multiple quota(s)."),
+    fetch: bool = typer.Option(
+        False, "--fetch", "-fe", help="Fetch one or multiple quota(s). This is the default action."
+    ),
     add: bool = typer.Option(False, "--add", "-a", help="Add a quota."),
     update: bool = typer.Option(False, "--update", "-ud", help="Update a quota (requires a quota identifier)."),
     delete: bool = typer.Option(False, "--delete", "-de", help="Delete a quota (requires a quota identifier)."),

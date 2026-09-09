@@ -68,22 +68,26 @@ class TestClass:
             assert "metric" in usage
             assert "usedMillis" in usage
 
-    def test_invalid_quota(self):
-        service = DataSHIELDQuotaService(self.client)
-        with pytest.raises(ValueError):
-            # a group quota requires a subject name
-            service.add_quota(60000, "group")
-        with pytest.raises(ValueError):
-            service.add_quota(60000, "nosuchtype", "dsuser")
-        with pytest.raises(ValueError):
-            service.add_quota(60000, "user", "dsuser", "nosuchmetric")
-        with pytest.raises(ValueError):
-            service.add_quota(60000, "user", "dsuser", "session-time", "nosuchperiod")
-        with pytest.raises(ValueError):
-            service.add_quota(-1)
-        with pytest.raises(ValueError):
-            service.get_quota(None)
-        with pytest.raises(ValueError):
-            service.delete_quota(None)
-        with pytest.raises(ValueError):
-            service.get_usage(None)
+
+def test_invalid_quota():
+    """
+    The quota values are validated before any request is sent, so no server is needed here
+    """
+    service = DataSHIELDQuotaService(None)
+    with pytest.raises(ValueError):
+        # a group quota requires a subject name
+        service.add_quota(60000, "group")
+    with pytest.raises(ValueError):
+        service.add_quota(60000, "nosuchtype", "dsuser")
+    with pytest.raises(ValueError):
+        service.add_quota(60000, "user", "dsuser", "nosuchmetric")
+    with pytest.raises(ValueError):
+        service.add_quota(60000, "user", "dsuser", "session-time", "nosuchperiod")
+    with pytest.raises(ValueError):
+        service.add_quota(-1)
+    with pytest.raises(ValueError):
+        service.get_quota(None)
+    with pytest.raises(ValueError):
+        service.delete_quota(None)
+    with pytest.raises(ValueError):
+        service.get_usage(None)
