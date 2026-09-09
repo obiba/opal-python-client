@@ -200,6 +200,11 @@ app.command(
     help="Analyses a project variables using external R plugins.",
 )(handle_exceptions(cmd.analysis_plugin_command))
 
+# DataSHIELD commands
+app.command(name="datashield-quota", help="Manage DataSHIELD usage quotas.")(
+    handle_exceptions(cmd.datashield_quota_command)
+)
+
 
 # =============================================================================
 # Global options callback

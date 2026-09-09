@@ -74,6 +74,7 @@ from obiba_opal.system import (
 )
 from obiba_opal.sql import SQLService, SQLHistoryService
 from obiba_opal.security import EncryptService, DecryptService
+from obiba_opal.datashield import DataSHIELDQuotaService
 
 
 def _make_args_with_globals(
@@ -3418,3 +3419,103 @@ def analysis_plugin_command(
         json=json_output,
     )
     AnalysisCommand.do_command(args)
+
+
+# =============================================================================
+# DataSHIELD Commands
+# =============================================================================
+
+
+def datashield_quota_command(
+    ctx: typer.Context,
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
+    password: str | None = typer.Option(
+        None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
+    ),
+    token: str | None = typer.Option(None, "--token", "-tk", help="Token auth: User access token"),
+    ssl_cert: str | None = typer.Option(
+        None, "--ssl-cert", "-sc", help="Two-way SSL auth: certificate/public key file (requires a private key)"
+    ),
+    ssl_key: str | None = typer.Option(
+        None, "--ssl-key", "-sk", help="Two-way SSL auth: private key file (requires a certificate)"
+    ),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Verbose output"),
+    no_ssl_verify: bool = typer.Option(
+        False, "--no-ssl-verify", "-nv", help="Do not verify SSL certificates for HTTPS."
+    ),
+    id: str | None = typer.Option(
+        None,
+        "--id",
+        "-id",
+        help="Quota identifier. Not specifying the quota identifier, will get the list of the DataSHIELD quotas.",
+    ),
+    type: str | None = typer.Option(
+        None, "--type", "-ty", help="Subject type: system, group, user. Default is system."
+    ),
+    subject: str | None = typer.Option(
+        None,
+        "--subject",
+        "-s",
+        help="Subject name: the user or the group name (required when subject type is user or group).",
+    ),
+    metric: str | None = typer.Option(
+        None, "--metric", "-m", help="Usage metric: execution-time, session-time. Default is execution-time."
+    ),
+    period: str | None = typer.Option(
+        None, "--period", "-pd", help="Rolling period the usage is summed over: daily, weekly. Default is weekly."
+    ),
+    limit: float | None = typer.Option(
+        None, "--limit", "-lm", help="Usage allowance, in minutes (zero forbids DataSHIELD for this subject)."
+    ),
+    disabled: bool = typer.Option(
+        False, "--disabled", "-di", help="Disable the quota (on add, if omitted the quota is enabled by default)."
+    ),
+    enabled: bool = typer.Option(
+        False,
+        "--enabled",
+        "-en",
+        help="Enable the quota (on update, when neither --enabled nor --disabled is specified, the quota is left "
+        "as it is).",
+    ),
+    fetch: bool = typer.Option(False, "--fetch", "-fe", help="Fetch one or multiple quota(s)."),
+    add: bool = typer.Option(False, "--add", "-a", help="Add a quota."),
+    update: bool = typer.Option(False, "--update", "-ud", help="Update a quota (requires a quota identifier)."),
+    delete: bool = typer.Option(False, "--delete", "-de", help="Delete a quota (requires a quota identifier)."),
+    usage: bool = typer.Option(
+        False,
+        "--usage",
+        "-us",
+        help="Get the quota usage of the user specified by --subject, or of the current user when omitted.",
+    ),
+    json_output: bool = typer.Option(False, "--json", "-j", help="Pretty JSON formatting of the response"),
+):
+    """Manage DataSHIELD usage quotas."""
+    args = _make_args_with_globals(
+        ctx,
+        opal=opal,
+        user=user,
+        password=password,
+        token=token,
+        ssl_cert=ssl_cert,
+        ssl_key=ssl_key,
+        verbose=verbose,
+        no_ssl_verify=no_ssl_verify,
+        id=id,
+        type=type,
+        subject=subject,
+        metric=metric,
+        period=period,
+        limit=limit,
+        disabled=disabled,
+        enabled=enabled,
+        fetch=fetch,
+        add=add,
+        update=update,
+        delete=delete,
+        usage=usage,
+        json=json_output,
+    )
+    DataSHIELDQuotaService.do_command(args)
