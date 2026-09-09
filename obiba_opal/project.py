@@ -160,21 +160,21 @@ class ProjectService:
         description: str = None,
         tags: list = None,
         export_folder: str = None,
-        internal: bool = False
+        internal: bool = False,
     ):
         """
         Add a project.
 
         :param name: The project name
-        :param database: The project database name. If not provided and internal is False, 
+        :param database: The project database name. If not provided and internal is False,
             only views can be added. See get_databases() for the list of databases available
             for storage.
         :param title: The project title
         :param description: The project description
         :param tags: The list of project tags
         :param export_folder: The project's preferred export folder
-        :param internal: If True, the project will be created using an internal database. Ignored 
-            if database is provided. If False, the project will be created without a database. Default 
+        :param internal: If True, the project will be created using an internal database. Ignored
+            if database is provided. If False, the project will be created without a database. Default
             is False.
         """
         if not name:

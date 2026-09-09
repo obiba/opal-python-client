@@ -73,27 +73,29 @@ from obiba_opal import OpalClient, HTTPError, Formatter, ImportCSVCommand, TaskS
 
 # if 2-factor auth is enabled, user will be asked for the secret code
 # Personal access token authentication is also supported (and recommended)
-client = OpalClient.buildWithAuthentication(server='https://opal-demo.obiba.org', user='administrator', password='password')
+client = OpalClient.buildWithAuthentication(
+    server="https://opal-demo.obiba.org", user="administrator", password="password"
+)
 
 try:
     # upload a local CSV data file into Opal file system
     fs = FileService(client)
-    fs.upload_file('./data.csv', '/tmp')
+    fs.upload_file("./data.csv", "/tmp")
 
     # import this CSV file into a project
-    task = ImportCSVCommand(client).import_data('/tmp/data.csv', 'CNSIM')
-    status = TaskService(client).wait_task(task['id'])
-    
-    # clean data file from Opal
-    fs.delete_file('/tmp/data.csv')
+    task = ImportCSVCommand(client).import_data("/tmp/data.csv", "CNSIM")
+    status = TaskService(client).wait_task(task["id"])
 
-    if status == 'SUCCEEDED':
+    # clean data file from Opal
+    fs.delete_file("/tmp/data.csv")
+
+    if status == "SUCCEEDED":
         dico = DictionaryService(client)
-        table = dico.get_table('CNSIM', 'data')
+        table = dico.get_table("CNSIM", "data")
         # do something ...
-        dico.delete_tables('CNSIM', ['data'])
+        dico.delete_tables("CNSIM", ["data"])
     else:
-        print('Import failed!')
+        print("Import failed!")
         # do something ...
 except HTTPError as e:
     Formatter.print_json(e.error, True)
