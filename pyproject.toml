@@ -1,6 +1,6 @@
 [project]
 name = "obiba-opal"
-version = "6.1.0"
+version = "6.2.0"
 description = "OBiBa/Opal python client."
 authors = [
     {name = "Yannick Marcon", email = "yannick.marcon@obiba.org"}

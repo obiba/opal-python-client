@@ -453,7 +453,7 @@ class TaskService:
         request.put().resource(f"/shell/command/{id}/status").send()
 
     def wait_task(self, id: str | int, silently: bool = False):
-        """ Wait for the task to complete or being canceled, and return its status. """
+        """Wait for the task to complete or be canceled, and return its status."""
         task = self.get_task(id)
         while task["status"] not in ["SUCCEEDED", "CANCELED", "FAILED", "CANCEL_PENDING"]:
             if not silently:

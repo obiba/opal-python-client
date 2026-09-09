@@ -134,12 +134,21 @@ def project_command(
         None, "--name", "-n", help="Project name. Not specifying the project name, will get the list of the projects."
     ),
     database: str | None = typer.Option(
-        None, "--database", "-db", help="Project database name. If not provided only views can be added."
+        None,
+        "--database",
+        "-db",
+        help="Project database name. If not provided and internal is False, only views can be added.",
     ),
     title: str | None = typer.Option(None, "--title", "-t", help="Project title."),
     description: str | None = typer.Option(None, "--description", "-dc", help="Project description."),
     tags: list[str] | None = typer.Option(None, "--tags", "-tg", help="Tags to apply to the project."),
     export_folder: str | None = typer.Option(None, "--export-folder", "-ex", help="Project preferred export folder."),
+    internal: bool = typer.Option(
+        False,
+        "--internal",
+        "-i",
+        help="Create the project using an internal database. Ignored if database is provided.",
+    ),
     add: bool = typer.Option(False, "--add", "-a", help="Add a project (requires at least a project name)."),
     delete: bool = typer.Option(False, "--delete", "-de", help="Delete a project (requires at least a project name)."),
     force: bool = typer.Option(False, "--force", "-f", help="Skip confirmation on project deletion"),
@@ -162,6 +171,7 @@ def project_command(
         description=description,
         tags=tags,
         export_folder=export_folder,
+        internal=internal,
         add=add,
         delete=delete,
         force=force,

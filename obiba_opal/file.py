@@ -119,7 +119,15 @@ class FileService:
                 bundle_request = self.client.new_request().fail_on_error()
                 if self.verbose:
                     bundle_request.verbose()
-                response = bundle_request.post().resource("/shell/commands/_file-bundle").accept_json().content_type_json().content(json.dumps(options)).send()
+                response = (
+                    bundle_request
+                    .post()
+                    .resource("/shell/commands/_file-bundle")
+                    .accept_json()
+                    .content_type_json()
+                    .content(json.dumps(options))
+                    .send()
+                )
                 task = response.from_json()
                 task_service = TaskService(self.client)
                 try:
@@ -210,9 +218,7 @@ class FileService:
             return f"/files{self.path}"
 
         def make_bundle_options(self, download_password):
-            options = {
-                "paths": [self.path]
-            }
+            options = {"paths": [self.path]}
             if download_password:
                 options["password"] = download_password
             return options
