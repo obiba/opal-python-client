@@ -184,8 +184,8 @@ class ProjectService:
         project = {"name": name}
         if database:
             project["database"] = database
-        else:
-            project["internalDatabase"] = internal
+        elif internal:
+            project["internalDatabase"] = True
         if title:
             project["title"] = title
         else:
