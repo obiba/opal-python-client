@@ -72,6 +72,7 @@ from obiba_opal.system import (
 )
 from obiba_opal.sql import SQLService, SQLHistoryService
 from obiba_opal.security import EncryptService, DecryptService
+from obiba_opal.datashield import DataSHIELDQuotaService
 
 
 def prompt_password():
@@ -545,6 +546,13 @@ def run():
         "SQL execution history of current user or of other users (administrator only).",
         SQLHistoryService.add_arguments,
         SQLHistoryService.do_command,
+    )
+    add_subcommand(
+        subparsers,
+        "datashield-quota",
+        "Manage DataSHIELD usage quotas.",
+        DataSHIELDQuotaService.add_arguments,
+        DataSHIELDQuotaService.do_command,
     )
 
     # Execute selected command

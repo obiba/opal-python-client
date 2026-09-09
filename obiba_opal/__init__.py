@@ -68,6 +68,7 @@ from obiba_opal.system import (
 )
 from obiba_opal.sql import SQLService, SQLHistoryService
 from obiba_opal.security import EncryptService, DecryptService
+from obiba_opal.datashield import DataSHIELDQuotaService
 
 __all__ = [
     "UriBuilder",
@@ -133,4 +134,5 @@ __all__ = [
     "SQLHistoryService",
     "EncryptService",
     "DecryptService",
+    "DataSHIELDQuotaService",
 ]
