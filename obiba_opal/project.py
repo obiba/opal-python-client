@@ -185,7 +185,7 @@ class ProjectService:
         if database:
             project["database"] = database
         else:
-            project["internal"] = internal
+            project["internalDatabase"] = internal
         if title:
             project["title"] = title
         else:
