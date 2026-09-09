@@ -32,7 +32,7 @@ class ProjectService:
             "--database",
             "-db",
             required=False,
-            help="Project database name. If not provided only views can be added.",
+            help="Project database name. If not provided and internal is False, only views can be added.",
         )
         parser.add_argument("--title", "-t", required=False, help="Project title.")
         parser.add_argument("--description", "-dc", required=False, help="Project description.")
@@ -49,7 +49,12 @@ class ProjectService:
             required=False,
             help="Project preferred export folder.",
         )
-
+        parser.add_argument(
+            "--internal",
+            "-i",
+            action="store_true",
+            help="Create the project using an internal database. Ignored if database is provided.",
+        )
         parser.add_argument(
             "--add",
             "-a",
@@ -94,6 +99,7 @@ class ProjectService:
                 args.description,
                 args.tags,
                 args.export_folder,
+                args.internal,
             )
         elif args.delete:
             if not args.name:
@@ -154,17 +160,22 @@ class ProjectService:
         description: str = None,
         tags: list = None,
         export_folder: str = None,
+        internal: bool = False
     ):
         """
         Add a project.
 
         :param name: The project name
-        :param database: The project database name. If not provided only views can be added. See
-            get_databases() for the list of databases available for storage.
+        :param database: The project database name. If not provided and internal is False, 
+            only views can be added. See get_databases() for the list of databases available
+            for storage.
         :param title: The project title
         :param description: The project description
         :param tags: The list of project tags
         :param export_folder: The project's preferred export folder
+        :param internal: If True, the project will be created using an internal database. Ignored 
+            if database is provided. If False, the project will be created without a database. Default 
+            is False.
         """
         if not name:
             raise ValueError("The project name is required.")
@@ -173,6 +184,8 @@ class ProjectService:
         project = {"name": name}
         if database:
             project["database"] = database
+        else:
+            project["internal"] = internal
         if title:
             project["title"] = title
         else:
