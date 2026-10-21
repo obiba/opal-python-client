@@ -76,6 +76,9 @@ app.command(
 app.command(name="import-opal", help="Import data from a remote Opal server.")(
     handle_exceptions(cmd.import_opal_command)
 )
+app.command(name="import-amber", help="Import case reports or interviews from an Amber server.")(
+    handle_exceptions(cmd.import_amber_command)
+)
 app.command(name="import-csv", help="Import data from a CSV file.")(handle_exceptions(cmd.import_csv_command))
 app.command(name="import-xml", help="Import data from a ZIP file.")(handle_exceptions(cmd.import_xml_command))
 app.command(

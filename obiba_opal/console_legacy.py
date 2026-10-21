@@ -50,6 +50,7 @@ from obiba_opal.perm import (
 )
 from obiba_opal.imports import (
     ImportPluginCommand,
+    ImportAmberCommand,
     ImportCSVCommand,
     ImportIDMapService,
     ImportIDService,
@@ -224,6 +225,13 @@ def run():
         "Import data from a remote Opal server.",
         ImportOpalCommand.add_arguments,
         ImportOpalCommand.do_command,
+    )
+    add_subcommand(
+        subparsers,
+        "import-amber",
+        "Import case reports or interviews from an Amber server.",
+        ImportAmberCommand.add_arguments,
+        ImportAmberCommand.do_command,
     )
     add_subcommand(
         subparsers,
