@@ -52,6 +52,7 @@ from obiba_opal.perm import (
 )
 from obiba_opal.imports import (
     ImportPluginCommand,
+    ImportAmberCommand,
     ImportCSVCommand,
     ImportIDMapService,
     ImportIDService,
@@ -1468,6 +1469,105 @@ def import_opal_command(
         json=json_output,
     )
     ImportOpalCommand.do_command(args)
+
+
+def import_amber_command(
+    ctx: typer.Context,
+    opal: str = typer.Option("http://localhost:8080", "--opal", "-o", help="Opal server base url"),
+    user: str | None = typer.Option(
+        None, "--user", "-u", help="Credentials auth: user name (password will be requested if not provided)"
+    ),
+    password: str | None = typer.Option(
+        None, "--password", "-p", help="Credentials auth: user password (requires a user name)"
+    ),
+    token: str | None = typer.Option(None, "--token", "-tk", help="Token auth: User access token"),
+    ssl_cert: str | None = typer.Option(
+        None, "--ssl-cert", "-sc", help="Two-way SSL auth: certificate/public key file (requires a private key)"
+    ),
+    ssl_key: str | None = typer.Option(
+        None, "--ssl-key", "-sk", help="Two-way SSL auth: private key file (requires a certificate)"
+    ),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Verbose output"),
+    no_ssl_verify: bool = typer.Option(
+        False, "--no-ssl-verify", "-nv", help="Do not verify SSL certificates for HTTPS."
+    ),
+    amber: str = typer.Option(..., "--amber", "-am", help="Amber API base url (e.g. https://amber.example.org/api)"),
+    key: str = typer.Option(..., "--key", "-ak", help="Amber API key giving access to the study"),
+    study: str = typer.Option(..., "--study", "-st", help="Amber study name"),
+    crf: str | None = typer.Option(
+        None, "--crf", "-cr", help="Amber case report form name, to import its case reports (exclusive from design)"
+    ),
+    design: str | None = typer.Option(
+        None, "--design", "-ds", help="Amber interview design name, to import its interviews (exclusive from crf)"
+    ),
+    campaign: str | None = typer.Option(
+        None, "--campaign", "-ca", help="Amber campaign name, to filter the interviews"
+    ),
+    state: str | None = typer.Option(
+        None,
+        "--state",
+        "-sta",
+        help='Record state: "completed" (default), "in_progress" or "initiated" (interviews only), "all" for any state',
+    ),
+    from_date: str | None = typer.Option(None, "--from", "-fr", help="Records updated since this date (YYYY-MM-DD)"),
+    to_date: str | None = typer.Option(None, "--to", "-to", help="Records updated until this date (YYYY-MM-DD)"),
+    entity_type: str | None = typer.Option(
+        None, "--type", "-ty", help="Entity type (default is the one defined by Amber)"
+    ),
+    destination: str = typer.Option(..., "--destination", "-d", help="Destination datasource name"),
+    tables: list[str] | None = typer.Option(
+        None, "--tables", "-t", help="The list of tables to be imported (defaults to all)"
+    ),
+    incremental: bool = typer.Option(
+        False, "--incremental", "-i", help="Incremental import (new and updated value sets)"
+    ),
+    limit: int | None = typer.Option(None, "--limit", "-li", help="Import limit (maximum number of value sets)"),
+    identifiers: str | None = typer.Option(None, "--identifiers", "-id", help="Name of the ID mapping"),
+    policy: str | None = typer.Option(
+        None,
+        "--policy",
+        "-po",
+        help='ID mapping policy: "required" (each identifiers must be mapped prior importation, default), "ignore" (ignore unknown identifiers), "generate" (generate a system identifier for each unknown identifier)',
+    ),
+    merge: bool = typer.Option(
+        False,
+        "--merge",
+        "-mg",
+        help="Merge imported data dictionary with the destination one (default is false, i.e. data dictionary is overridden).",
+    ),
+    json_output: bool = typer.Option(False, "--json", "-j", help="Pretty JSON formatting of the response"),
+):
+    """Import case reports or interviews from an Amber server."""
+    args = _make_args_with_globals(
+        ctx,
+        opal=opal,
+        user=user,
+        password=password,
+        token=token,
+        ssl_cert=ssl_cert,
+        ssl_key=ssl_key,
+        verbose=verbose,
+        no_ssl_verify=no_ssl_verify,
+        amber=amber,
+        key=key,
+        study=study,
+        crf=crf,
+        design=design,
+        campaign=campaign,
+        state=state,
+        from_date=from_date,
+        to_date=to_date,
+        type=entity_type,
+        destination=destination,
+        tables=tables,
+        incremental=incremental,
+        limit=limit,
+        identifiers=identifiers,
+        policy=policy,
+        merge=merge,
+        json=json_output,
+    )
+    ImportAmberCommand.do_command(args)
 
 
 def import_limesurvey_command(

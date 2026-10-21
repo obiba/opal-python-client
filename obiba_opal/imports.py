@@ -613,6 +613,171 @@ class ImportOpalCommand:
             factory["Magma.RestDatasourceFactoryDto.params"] = rest_factory
 
 
+class ImportAmberCommand:
+    """
+    Import case reports or interviews from an Amber server.
+    """
+
+    def __init__(self, client: core.OpalClient, verbose: bool = False):
+        self.client = client
+        self.verbose = verbose
+
+    @classmethod
+    def add_arguments(cls, parser):
+        """
+        Add data command specific options
+        """
+        parser.add_argument(
+            "--amber", "-am", required=True, help="Amber API base url (e.g. https://amber.example.org/api)"
+        )
+        parser.add_argument("--key", "-ak", required=True, help="Amber API key giving access to the study")
+        parser.add_argument("--study", "-st", required=True, help="Amber study name")
+        source = parser.add_mutually_exclusive_group(required=True)
+        source.add_argument("--crf", "-cr", help="Amber case report form name, to import its case reports")
+        source.add_argument("--design", "-ds", help="Amber interview design name, to import its interviews")
+        parser.add_argument("--campaign", "-ca", required=False, help="Amber campaign name, to filter the interviews")
+        parser.add_argument(
+            "--state",
+            "-sta",
+            required=False,
+            help='Record state: "completed" (default), "in_progress" or "initiated" (interviews only), '
+            '"all" for any state',
+        )
+        parser.add_argument(
+            "--from", "-fr", dest="from_date", required=False, help="Records updated since this date (YYYY-MM-DD)"
+        )
+        parser.add_argument(
+            "--to", "-to", dest="to_date", required=False, help="Records updated until this date (YYYY-MM-DD)"
+        )
+        parser.add_argument("--type", "-ty", required=False, help="Entity type (default is the one defined by Amber)")
+        # non specific import arguments
+        io.add_import_arguments(parser)
+
+    @classmethod
+    def do_command(cls, args):
+        """
+        Execute import data command
+        """
+        # Build and send request
+        client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
+        try:
+            res = cls(client, args.verbose).import_data(
+                args.amber,
+                args.key,
+                args.study,
+                args.destination,
+                args.crf,
+                args.design,
+                args.campaign,
+                args.state,
+                args.from_date,
+                args.to_date,
+                args.type,
+                args.tables,
+                args.incremental,
+                args.limit,
+                args.identifiers,
+                args.policy,
+                args.merge,
+            )
+            # format response
+            core.Formatter.print_json(res, args.json)
+        finally:
+            client.close()
+
+    def import_data(
+        self,
+        amber: str,
+        key: str,
+        study: str,
+        destination: str,
+        crf: str = None,
+        design: str = None,
+        campaign: str = None,
+        state: str = None,
+        from_date: str = None,
+        to_date: str = None,
+        entityType: str = None,
+        tables: list = None,
+        incremental: bool = None,
+        limit: int = None,
+        identifiers: str = None,
+        policy: str = None,
+        merge: bool = None,
+    ):
+        """
+        Import case reports or interviews, with their files, from an Amber server.
+
+        :param amber: Amber API base url
+        :param key: Amber API key giving access to the study
+        :param study: Amber study name
+        :param destination: The destination project
+        :param crf: Amber case report form name, to import its case reports (exclusive from design)
+        :param design: Amber interview design name, to import its interviews (exclusive from crf)
+        :param campaign: Amber campaign name, to filter the interviews
+        :param state: Record state: "completed" (default), "in_progress" or "initiated" (interviews only),
+            "all" for any state
+        :param from_date: Records updated since this date (YYYY-MM-DD, or ISO date-time)
+        :param to_date: Records updated until this date (YYYY-MM-DD, or ISO date-time)
+        :param entityType: Entity type (default is the one defined by Amber)
+        :param tables: The tables names to be imported (default is all)
+        :param incremental: Incremental import (new and updated value sets)
+        :param limit: Import limit (maximum number of value sets)
+        :param identifiers: The name of the ID mapping
+        :param policy: The ID mapping policy: "required" (each identifiers must
+            be mapped prior importation, default), "ignore" (ignore unknown
+            identifiers), "generate" (generate a system identifier for each
+            unknown identifier)
+        :param merge: Merge imported data dictionary with the destination one
+            (default is false, i.e. data dictionary is overridden)
+        """
+        if bool(crf) == bool(design):
+            raise ValueError("Either specify a case report form OR an interview design")
+        if campaign and not design:
+            raise ValueError("A campaign applies to interviews only")
+        importer = io.OpalImporter.build(
+            self.client,
+            destination=destination,
+            tables=tables,
+            incremental=incremental,
+            limit=limit,
+            identifiers=identifiers,
+            policy=policy,
+            merge=merge,
+            verbose=self.verbose,
+        )
+        amber_factory = {
+            "url": amber,
+            "token": key,
+            "source": "interview" if design else "case_report",
+            "study": study,
+            "form": design or crf,
+        }
+        if state != "all":
+            amber_factory["state"] = state if state else "completed"
+        # whole days, in UTC
+        if from_date:
+            amber_factory["from"] = from_date if "T" in from_date else f"{from_date}T00:00:00.000Z"
+        if to_date:
+            amber_factory["to"] = to_date if "T" in to_date else f"{to_date}T23:59:59.999Z"
+        if entityType:
+            amber_factory["entityType"] = entityType
+        if campaign:
+            amber_factory["campaign"] = campaign
+        response = importer.submit(self.AmberExtensionFactory(amber_factory))
+        return response.from_json()
+
+    class AmberExtensionFactory(io.OpalImporter.ExtensionFactoryInterface):
+        def __init__(self, amber_factory: dict):
+            self.amber_factory = amber_factory
+
+        def add(self, factory):
+            """
+            Add specific datasource factory extension
+            """
+            factory["Magma.AmberDatasourceFactoryDto.params"] = self.amber_factory
+
+
 class ImportRDSCommand:
     """
     Import from a RDS file.

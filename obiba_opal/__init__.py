@@ -46,6 +46,7 @@ from obiba_opal.perm import (
 )
 from obiba_opal.imports import (
     ImportPluginCommand,
+    ImportAmberCommand,
     ImportCSVCommand,
     ImportIDMapService,
     ImportIDService,
@@ -113,6 +114,7 @@ __all__ = [
     "DataSHIELDPermService",
     "SystemPermService",
     "ImportPluginCommand",
+    "ImportAmberCommand",
     "ImportCSVCommand",
     "ImportIDMapService",
     "ImportIDService",
