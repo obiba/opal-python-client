@@ -1,4 +1,5 @@
 import pytest
+import uuid
 from obiba_opal import DataSHIELDQuotaService, HTTPError
 from tests.utils import make_client
 
@@ -36,11 +37,13 @@ class TestClass:
     @pytest.mark.integration
     def test_add_update_delete_quota(self):
         service = self._service()
-        quota = service.add_quota(60 * 60000, "user", "dsuser", "session-time", "daily")
+        # a principal of its own, as the CI jobs run in parallel against the same test server
+        principal = f"dsuser-{uuid.uuid4().hex[:8]}"
+        quota = service.add_quota(60 * 60000, "user", principal, "session-time", "daily")
         try:
             assert quota["context"] == "DataSHIELD"
             assert quota["subjectType"] == "USER"
-            assert quota["principal"] == "dsuser"
+            assert quota["principal"] == principal
             assert quota["metric"] == "SESSION_TIME"
             assert quota["period"] == "DAILY"
             assert quota["limitMillis"] == 3600000
@@ -53,7 +56,7 @@ class TestClass:
             assert updated["limitMillis"] == 7200000
             assert not updated["enabled"]
             # the values that were not provided are left unchanged
-            assert updated["principal"] == "dsuser"
+            assert updated["principal"] == principal
             assert updated["period"] == "DAILY"
         finally:
             service.delete_quota(quota["id"])
