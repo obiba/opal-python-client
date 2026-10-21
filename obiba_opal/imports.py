@@ -6,6 +6,7 @@ import obiba_opal.core as core
 import obiba_opal.io as io
 import sys
 import json
+import datetime
 
 
 class ImportPluginCommand:
@@ -649,7 +650,9 @@ class ImportAmberCommand:
         parser.add_argument(
             "--to", "-to", dest="to_date", required=False, help="Records updated until this date (YYYY-MM-DD)"
         )
-        parser.add_argument("--type", "-ty", required=False, help="Entity type (default is the one defined by Amber)")
+        parser.add_argument(
+            "--type", "-ty", required=False, help="Entity type replacing the Participant one defined by Amber"
+        )
         # non specific import arguments
         io.add_import_arguments(parser)
 
@@ -719,7 +722,7 @@ class ImportAmberCommand:
             "all" for any state
         :param from_date: Records updated since this date (YYYY-MM-DD, or ISO date-time)
         :param to_date: Records updated until this date (YYYY-MM-DD, or ISO date-time)
-        :param entityType: Entity type (default is the one defined by Amber)
+        :param entityType: Entity type replacing the Participant one defined by Amber
         :param tables: The tables names to be imported (default is all)
         :param incremental: Incremental import (new and updated value sets)
         :param limit: Import limit (maximum number of value sets)
@@ -735,6 +738,11 @@ class ImportAmberCommand:
             raise ValueError("Either specify a case report form OR an interview design")
         if campaign and not design:
             raise ValueError("A campaign applies to interviews only")
+        if state == "initiated" and not design:
+            raise ValueError("The initiated state applies to interviews only")
+        for date in (from_date, to_date):
+            if date and "T" not in date:
+                datetime.date.fromisoformat(date)
         importer = io.OpalImporter.build(
             self.client,
             destination=destination,
