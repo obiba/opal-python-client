@@ -26,3 +26,12 @@ local-install: clean build
 
 local-install-force: clean build
 	pip install ./dist/obiba_opal-*.tar.gz --break-system-packages
+
+bump-major:
+	uv version --bump major
+
+bump-minor:
+	uv version --bump minor
+
+bump-patch:
+	uv version --bump patch
