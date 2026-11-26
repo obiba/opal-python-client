@@ -216,9 +216,10 @@ def backup_project_command(
         "-vt",
         help="Treat views as tables, i.e. export data instead of keeping derivation scripts (default is false)",
     ),
+    permissions: bool = typer.Option(False, "--permissions", help="Backup the project permissions (default is false)"),
     json_output: bool = typer.Option(False, "--json", "-j", help="Pretty JSON formatting of the response"),
 ):
-    """Backup project data: tables (data export), views, resources, report templates, files."""
+    """Backup project data: tables (data export), views, resources, report templates, files and, optionally, permissions."""
     args = _make_args_with_globals(
         ctx,
         opal=opal,
@@ -233,6 +234,7 @@ def backup_project_command(
         archive=archive,
         force=force,
         views_as_tables=views_as_tables,
+        permissions=permissions,
         json=json_output,
     )
     BackupProjectCommand.do_command(args)
@@ -269,9 +271,15 @@ def restore_project_command(
     arpassword: str | None = typer.Option(
         None, "--arpassword", "-arp", help="Password to decrypt zip archive (optional)"
     ),
+    permissions: bool = typer.Option(
+        False,
+        "--permissions",
+        help="Restore the project permissions found in the archive (default is false). "
+        "A user or group name on another server does not necessarily designate the same person",
+    ),
     json_output: bool = typer.Option(False, "--json", "-j", help="Pretty JSON formatting of the response"),
 ):
-    """Restore project data: tables (data import), views, resources, report templates, files."""
+    """Restore project data: tables (data import), views, resources, report templates, files and, optionally, permissions."""
     args = _make_args_with_globals(
         ctx,
         opal=opal,
@@ -286,6 +294,7 @@ def restore_project_command(
         archive=archive,
         force=force,
         arpassword=arpassword,
+        permissions=permissions,
         json=json_output,
     )
     RestoreProjectCommand.do_command(args)

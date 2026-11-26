@@ -49,11 +49,11 @@ app.command(name="file", help="Manage Opal file system.")(handle_exceptions(cmd.
 # Backup/Restore commands
 app.command(
     name="backup-project",
-    help="Backup project data: tables (data export), views, resources, report templates, files.",
+    help="Backup project data: tables (data export), views, resources, report templates, files and, optionally, permissions.",
 )(handle_exceptions(cmd.backup_project_command))
 app.command(
     name="restore-project",
-    help="Restore project data: tables (data import), views, resources, report templates, files.",
+    help="Restore project data: tables (data import), views, resources, report templates, files and, optionally, permissions.",
 )(handle_exceptions(cmd.restore_project_command))
 app.command(name="backup-view", help="Backup views of a project.")(handle_exceptions(cmd.backup_view_command))
 app.command(name="restore-view", help="Restore views of a project.")(handle_exceptions(cmd.restore_view_command))

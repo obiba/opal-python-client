@@ -255,6 +255,11 @@ class BackupProjectCommand:
             help="Force overwriting an existing backup folder",
         )
         parser.add_argument(
+            "--permissions",
+            action="store_true",
+            help="Backup the project permissions (default is false)",
+        )
+        parser.add_argument(
             "--json",
             "-j",
             action="store_true",
@@ -269,7 +274,7 @@ class BackupProjectCommand:
         client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
         try:
             res = BackupProjectCommand(client, args.verbose).backup_project(
-                args.project, args.archive, args.views_as_tables, args.force
+                args.project, args.archive, args.views_as_tables, args.force, args.permissions
             )
             # format response
             core.Formatter.print_json(res, args.json)
@@ -282,6 +287,7 @@ class BackupProjectCommand:
         archive: str,
         views_as_tables: bool = False,
         force: bool = False,
+        permissions: bool = False,
     ) -> dict:
         """
         Prepare the backup parameters and launch the backup task on the project
@@ -291,6 +297,7 @@ class BackupProjectCommand:
         :param views_as_tables: Treat views as tables, i.e. export data instead of
             keeping derivation scripts
         :param force: Force overwriting an existing backup folder
+        :param permissions: Backup the project permissions
         """
         # Build and send request
         # backup options
@@ -299,6 +306,8 @@ class BackupProjectCommand:
             options["viewsAsTables"] = views_as_tables
         if force:
             options["override"] = force
+        if permissions:
+            options["permissions"] = permissions
 
         uri = core.UriBuilder(["project", project, "commands", "_backup"]).build()
         request = self.client.new_request()
@@ -357,6 +366,12 @@ class RestoreProjectCommand:
             help="Force overwriting existing items (table, view, resource, report). Files override is not checked",
         )
         parser.add_argument(
+            "--permissions",
+            action="store_true",
+            help="Restore the project permissions found in the archive (default is false). "
+            "A user or group name on another server does not necessarily designate the same person",
+        )
+        parser.add_argument(
             "--json",
             "-j",
             action="store_true",
@@ -376,6 +391,8 @@ class RestoreProjectCommand:
             options["override"] = args.force
         if args.arpassword:
             options["password"] = args.arpassword
+        if args.permissions:
+            options["permissions"] = args.permissions
 
         client = core.OpalClient.build(core.OpalClient.LoginInfo.parse(args))
         uri = core.UriBuilder(["project", args.project, "commands", "_restore"]).build()
